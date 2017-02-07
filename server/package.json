@@ -1,0 +1,24 @@
+{
+  "name": "flash-on-visit",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abertschi/flash-on-visit.git"
+  },
+  "author": "Andrin Bertschi <andrin.bertschi@gmail.com> (http://www.abertschi.ch)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/abertschi/flash-on-visit/issues"
+  },
+  "homepage": "https://github.com/abertschi/flash-on-visit#readme",
+  "dependencies": {
+    "express": "^4.14.1",
+    "socket.io": "^1.7.2",
+    "winston": "^2.3.1"
+  }
+}
