@@ -19,13 +19,20 @@ program
 console.log('Running flash-on-visit client \n');
 
 if (!program.debug) {
+  let missing = false;
   if (!program.host) {
     console.log('No host name set.');
+    missing = true;
   }
   if (!program.channel) {
     console.log('No channel set.');
+    missing = true;
   }
-  program.help();
+
+  if (missing) {
+      program.help();
+      process.exit();
+  }
 }
 
 let channel = program.channel || 'hack';
