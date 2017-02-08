@@ -2,17 +2,35 @@
 
 const io = require('socket.io-client');
 const exec = require('child_process').exec;
-const argv = require('yargs').argv;
+
 const log = require('debug')('flash-on-visit');
 const error = require('debug')('flash-on-visit:error');
+var program = require('commander');
 
 
-let channel = argv.channel || 'hack';
-let serverUrl = argv.url || 'http://localhost:5001';
+program
+  .version('0.0.1')
+  .usage('[options] <file ...>')
+  .option('-h, --host <h>', 'The server adress')
+  .option('-c, --channel <c>', 'The channel to subscribe')
+  .option('-d, --debug', 'For debugging purpose')
+  .parse(process.argv);
+
+console.log('Running flash-on-visit client \n');
+
+if (!program.debug) {
+  if (!program.host) {
+    console.log('No host name set.');
+  }
+  if (!program.channel) {
+    console.log('No channel set.');
+  }
+  program.help();
+}
+
+let channel = program.channel || 'hack';
+let serverUrl = program.host || 'http://localhost:5001';
 const conn = io.connect(serverUrl);
-
-console.log('Running flash-on-visit client');
-console.log('Trying to connect to ' + serverUrl);
 
 exec('maclight', (error, stdout, stderr) => {
     if (error) {
@@ -20,6 +38,7 @@ exec('maclight', (error, stdout, stderr) => {
     }
 });
 
+console.log('Trying to connect to ' + serverUrl);
 conn.on('connect', () => {
     console.log(`Connected to ${serverUrl}. `);
     console.log(`Waiting for flash instructions in channel: ${channel}`);
