@@ -2,8 +2,9 @@
   "name": "flash-on-visit",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
+    "start": "DEBUG=flash-on-visit* node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,6 +18,7 @@
   },
   "homepage": "https://github.com/abertschi/flash-on-visit#readme",
   "dependencies": {
+    "debug": "^2.6.0",
     "express": "^4.14.1",
     "socket.io": "^1.7.2",
     "winston": "^2.3.1"

@@ -1,14 +1,18 @@
 "use strict";
 
 const io = require('socket.io-client');
-const SERVER_URL = 'http://localhost:5001';
 const exec = require('child_process').exec;
-const conn = io.connect(SERVER_URL);
+const argv = require('yargs').argv;
+const log = require('debug')('flash-on-visit');
+const error = require('debug')('flash-on-visit:error');
 
-const args = process.argv;
-let channel = args.length > 2 ? args[2] : 'hack';
+
+let channel = argv.channel || 'hack';
+let serverUrl = argv.url || 'http://localhost:5001';
+const conn = io.connect(serverUrl);
 
 console.log('Running flash-on-visit client');
+console.log('Trying to connect to ' + serverUrl);
 
 exec('maclight', (error, stdout, stderr) => {
     if (error) {
@@ -17,8 +21,8 @@ exec('maclight', (error, stdout, stderr) => {
 });
 
 conn.on('connect', () => {
-    console.log(`Connected to ${SERVER_URL}. ` +
-        `Waiting for flash instructions in channel: ${channel}`);
+    console.log(`Connected to ${serverUrl}. `);
+    console.log(`Waiting for flash instructions in channel: ${channel}`);
 
     let regist = {
         channel: channel
@@ -27,7 +31,6 @@ conn.on('connect', () => {
     conn.emit('regist', regist, (resp, data) => {
         console.log('server sent resp code ' + resp);
     });
-
 });
 
 conn.on('disconnect', () => {

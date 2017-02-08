@@ -4,13 +4,16 @@
   "description": "",
   "main": "client.js",
   "scripts": {
+    "start": "node client.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Andrin Bertschi <andrin.bertschi@gmail.com> (http://www.abertschi.ch)",
   "license": "ISC",
   "dependencies": {
+    "debug": "^2.6.0",
     "express": "^4.14.1",
     "socket.io": "^1.7.2",
-    "socket.io-client": "^1.7.2"
+    "socket.io-client": "^1.7.2",
+    "yargs": "^6.6.0"
   }
 }
