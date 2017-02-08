@@ -22,7 +22,7 @@ app.get('/channels/:channel', (req, res) => {
     };
 
     io.to(payload.channel).emit('flash', payload);
-    res.send('flash on visit successful 🚀');
+    res.send("{}");
 });
 
 io.on('connection', (socket) => {
