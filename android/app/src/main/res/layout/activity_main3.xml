@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EEEEEE"
+    android:fitsSystemWindows="false"
+    tools:context="flashonvisit.abertschi.ch.ch.MainActivity">
+
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fillViewport="true">
+
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                      xmlns:card_view="http://schemas.android.com/apk/res-auto"
+                      android:layout_width="match_parent"
+                      android:layout_height="match_parent"
+                      android:orientation="vertical"
+                      android:layout_marginBottom="@dimen/activity_vertical_margin"
+                      android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                      android:layout_marginRight="@dimen/activity_horizontal_margin"
+                      android:layout_marginTop="@dimen/activity_vertical_margin">
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/card_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="7dp"
+                card_view:cardCornerRadius="3dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#5F0F40"
+                    android:padding="20dp">
+
+                    <ImageView
+                        android:id="@+id/img_wireless"
+                        android:layout_width="wrap_content"
+                        android:layout_height="200dp"
+                        android:layout_centerHorizontal="true"
+                        android:layout_gravity="center_horizontal|top"
+                        android:src="@mipmap/logo"/>
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/img_wireless"
+                        android:layout_centerHorizontal="true">
+
+                        <Button
+                            android:id="@+id/button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_gravity="right"
+                            android:backgroundTint="#321325"
+                            android:text="TURN ON"
+                            android:textColor="@android:color/white"
+                            android:textSize="16dp"
+                            android:textStyle="normal"/>
+                    </RelativeLayout>
+                </RelativeLayout>
+            </android.support.v7.widget.CardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|top"
+                android:layout_marginLeft="7dp"
+                android:layout_marginTop="7dp"
+                android:paddingLeft="10dp"
+                android:text="Settings"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@android:color/black"/>
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/settings_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="7dp"
+                card_view:cardCornerRadius="3dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#FFFFFF"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:id="@+id/server_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:gravity="top|left"
+                        android:text="Server and Channel"
+                        android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:orientation="vertical"
+                        android:layout_below="@id/server_title"
+                        android:layout_height="wrap_content">
+
+                        <EditText
+                            android:id="@+id/serveradress"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/server_title"
+                            android:layout_gravity="center_horizontal"
+
+                            android:hint="Server adress"/>
+
+                        <EditText
+                            android:id="@+id/channel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginTop="10dp"
+                            android:hint="Channel"/>
+
+
+                    </LinearLayout>
+                </RelativeLayout>
+            </android.support.v7.widget.CardView>
+
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/led_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="7dp"
+                card_view:cardCornerRadius="3dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#FFFFFF"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="15dp">
+
+                    <TextView
+                        android:id="@+id/led_preferences"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:gravity="top|left"
+                        android:text="LED"
+                        android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+                    <TextView
+                        android:id="@+id/led_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/led_preferences"
+                        android:gravity="left"
+                        android:layout_marginBottom="10dp"
+                        android:text="Choose LED color"
+                        android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_gravity="center_horizontal|bottom"
+                        android:gravity= "center"
+                        android:id="@+id/led_choose"
+                        android:layout_below="@id/led_text"
+                        android:orientation="horizontal"
+                        android:layout_height="wrap_content">
+
+                        <android.support.design.widget.FloatingActionButton
+                            android:layout_width="50dp"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="10dp"
+                            card_view:backgroundTint="@android:color/holo_red_dark"
+                            />
+
+                        <android.support.design.widget.FloatingActionButton
+                            android:layout_width="50dp"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="10dp"
+                            card_view:backgroundTint="@android:color/holo_blue_dark"
+                            />
+
+                        <android.support.design.widget.FloatingActionButton
+                            android:layout_width="50dp"
+                            android:layout_margin="10dp"
+                            android:layout_height="wrap_content"
+                            card_view:backgroundTint="@android:color/holo_green_dark"
+                            />
+                    </LinearLayout>
+
+                </RelativeLayout>
+
+            </android.support.v7.widget.CardView>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="30dp"></View>
+
+
+        </LinearLayout>
+    </ScrollView>
+
+
+</RelativeLayout>
