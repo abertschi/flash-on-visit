@@ -12,12 +12,17 @@ log('Flash on visit server');
 log('Running server at port %d', SOCKET_PORT);
 
 app.get('/channels/:channel', (req, res) => {
-    log('New flash request in %s by %s', req.params.channel, req.ip);
 
     if (!req.params.channel) res.status(400).end();
+
+    let ip = req.ip;
+    if (ip.lastIndexOf(':')  > -1) {
+      ip = ip.substring(ip.lastIndexOf(':'), ip.length);
+    }
+    log('New flash request in %s by %s', req.params.channel, ip);
     let payload = {
         channel: req.params.channel,
-        ip: req.ip
+        ip: ip
     };
 
     io.to(payload.channel).emit('flash', payload);
