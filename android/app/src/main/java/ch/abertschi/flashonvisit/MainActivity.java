@@ -1,11 +1,14 @@
 package ch.abertschi.flashonvisit;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,6 +19,8 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -61,6 +66,90 @@ public class MainActivity extends AppCompatActivity {
     private HistoryAdapter historyAdapter;
     private RecyclerView.LayoutManager historyLayoutManager;
 
+    private View statusBar;
+    private Button statusBarText;
+
+    private void showStatusBar(String text) {
+        statusBarText.setText(text);
+        statusBar.setVisibility(View.VISIBLE);
+
+        //ObjectAnimator fadeOut = ObjectAnimator.ofFloat(statusBar, "alpha",  1f, .3f);
+        //fadeOut.setDuration(2000);
+        final ObjectAnimator fadeIn = ObjectAnimator.ofFloat(statusBar, "alpha", 0f, 1f);
+        fadeIn.setDuration(500);
+
+        final Handler handler = new Handler(Looper.getMainLooper());
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                // Do the task...
+                //handler.postDelayed(this);
+                ObjectAnimator fadeOut = ObjectAnimator.ofFloat(statusBar, "alpha", 1f, 0f);
+                fadeOut.setDuration(500);
+                fadeOut.start();
+                fadeOut.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        statusBar.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                });
+            }
+        };
+        handler.postDelayed(runnable, 5000);
+
+// Stop a repeating task like this.
+        //hander.removeCallbacks(runnable);
+
+//        TranslateAnimation animation = new TranslateAnimation(0, 0, -300, 0);
+//        animation.setDuration(500);
+//        animation.setFillAfter(false);
+//        statusBar.setAnimation(animation);
+//        animation.start();
+        fadeIn.start();
+    }
+
+    private void hideStatusBar() {
+        TranslateAnimation animation = new TranslateAnimation(0, 0, 0, -300);
+        animation.setDuration(500);
+        animation.setFillAfter(false);
+        statusBar.setAnimation(animation);
+        animation.start();
+        animation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                statusBar.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+    }
+
+    private void updateStatusBar(String text) {
+        statusBarText.setText(text);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -81,10 +170,11 @@ public class MainActivity extends AppCompatActivity {
         historyLayoutManager = new LinearLayoutManager(this);
         historyRecycleView.setLayoutManager(historyLayoutManager);
 
+        statusBar = this.findViewById(R.id.connection_status);
+        statusBar.setVisibility(View.GONE);
+        statusBarText = (Button) this.findViewById(R.id.status_button);
+
         List<HistoryEntry> historyEntries = new ArrayList<>();
-        historyEntries.add(new HistoryEntry("test"));
-        historyEntries.add(new HistoryEntry("test"));
-        historyEntries.add(new HistoryEntry("test"));
 
         historyAdapter = new HistoryAdapter(historyEntries, this, historyRecycleView);
         historyRecycleView.setAdapter(historyAdapter);
@@ -109,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (isEnabled) {
             connectSocket();
-            Toast.makeText(MainActivity.this, "Connecting ...", Toast.LENGTH_SHORT).show();
+            showStatusBar("CONNECTING TO SERVER");
         }
 
         enableButton.setOnClickListener(new View.OnClickListener() {
@@ -117,24 +207,18 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 final String toastMsg;
                 if (isEnabled) {
-                    toastMsg = "Disconnecting ...";
+                    showStatusBar("DISCONNECTING");
                     isEnabled = false;
                     enableButton.setText("TURN ON");
                     System.out.println("disconnecting ****");
                     disconnectSocket();
                 } else {
-                    toastMsg = "Connecting ...";
+                    showStatusBar("CONNECTING TO SERVER");
                     isEnabled = true;
                     enableButton.setText("TURN OFF");
                     connectSocket();
                 }
                 prefs.edit().putBoolean(ENABLED, isEnabled).commit();
-                MainActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(MainActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
-                    }
-                });
             }
         });
 

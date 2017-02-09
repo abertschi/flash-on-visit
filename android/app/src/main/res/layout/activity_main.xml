@@ -86,12 +86,41 @@
                 </RelativeLayout>
             </android.support.v7.widget.CardView>
 
+            <android.support.v7.widget.CardView
+                android:id="@+id/connection_status"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_below="@id/logo_card"
+                android:layout_centerVertical="false"
+                android:layout_gravity="center_horizontal|center_vertical"
+                android:layout_margin="7dp"
+                android:background="#321325"
+                card_view:cardCornerRadius="0dp">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:background="#321325"
+                    android:layout_height="40dp">
+                    <Button
+                        android:id="@+id/status_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_gravity="center_horizontal|center_vertical"
+                        android:background="@android:color/transparent"
+                        android:text="CONNECTING TO SERVER"
+                        android:textColor="@android:color/white"
+                        android:textSize="16dp"
+                        android:textStyle="normal"/>
+
+                </FrameLayout>
+            </android.support.v7.widget.CardView>
+
             <LinearLayout
                 android:id="@+id/settings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-
-                android:layout_below="@id/logo_card"
+                android:layout_below="@id/connection_status"
                 android:orientation="vertical">
 
                 <TextView
@@ -200,6 +229,7 @@
 
 
                         <FrameLayout
+                            android:id="@+id/tryout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             >
@@ -239,37 +269,76 @@
 
                         </FrameLayout>
 
+                        <View
+                            android:id="@+id/sep2"
+                            android:layout_width="fill_parent"
+                            android:layout_height="1dip"
+                            android:layout_below="@id/tryout"
+                            android:layout_marginTop="10dp"
+                            android:background="#11000000"/>
 
-                        <!--<LinearLayout-->
-                        <!--android:id="@+id/led_choose"-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_below="@id/led_preferences"-->
-                        <!--android:layout_gravity="center_horizontal|bottom"-->
-                        <!--android:gravity="center"-->
-                        <!--android:orientation="horizontal">-->
 
-                        <!--<android.support.design.widget.FloatingActionButton-->
-                        <!--android:layout_width="50dp"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_margin="10dp"-->
-                        <!--card_view:backgroundTint="@android:color/holo_red_dark"-->
-                        <!--/>-->
+                        <FrameLayout
 
-                        <!--<android.support.design.widget.FloatingActionButton-->
-                        <!--android:layout_width="50dp"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_margin="10dp"-->
-                        <!--card_view:backgroundTint="@android:color/holo_blue_dark"-->
-                        <!--/>-->
+                            android:id="@+id/choose_color"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/sep2"
+                            android:layout_marginTop="10dp"
+                            >
 
-                        <!--<android.support.design.widget.FloatingActionButton-->
-                        <!--android:layout_width="50dp"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_margin="10dp"-->
-                        <!--card_view:backgroundTint="@android:color/holo_green_dark"-->
-                        <!--/>-->
-                        <!--</LinearLayout>-->
+                            <TextView
+                                android:id="@+id/choose_color_text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="left|top"
+                                android:text="Choose color"
+                                android:textAppearance="?android:attr/textAppearanceMedium"
+                                android:textColor="@android:color/black"/>
+
+                            <TextView
+                                android:id="@+id/choose_color_detail"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="left|bottom"
+                                android:layout_marginTop="25dp"
+                                android:text="Needs to be supported by your device"
+                                android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:id="@+id/led_choose"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/choose_color"
+                            android:layout_gravity="center_horizontal|bottom"
+                            android:layout_marginTop="10dp"
+                            android:gravity="center"
+                            android:orientation="horizontal">
+
+                            <android.support.design.widget.FloatingActionButton
+                                android:layout_width="50dp"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="10dp"
+                                card_view:backgroundTint="@android:color/holo_red_dark"
+                                />
+
+                            <android.support.design.widget.FloatingActionButton
+                                android:layout_width="50dp"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="10dp"
+                                card_view:backgroundTint="@android:color/holo_blue_dark"
+                                />
+
+                            <android.support.design.widget.FloatingActionButton
+                                android:layout_width="50dp"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="10dp"
+                                card_view:backgroundTint="@android:color/holo_green_dark"
+                                />
+                        </LinearLayout>
+
 
                     </RelativeLayout>
 
@@ -383,20 +452,20 @@
                                 android:layout_height="150dp">
 
                                 <!--<ImageView-->
-                                    <!--android:id="@+id/img_empty"-->
-                                    <!--android:layout_centerInParent="true"-->
-                                    <!--android:layout_width="fill_parent"-->
-                                    <!--android:layout_height="wrap_content"-->
-                                    <!--android:alpha=".3"-->
-                                    <!--android:adjustViewBounds="true"-->
-                                    <!--android:src="@mipmap/empty"-->
-                                    <!--android:scaleType="fitCenter" />-->
+                                <!--android:id="@+id/img_empty"-->
+                                <!--android:layout_centerInParent="true"-->
+                                <!--android:layout_width="fill_parent"-->
+                                <!--android:layout_height="wrap_content"-->
+                                <!--android:alpha=".3"-->
+                                <!--android:adjustViewBounds="true"-->
+                                <!--android:src="@mipmap/empty"-->
+                                <!--android:scaleType="fitCenter" />-->
 
                                 <android.support.v7.widget.RecyclerView
                                     android:id="@+id/history_recycleview"
-                                    android:layout_centerInParent="true"
                                     android:layout_width="match_parent"
                                     android:layout_height="150dp"
+                                    android:layout_centerInParent="true"
                                     android:layout_margin="0dp"
                                     android:orientation="vertical"
                                     android:padding="0dp"
@@ -522,7 +591,6 @@
                                     android:layout_height="50dp"
                                     android:layout_gravity="left|center_vertical"
                                     android:src="@mipmap/history_end4"/>
-
 
 
                                 <Button
