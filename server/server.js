@@ -17,7 +17,7 @@ app.get('/channels/:channel', (req, res) => {
 
     let ip = req.ip;
     if (ip.lastIndexOf(':')  > -1) {
-      ip = ip.substring(ip.lastIndexOf(':'), ip.length);
+      ip = ip.substring(ip.lastIndexOf(':') + 1, ip.length);
     }
     log('New flash request in %s by %s', req.params.channel, ip);
     let payload = {
