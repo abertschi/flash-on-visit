@@ -32,7 +32,7 @@ app.get('/channels/:channel', (req, res) => {
 io.on('connection', (socket) => {
     socket.on('regist', (data) => {
         if (!data.channel) {
-            socket.emit('error', 'Channel missing. Please set a channel to join');
+            socket.emit('failure', 'Channel missing. Please set a channel to join');
             log("Error - no channel name specified. Can not join.");
         } else {
           log('New client registered in channel %s', data.channel);
