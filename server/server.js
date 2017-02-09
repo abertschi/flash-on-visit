@@ -4,7 +4,6 @@ const app = require('express')();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const log = require('debug')('flash-on-visit');
-const error = require('debug')('flash-on-visit:error');
 
 const SOCKET_PORT = process.env.PORT || 5001;
 server.listen(SOCKET_PORT);
@@ -29,11 +28,10 @@ io.on('connection', (socket) => {
     socket.on('regist', (data) => {
         if (!data.channel) {
             socket.emit('error', 'Channel missing. Please set a channel to join');
-            error('Client tried to connect without channel. Failed.');
-            return;
+            log("Error - no channel name specified. Can not join.");
+        } else {
+          log('New client registered in channel %s', data.channel);
+          socket.join(data.channel);
         }
-
-        log('New client registered in channel %s', data.channel);
-        socket.join(data.channel);
     });
 });

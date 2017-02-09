@@ -1,15 +1,19 @@
 package ch.abertschi.flashonvisit;
 
 import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.support.v13.view.ViewCompat;
+import android.support.v4.view.ViewPropertyAnimatorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
@@ -18,8 +22,13 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.EditText;
@@ -58,6 +67,10 @@ public class MainActivity extends AppCompatActivity {
     private static final String CHANNEL = "channel_name";
     private static final String ENABLED = "is_enabled";
 
+    public static final int STARTUP_DELAY = 300;
+    public static final int ANIM_ITEM_DURATION = 1000;
+    public static final int ITEM_DELAY = 300;
+
     private static final String DEFAULT_SERVER_NAME = "http://213.136.81.179:3004";
 
     private LEDManager ledManager;
@@ -68,90 +81,123 @@ public class MainActivity extends AppCompatActivity {
 
     private View statusBar;
     private Button statusBarText;
+    private View logoHeader;
+    private ViewGroup container;
 
-    private void showStatusBar(String text) {
-        statusBarText.setText(text);
-        statusBar.setVisibility(View.VISIBLE);
+    private void animate() {
 
-        //ObjectAnimator fadeOut = ObjectAnimator.ofFloat(statusBar, "alpha",  1f, .3f);
-        //fadeOut.setDuration(2000);
-        final ObjectAnimator fadeIn = ObjectAnimator.ofFloat(statusBar, "alpha", 0f, 1f);
-        fadeIn.setDuration(500);
+        for (int i = 0; i < container.getChildCount(); i++) {
+            View v = container.getChildAt(i);
 
-        final Handler handler = new Handler(Looper.getMainLooper());
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                // Do the task...
-                //handler.postDelayed(this);
-                ObjectAnimator fadeOut = ObjectAnimator.ofFloat(statusBar, "alpha", 1f, 0f);
-                fadeOut.setDuration(500);
-                fadeOut.start();
-                fadeOut.addListener(new Animator.AnimatorListener() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
+            TranslateAnimation animation = new TranslateAnimation(0, 0, 400, 0);
+            animation.setDuration(300);
+            animation.setStartOffset((100 * i));
+            animation.setInterpolator(new DecelerateInterpolator(0.5f));
+            animation.setFillAfter(true);
 
-                    }
+            Animation a = new AlphaAnimation(0, 1.0f);
+            a.setDuration(800);
+            a.setInterpolator(new DecelerateInterpolator(0.5f));
+            a.setStartOffset((100 * i));
+            a.setFillAfter(true);
 
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        statusBar.setVisibility(View.GONE);
-                    }
+            AnimationSet set = new AnimationSet(true);
+            set.addAnimation(animation);
+            set.addAnimation(a);
+            set.setFillAfter(true);
+            v.setAnimation(set);
+            set.start();
 
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
+        }
+    }
 
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animator animation) {
-
-                    }
-                });
-            }
-        };
-        handler.postDelayed(runnable, 5000);
-
-// Stop a repeating task like this.
-        //hander.removeCallbacks(runnable);
-
-//        TranslateAnimation animation = new TranslateAnimation(0, 0, -300, 0);
+//    private void showStatusBar(String text) {
+//        statusBarText.setText(text);
+//        statusBar.setVisibility(View.VISIBLE);
+//
+//        //ObjectAnimator fadeOut = ObjectAnimator.ofFloat(statusBar, "alpha",  1f, .3f);
+//        //fadeOut.setDuration(2000);
+//        final ObjectAnimator fadeIn = ObjectAnimator.ofFloat(statusBar, "alpha", 0f, 1f);
+//        fadeIn.setDuration(500);
+//
+//        final Handler handler = new Handler(Looper.getMainLooper());
+//        Runnable runnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                // Do the task...
+//                //handler.postDelayed(this);
+//                ObjectAnimator fadeOut = ObjectAnimator.ofFloat(statusBar, "alpha", 1f, 0f);
+//                fadeOut.setDuration(500);
+//                fadeOut.start();
+//                fadeOut.addListener(new Animator.AnimatorListener() {
+//                    @Override
+//                    public void onAnimationStart(Animator animation) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onAnimationEnd(Animator animation) {
+//                        statusBar.setVisibility(View.GONE);
+//                    }
+//
+//                    @Override
+//                    public void onAnimationCancel(Animator animation) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onAnimationRepeat(Animator animation) {
+//
+//                    }
+//                });
+//            }
+//        };
+//        handler.postDelayed(runnable, 5000);
+//
+//// Stop a repeating task like this.
+//        //hander.removeCallbacks(runnable);
+//
+////        TranslateAnimation animation = new TranslateAnimation(0, 0, -300, 0);
+////        animation.setDuration(500);
+////        animation.setFillAfter(false);
+////        statusBar.setAnimation(animation);
+////        animation.start();
+////        fadeIn.start();
+//    }
+//
+//    private void hideStatusBar() {
+//        TranslateAnimation animation = new TranslateAnimation(0, 0, 0, -300);
 //        animation.setDuration(500);
 //        animation.setFillAfter(false);
 //        statusBar.setAnimation(animation);
 //        animation.start();
-        fadeIn.start();
-    }
-
-    private void hideStatusBar() {
-        TranslateAnimation animation = new TranslateAnimation(0, 0, 0, -300);
-        animation.setDuration(500);
-        animation.setFillAfter(false);
-        statusBar.setAnimation(animation);
-        animation.start();
-        animation.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                statusBar.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-            }
-        });
-    }
-
-    private void updateStatusBar(String text) {
-        statusBarText.setText(text);
-    }
+//        animation.setAnimationListener(new Animation.AnimationListener() {
+//            @Override
+//            public void onAnimationStart(Animation animation) {
+//
+//            }
+//
+//            @Override
+//            public void onAnimationEnd(Animation animation) {
+//                statusBar.setVisibility(View.GONE);
+//            }
+//
+//            @Override
+//            public void onAnimationRepeat(Animation animation) {
+//            }
+//        });
+//    }
+//
+//    private void updateStatusBar(String text) {
+//        statusBarText.setText(text);
+//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        Resources r = getResources();
+        float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 200, r.getDisplayMetrics());
+        System.out.println(px + " DP TO PX");
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -169,6 +215,9 @@ public class MainActivity extends AppCompatActivity {
         this.historyRecycleView = (RecyclerView) this.findViewById(R.id.history_recycleview);
         historyLayoutManager = new LinearLayoutManager(this);
         historyRecycleView.setLayoutManager(historyLayoutManager);
+
+        this.logoHeader = this.findViewById(R.id.logo_card);
+        container = (ViewGroup) this.findViewById(R.id.container);
 
         statusBar = this.findViewById(R.id.connection_status);
         statusBar.setVisibility(View.GONE);
@@ -198,8 +247,8 @@ public class MainActivity extends AppCompatActivity {
         this.enableButton.setText(this.isEnabled ? "TURN OFF" : "TURN ON");
 
         if (isEnabled) {
+            Toast.makeText(MainActivity.this, "Connecting ...", Toast.LENGTH_SHORT).show();
             connectSocket();
-            showStatusBar("CONNECTING TO SERVER");
         }
 
         enableButton.setOnClickListener(new View.OnClickListener() {
@@ -207,18 +256,20 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 final String toastMsg;
                 if (isEnabled) {
-                    showStatusBar("DISCONNECTING");
                     isEnabled = false;
                     enableButton.setText("TURN ON");
+                    toastMsg = "Discnnecting ...";
                     System.out.println("disconnecting ****");
                     disconnectSocket();
                 } else {
-                    showStatusBar("CONNECTING TO SERVER");
+                    System.out.println("connecting");
+                    toastMsg = "Connecting ...";
                     isEnabled = true;
                     enableButton.setText("TURN OFF");
                     connectSocket();
                 }
                 prefs.edit().putBoolean(ENABLED, isEnabled).commit();
+                Toast.makeText(MainActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -271,6 +322,8 @@ public class MainActivity extends AppCompatActivity {
                 historyAdapter.clearModel();
             }
         });
+
+        animate();
     }
 
     private Emitter.Listener onFlash = new Emitter.Listener() {
@@ -388,7 +441,11 @@ public class MainActivity extends AppCompatActivity {
             if (mSocket != null) {
                 disconnectSocket();
             }
+
             String server = serverTextEdit.getText().toString();
+
+            historyAdapter.addAtFront(new HistoryEntry(String.format("Connecting to %s", server)));
+
             mSocket = IO.socket(server);
             mSocket.connect();
             mSocket.on("flash", onFlash);
@@ -401,10 +458,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void disconnectSocket() {
-        mSocket.disconnect();
-        mSocket.off("connect", onConnect);
-        mSocket.off("disconnect", onDisconnect);
-        mSocket.off("flash", onFlash);
+        if (mSocket != null) {
+            mSocket.disconnect();
+            mSocket.off("connect", onConnect);
+            mSocket.off("disconnect", onDisconnect);
+            mSocket.off("flash", onFlash);
+        }
     }
 
     @Override
