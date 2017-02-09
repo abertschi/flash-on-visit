@@ -30,4 +30,5 @@ dependencies {
     compile 'com.afollestad.material-dialogs:core:0.9.3.0'
 
 
+    compile 'com.google.android.gms:play-services-appindexing:8.1.0'
 }

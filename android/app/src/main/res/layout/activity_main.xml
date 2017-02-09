@@ -51,7 +51,6 @@
                         android:src="@mipmap/logo"/>
 
 
-
                     <RelativeLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -60,15 +59,15 @@
 
 
                         <TextView
+                            android:id="@+id/dots"
                             android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="left"
+                            android:paddingLeft="10dp"
                             android:text="..."
                             android:textColor="#FFFFFF"
-                            android:id="@+id/dots"
-                            android:textStyle="bold"
                             android:textSize="30dp"
-                            android:paddingLeft="10dp"
-                            android:layout_gravity="left"
-                            android:layout_height="wrap_content"/>
+                            android:textStyle="bold"/>
 
 
                         <Button
@@ -298,180 +297,224 @@
 
                     <RelativeLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="#FFFFFF"
-                        android:paddingBottom="15dp"
-                        android:paddingLeft="20dp"
-                        android:paddingRight="20dp"
-                        android:paddingTop="20dp">
+
+                        android:layout_height="wrap_content">
 
 
-                        <!--<FrameLayout-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:id="@+id/history_group"-->
-                        <!--&gt;-->
+                        <TextView
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_alignParentTop="true"
+                            android:background="@color/colorAccent"
+                            android:text="..."/>
 
 
-                        <!--<TextView-->
-                        <!--android:id="@+id/historyTitle"-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_gravity="left|center_vertical"-->
-                        <!--android:text="See passed events"-->
-                        <!--android:textAppearance="?android:attr/textAppearanceMedium"-->
-                        <!--android:textColor="@android:color/black" />-->
-
-                        <!--&lt;!&ndash;<TextView&ndash;&gt;-->
-                        <!--&lt;!&ndash;android:id="@+id/historyText"&ndash;&gt;-->
-                        <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
-                        <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
-                        <!--&lt;!&ndash;android:layout_gravity="left|center"&ndash;&gt;-->
-                        <!--&lt;!&ndash;android:layout_marginTop="10dp"&ndash;&gt;-->
-                        <!--&lt;!&ndash;android:text="See passed flashes"&ndash;&gt;-->
-                        <!--&lt;!&ndash;android:textAppearance="?android:attr/textAppearanceSmall" />&ndash;&gt;-->
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="#FFFFFF"
+                            android:paddingBottom="15dp"
+                            android:paddingLeft="20dp"
+                            android:paddingRight="20dp"
+                            android:paddingTop="20dp">
 
 
-                        <!--<Button-->
-                        <!--android:id="@+id/clearHistoryButton"-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_alignParentBottom="true"-->
-                        <!--android:layout_alignParentEnd="true"-->
-                        <!--android:layout_gravity="right|center_vertical"-->
-                        <!--android:backgroundTint="#321325"-->
-                        <!--android:text="CLEAR"-->
-                        <!--android:textColor="@android:color/white"-->
-                        <!--android:textSize="16dp"-->
-                        <!--android:textStyle="normal" />-->
-
-                        <!--</FrameLayout>-->
+                            <!--<FrameLayout-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:id="@+id/history_group"-->
+                            <!--&gt;-->
 
 
-                        <!--<View-->
-                        <!--android:layout_width="fill_parent"-->
-                        <!--android:layout_height="1dip"-->
-                        <!--android:layout_below="@id/history_group"-->
-                        <!--android:id="@+id/sep2"-->
-                        <!--android:layout_marginTop="10dp"-->
-                        <!--android:background="#11000000" />-->
+                            <!--<TextView-->
+                            <!--android:id="@+id/historyTitle"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_gravity="left|center_vertical"-->
+                            <!--android:text="See passed events"-->
+                            <!--android:textAppearance="?android:attr/textAppearanceMedium"-->
+                            <!--android:textColor="@android:color/black" />-->
+
+                            <!--&lt;!&ndash;<TextView&ndash;&gt;-->
+                            <!--&lt;!&ndash;android:id="@+id/historyText"&ndash;&gt;-->
+                            <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
+                            <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+                            <!--&lt;!&ndash;android:layout_gravity="left|center"&ndash;&gt;-->
+                            <!--&lt;!&ndash;android:layout_marginTop="10dp"&ndash;&gt;-->
+                            <!--&lt;!&ndash;android:text="See passed flashes"&ndash;&gt;-->
+                            <!--&lt;!&ndash;android:textAppearance="?android:attr/textAppearanceSmall" />&ndash;&gt;-->
 
 
-                        <!--<android.support.v7.widget.RecyclerView-->
+                            <!--<Button-->
+                            <!--android:id="@+id/clearHistoryButton"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_alignParentBottom="true"-->
+                            <!--android:layout_alignParentEnd="true"-->
+                            <!--android:layout_gravity="right|center_vertical"-->
+                            <!--android:backgroundTint="#321325"-->
+                            <!--android:text="CLEAR"-->
+                            <!--android:textColor="@android:color/white"-->
+                            <!--android:textSize="16dp"-->
+                            <!--android:textStyle="normal" />-->
+
+                            <!--</FrameLayout>-->
+
+
+                            <!--<View-->
+                            <!--android:layout_width="fill_parent"-->
+                            <!--android:layout_height="1dip"-->
+                            <!--android:layout_below="@id/history_group"-->
+                            <!--android:id="@+id/sep2"-->
+                            <!--android:layout_marginTop="10dp"-->
+                            <!--android:background="#11000000" />-->
+
+
+                            <!--<android.support.v7.widget.RecyclerView-->
                             <!--android:id="@+id/recyclerView"-->
                             <!--android:layout_width="match_parent"-->
                             <!--android:layout_height="match_parent"-->
                             <!--android:padding="0dp"-->
                             <!--android:scrollbars="vertical"/>-->
 
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="0dp"
-                            android:orientation="vertical"
-                            android:padding="0dp">
-
-                            <FrameLayout
-                                android:id="@+id/f1"
+                            <RelativeLayout
+                                android:id="@+id/history_recycleview_container"
                                 android:layout_width="match_parent"
-                                android:layout_height="50dp"
-                                android:layout_margin="0dip"
-                                android:padding="0dip">
+                                android:layout_height="150dp">
 
+                                <!--<ImageView-->
+                                    <!--android:id="@+id/img_empty"-->
+                                    <!--android:layout_centerInParent="true"-->
+                                    <!--android:layout_width="fill_parent"-->
+                                    <!--android:layout_height="wrap_content"-->
+                                    <!--android:alpha=".3"-->
+                                    <!--android:adjustViewBounds="true"-->
+                                    <!--android:src="@mipmap/empty"-->
+                                    <!--android:scaleType="fitCenter" />-->
 
-                                <ImageView
-                                    android:id="@+id/border"
-                                    android:layout_width="30dp"
-                                    android:layout_height="50dp"
-                                    android:layout_gravity="left|center_vertical"
-                                    android:src="@mipmap/history_start"/>
-
-                                <LinearLayout
+                                <android.support.v7.widget.RecyclerView
+                                    android:id="@+id/history_recycleview"
+                                    android:layout_centerInParent="true"
                                     android:layout_width="match_parent"
-                                    android:layout_height="50dp"
-                                    android:layout_gravity="left|center_vertical"
-                                    android:layout_marginLeft="40dp"
-                                    android:layout_marginRight="5dp"
-                                    android:orientation="horizontal"
-                                    >
+                                    android:layout_height="150dp"
+                                    android:layout_margin="0dp"
+                                    android:orientation="vertical"
+                                    android:padding="0dp"
+                                    android:scrollbars="none"
+                                    />
 
 
-                                    <TextView
-
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_gravity="center_vertical"
-                                        android:text="8 Feb. \n11:48:12 PM"
-                                        android:textAppearance="?android:attr/textAppearanceSmall"
-                                        />
-
-                                    <TextView
-
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_gravity="center_vertical"
-                                        android:layout_marginLeft="20dp"
-                                        android:text="Try out flash"
-                                        android:textAppearance="?android:attr/textAppearanceSmall"
-                                        android:textColor="@android:color/black"/>
-
-                                </LinearLayout>
+                            </RelativeLayout>
 
 
-                            </FrameLayout>
+                            <!--<LinearLayout-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_margin="0dp"-->
+                            <!--android:orientation="vertical"-->
+                            <!--android:padding="0dp">-->
 
-                            <FrameLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="50dp"
-                                android:layout_below="@+id/f1"
-                                android:layout_margin="0dip"
-                                android:padding="0dip">
-
-
-                                <ImageView
-                                    android:layout_width="30dp"
-                                    android:layout_height="50dp"
-                                    android:layout_gravity="left|center_vertical"
-                                    android:src="@mipmap/history"/>
-
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="50dp"
-                                    android:layout_gravity="left|center_vertical"
-                                    android:layout_marginLeft="40dp"
-                                    android:layout_marginRight="5dp"
-                                    android:orientation="horizontal"
-                                    >
+                            <!--<FrameLayout-->
+                            <!--android:id="@+id/f1"-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="50dp"-->
+                            <!--android:layout_margin="0dip"-->
+                            <!--android:padding="0dip">-->
 
 
-                                    <TextView
+                            <!--<ImageView-->
+                            <!--android:id="@+id/border"-->
+                            <!--android:layout_width="30dp"-->
+                            <!--android:layout_height="50dp"-->
+                            <!--android:layout_gravity="left|center_vertical"-->
+                            <!--android:src="@mipmap/history_start"/>-->
 
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_gravity="center_vertical"
-                                        android:text="8 Feb. 17\n11:48:12 PM"
-                                        android:textAppearance="?android:attr/textAppearanceSmall"
-                                        />
+                            <!--<LinearLayout-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="50dp"-->
+                            <!--android:layout_gravity="left|center_vertical"-->
+                            <!--android:layout_marginLeft="40dp"-->
+                            <!--android:layout_marginRight="5dp"-->
+                            <!--android:orientation="horizontal"-->
+                            <!--&gt;-->
 
-                                    <TextView
 
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_gravity="center_vertical"
-                                        android:layout_marginLeft="20dp"
-                                        android:text="Flash in channel abertschi by ::ffff:46.127.158.4"
-                                        android:textAppearance="?android:attr/textAppearanceSmall"
-                                        android:textColor="@android:color/black"/>
+                            <!--<TextView-->
 
-                                </LinearLayout>
-                            </FrameLayout>
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_gravity="center_vertical"-->
+                            <!--android:text="8 Feb. \n11:48:12 PM"-->
+                            <!--android:textAppearance="?android:attr/textAppearanceSmall"-->
+                            <!--/>-->
+
+                            <!--<TextView-->
+
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_gravity="center_vertical"-->
+                            <!--android:layout_marginLeft="20dp"-->
+                            <!--android:text="Try out flash"-->
+                            <!--android:textAppearance="?android:attr/textAppearanceSmall"-->
+                            <!--android:textColor="@android:color/black"/>-->
+
+                            <!--</LinearLayout>-->
+
+
+                            <!--</FrameLayout>-->
+
+                            <!--<FrameLayout-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="50dp"-->
+                            <!--android:layout_below="@+id/f1"-->
+                            <!--android:layout_margin="0dip"-->
+                            <!--android:padding="0dip">-->
+
+
+                            <!--<ImageView-->
+                            <!--android:layout_width="30dp"-->
+                            <!--android:layout_height="50dp"-->
+                            <!--android:layout_gravity="left|center_vertical"-->
+                            <!--android:src="@mipmap/history"/>-->
+
+                            <!--<LinearLayout-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="50dp"-->
+                            <!--android:layout_gravity="left|center_vertical"-->
+                            <!--android:layout_marginLeft="40dp"-->
+                            <!--android:layout_marginRight="5dp"-->
+                            <!--android:orientation="horizontal"-->
+                            <!--&gt;-->
+
+
+                            <!--<TextView-->
+
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_gravity="center_vertical"-->
+                            <!--android:text="8 Feb. 17\n11:48:12 PM"-->
+                            <!--android:textAppearance="?android:attr/textAppearanceSmall"-->
+                            <!--/>-->
+
+                            <!--<TextView-->
+
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_gravity="center_vertical"-->
+                            <!--android:layout_marginLeft="20dp"-->
+                            <!--android:text="Flash in channel abertschi by ::ffff:46.127.158.4"-->
+                            <!--android:textAppearance="?android:attr/textAppearanceSmall"-->
+                            <!--android:textColor="@android:color/black"/>-->
+
+                            <!--</LinearLayout>-->
+                            <!--</FrameLayout>-->
 
 
                             <FrameLayout
                                 android:id="@+id/history_group"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_below="@id/history_recycleview_container"
                                 >
 
                                 <ImageView
@@ -479,6 +522,22 @@
                                     android:layout_height="50dp"
                                     android:layout_gravity="left|center_vertical"
                                     android:src="@mipmap/history_end4"/>
+
+
+
+                                <Button
+                                    android:id="@+id/clearHistoryButton"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_alignParentBottom="true"
+                                    android:layout_alignParentEnd="true"
+                                    android:layout_gravity="center|center_vertical"
+                                    android:backgroundTint="#321325"
+                                    android:text="CLEAR"
+                                    android:textColor="@android:color/white"
+                                    android:textSize="16dp"
+                                    android:textStyle="normal"/>
+
 
                                 <Button
                                     android:id="@+id/moreHistoryButton"
@@ -495,9 +554,7 @@
                             </FrameLayout>
 
 
-                        </LinearLayout>
-
-
+                        </RelativeLayout>
                     </RelativeLayout>
 
                 </android.support.v7.widget.CardView>

@@ -4,33 +4,44 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.kdb.ledcontrol.LEDManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int LED_NOTIFICATION_ID = 1;
-    private com.github.nkzawa.socketio.client.Socket mSocket;
+    private Socket mSocket;
 
     private SharedPreferences prefs;
     private EditText serverTextEdit;
@@ -45,6 +56,10 @@ public class MainActivity extends AppCompatActivity {
     private static final String DEFAULT_SERVER_NAME = "http://213.136.81.179:3004";
 
     private LEDManager ledManager;
+
+    private RecyclerView historyRecycleView;
+    private HistoryAdapter historyAdapter;
+    private RecyclerView.LayoutManager historyLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +76,20 @@ public class MainActivity extends AppCompatActivity {
         this.channelTextEdit = (EditText) this.findViewById(R.id.channel);
         final Button enableButton = (Button) this.findViewById(R.id.button);
         final Button tryOutLedButton = (Button) this.findViewById(R.id.tryoutButton);
+        final Button clearHistoryButton = (Button) this.findViewById(R.id.clearHistoryButton);
+        this.historyRecycleView = (RecyclerView) this.findViewById(R.id.history_recycleview);
+        historyLayoutManager = new LinearLayoutManager(this);
+        historyRecycleView.setLayoutManager(historyLayoutManager);
+
+        List<HistoryEntry> historyEntries = new ArrayList<>();
+        historyEntries.add(new HistoryEntry("test"));
+        historyEntries.add(new HistoryEntry("test"));
+        historyEntries.add(new HistoryEntry("test"));
+
+        historyAdapter = new HistoryAdapter(historyEntries, this, historyRecycleView);
+        historyRecycleView.setAdapter(historyAdapter);
+        historyRecycleView.setNestedScrollingEnabled(false);
+        historyRecycleView.addItemDecoration(new HistoryAdapter.HistoryItemDecorator(this, historyAdapter));
 
         TextView dotsTextview = (TextView) this.findViewById(R.id.dots);
         dotsTextview.setOnClickListener(new View.OnClickListener() {
@@ -86,18 +115,26 @@ public class MainActivity extends AppCompatActivity {
         enableButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                final String toastMsg;
                 if (isEnabled) {
+                    toastMsg = "Disconnecting ...";
                     isEnabled = false;
                     enableButton.setText("TURN ON");
+                    System.out.println("disconnecting ****");
                     disconnectSocket();
-                    Toast.makeText(MainActivity.this, "Disconnecting ...", Toast.LENGTH_SHORT).show();
                 } else {
+                    toastMsg = "Connecting ...";
                     isEnabled = true;
                     enableButton.setText("TURN OFF");
                     connectSocket();
-                    Toast.makeText(MainActivity.this, "Connecting ...", Toast.LENGTH_SHORT).show();
                 }
                 prefs.edit().putBoolean(ENABLED, isEnabled).commit();
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MainActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
 
@@ -139,9 +176,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 flashLedLight();
+                historyAdapter.addAtFront(new HistoryEntry("Try out LED"));
+
             }
         });
 
+        clearHistoryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                historyAdapter.clearModel();
+            }
+        });
     }
 
     private Emitter.Listener onFlash = new Emitter.Listener() {
@@ -152,17 +197,20 @@ public class MainActivity extends AppCompatActivity {
                 public void run() {
                     System.out.println("On flash");
                     JSONObject data = (JSONObject) args[0];
-                    String username;
-                    String message;
+                    String who;
+                    String channel;
                     try {
-                        username = data.getString("ip");
-                        message = data.getString("channel");
+                        who = data.getString("ip");
+                        channel = data.getString("channel");
                         flashLedLight();
+
+                        historyAdapter.addAtFront(new HistoryEntry(String.format("Flash in channel %s by %s ", channel, who)));
+
                     } catch (JSONException e) {
                         return;
                     }
                     // add the message to view
-                    System.out.println(username + " " + message);
+                    System.out.println(who + " " + channel);
                 }
             });
         }
@@ -174,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
             ledManager.ApplyBrightness(10);
             ledManager.Apply();
 
-            new android.os.Handler().postDelayed(
+            new Handler().postDelayed(
                     new Runnable() {
                         public void run() {
                             Log.i("tag", "This'll run 300 milliseconds later");
@@ -199,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
             notif.ledOffMS = 100;
 
             nm.notify(LED_NOTIFICATION_ID, notif);
-            new android.os.Handler().postDelayed(
+            new Handler().postDelayed(
                     new Runnable() {
                         public void run() {
                             NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -218,7 +266,10 @@ public class MainActivity extends AppCompatActivity {
                 public void run() {
                     try {
                         String channel = MainActivity.this.channelTextEdit.getText().toString();
+                        String server = MainActivity.this.serverTextEdit.getText().toString();
                         Toast.makeText(MainActivity.this, String.format("Connected to channel %s", channel), Toast.LENGTH_SHORT).show();
+                        historyAdapter.addAtFront(new HistoryEntry(String.format("Connected to channel %s", channel, server)));
+
                         System.out.println("On connect");
                         JSONObject payload = new JSONObject();
 
@@ -241,7 +292,8 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     System.out.println("Disconnected");
-
+                    String server = serverTextEdit.getText().toString();
+                    historyAdapter.addAtFront(new HistoryEntry("Disconnected from " + server));
                 }
             });
         }
@@ -252,7 +304,8 @@ public class MainActivity extends AppCompatActivity {
             if (mSocket != null) {
                 disconnectSocket();
             }
-            mSocket = IO.socket(serverTextEdit.getText().toString());
+            String server = serverTextEdit.getText().toString();
+            mSocket = IO.socket(server);
             mSocket.connect();
             mSocket.on("flash", onFlash);
             mSocket.on("connect", onConnect);
