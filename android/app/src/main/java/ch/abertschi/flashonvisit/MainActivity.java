@@ -6,6 +6,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -16,6 +17,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +29,7 @@ import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,7 +43,9 @@ import com.wang.avi.AVLoadingIndicatorView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
     private Button enableButton;
     private boolean isEnabled = false;
 
+    private boolean isHistoryCollapsed = true;
+
     private static final String SERVER = "server_name";
     private static final String CHANNEL = "channel_name";
     private static final String ENABLED = "is_enabled";
@@ -64,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int STARTUP_DELAY = 300;
     public static final int ANIM_ITEM_DURATION = 1000;
     public static final int ITEM_DELAY = 300;
+    public static final int HISTORY_COLLAPSED_HEIGHT_DP = 150;
 
     private static final String DEFAULT_SERVER_NAME = "http://213.136.81.179:3004";
 
@@ -93,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView indicatorDisconnected;
     private ImageView indicatorConnected;
     private AVLoadingIndicatorView indicatorConnecting;
+    private boolean isAdvancedLedOptionsCollapsed = true;
 
     private void animate() {
 
@@ -223,6 +232,7 @@ public class MainActivity extends AppCompatActivity {
             return;
 
         boolean hidePrevious = false;
+        hideView(indicatorConnecting, 0);
         if (indicatorConnecting.getVisibility() != View.GONE) {
             hideView(indicatorConnecting, 0);
             hidePrevious = true;
@@ -231,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
             hideView(indicatorDisconnected, 0);
             hidePrevious = true;
         }
-        showView(indicatorConnected, hidePrevious ? CONNECTION_ANIMATION_DURATION * 2 : 0);
+        showView(indicatorConnected, CONNECTION_ANIMATION_DURATION * 5);
     }
 
     private void showAnimationDisconnectedIfNotVisible() {
@@ -263,12 +273,15 @@ public class MainActivity extends AppCompatActivity {
             public void onAnimationStart(Animator animation) {
                 view.setVisibility(View.VISIBLE);
             }
+
             @Override
             public void onAnimationEnd(Animator animation) {
             }
+
             @Override
             public void onAnimationCancel(Animator animation) {
             }
+
             @Override
             public void onAnimationRepeat(Animator animation) {
             }
@@ -321,8 +334,11 @@ public class MainActivity extends AppCompatActivity {
         this.serverTextEdit = (EditText) this.findViewById(R.id.serveradress);
         this.channelTextEdit = (EditText) this.findViewById(R.id.channel);
         final Button enableButton = (Button) this.findViewById(R.id.button);
-        final Button tryOutLedButton = (Button) this.findViewById(R.id.tryoutButton);
-        final Button clearHistoryButton = (Button) this.findViewById(R.id.clearHistoryButton);
+        final View tryOutLedButton = this.findViewById(R.id.tryoutButton);
+        final View clearHistoryButton = this.findViewById(R.id.clearHistoryButton);
+        final TextView expandHistoryButton = (TextView) this.findViewById(R.id.moreHistoryButton);
+        final TextView expandLedOptions = (TextView) this.findViewById(R.id.button_show_advanced_led);
+
         this.indicatorConnected = (ImageView) this.findViewById(R.id.connection_logo_connected);
         this.indicatorDisconnected = (ImageView) this.findViewById(R.id.connection_logo_disconnected);
         this.indicatorConnecting = (AVLoadingIndicatorView) this.findViewById(R.id.connection_logo_loading);
@@ -366,7 +382,6 @@ public class MainActivity extends AppCompatActivity {
         enableButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final String toastMsg;
                 if (isEnabled) {
                     isEnabled = false;
                     enableButton.setText("START");
@@ -377,6 +392,43 @@ public class MainActivity extends AppCompatActivity {
                     connectToSocketAndRetryIfFailed();
                 }
                 prefs.edit().putBoolean(ENABLED, isEnabled).commit();
+            }
+        });
+
+        expandHistoryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RelativeLayout container = (RelativeLayout) findViewById(R.id.history_recycleview_container);
+                RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) container.getLayoutParams();
+                if (isHistoryCollapsed) {
+                    expandHistoryButton.setText("LESS");
+                    isHistoryCollapsed = false;
+                    layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                } else {
+                    isHistoryCollapsed = true;
+                    expandHistoryButton.setText("MORE");
+                    int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                            HISTORY_COLLAPSED_HEIGHT_DP, getResources().getDisplayMetrics());
+                    layoutParams.height = height;
+                }
+                container.setLayoutParams(layoutParams);
+            }
+        });
+
+        expandLedOptions.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                View container = findViewById(R.id.advanced_options_led);
+                TextView textView = (TextView) findViewById(R.id.button_show_advanced_led);
+                if (isAdvancedLedOptionsCollapsed) {
+                    showView(container, 0);
+                    textView.setText("BASIC");
+                    isAdvancedLedOptionsCollapsed = false;
+                } else {
+                    hideView(container, 0);
+                    textView.setText("ADVANCED");
+                    isAdvancedLedOptionsCollapsed = true;
+                }
             }
         });
 
@@ -393,6 +445,61 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
+                new AsyncTask<String, Void, Boolean>() {
+                    @Override
+                    protected Boolean doInBackground(String... params) {
+                        boolean reachable = false;
+                        String host = params[0];
+                        int port = 0;
+                        try {
+                            if (!host.startsWith("http://") && !host.startsWith("https://")) {
+                                host = "http://" + host;
+                            }
+                            System.out.println(host.lastIndexOf(":"));
+                            if (host.lastIndexOf(":") < 6) {
+
+                                port = 80;
+                            } else {
+                                String p = host.substring(host.lastIndexOf(":") + 1, host.length());
+                                if (p.endsWith("/")) {
+                                    p = p.substring(0, p.length() - 1);
+                                }
+                                port = Integer.valueOf(p);
+                                host = host.substring(0, host.length() - p.length() - 1);
+                            }
+
+                            System.out.println(host + " / " + port);
+                            URL url = new URL(host + ":" + port);
+                            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                            connection.setRequestMethod("GET");
+                            connection.connect();
+                            reachable = true;
+
+                        } catch (Exception e) {
+                            System.out.println(e);
+                        }
+                        return reachable;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Boolean result) {
+                        TextView txt = (TextView) findViewById(R.id.address_validation);
+                        if (result) {
+                            hideView(txt, 0);
+                        } else {
+                            showView(txt, 0);
+                        }
+                    }
+
+                    @Override
+                    protected void onPreExecute() {
+                    }
+
+                    @Override
+                    protected void onProgressUpdate(Void... values) {
+                    }
+                }.execute(s.toString());
+
                 prefs.edit().putString(SERVER, s.toString()).commit();
             }
         });
@@ -410,6 +517,12 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
+                TextView view = (TextView) findViewById(R.id.channel_validation);
+                if (s.toString().isEmpty()) {
+                    showView(view, 0);
+                } else {
+                    hideView(view, 0);
+                }
                 prefs.edit().putString(CHANNEL, s.toString()).commit();
             }
         });
@@ -419,7 +532,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 flashLedLight();
                 historyAdapter.addAtFront(new HistoryEntry("Try out LED"));
-
             }
         });
 
@@ -461,47 +573,47 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private void flashLedLight() {
-//        if (ledManager.isDeviceSupported()) {
-//            ledManager.setChoiseToOn();
-//            ledManager.ApplyBrightness(10);
-//            ledManager.Apply();
-//
-//            new Handler().postDelayed(
-//                    new Runnable() {
-//                        public void run() {
-//                            Log.i("tag", "This'll run 300 milliseconds later");
-//                            ledManager.setChoiseToOff();
-//                            ledManager.ApplyBrightness(10);
-//                            ledManager.Apply();
-//                        }
-//                    },
-//                    100);
-//        } else {
-        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (ledManager.isDeviceSupported()) {
+            ledManager.setChoiseToOn();
+            ledManager.ApplyBrightness(10);
+            ledManager.Apply();
 
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
-        //mBuilder.setLights(Color.RED, 1000, 1000); // will blink
-        mBuilder.setSmallIcon(R.mipmap.ic_launcher);
-        mBuilder.setPriority(Notification.PRIORITY_HIGH);
-        mBuilder.setOngoing(true);
-        mBuilder.setLights(0xff00ff00, 300, 100);
-        Notification notif = mBuilder.build();
+            new Handler().postDelayed(
+                    new Runnable() {
+                        public void run() {
+                            Log.i("tag", "This'll run 300 milliseconds later");
+                            ledManager.setChoiseToOff();
+                            ledManager.ApplyBrightness(10);
+                            ledManager.Apply();
+                        }
+                    },
+                    100);
+        } else {
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-        // notif.ledARGB = 0xFFff0000;
-        //notif.flags = Notification.FLAG_SHOW_LIGHTS;
-        //notif.ledOnMS = 100;
-        //notif.ledOffMS = 100;
+            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
+            //mBuilder.setLights(Color.RED, 1000, 1000); // will blink
+            mBuilder.setSmallIcon(R.mipmap.ic_launcher);
+            mBuilder.setPriority(Notification.PRIORITY_HIGH);
+//        mBuilder.setOngoing(true);
+//        mBuilder.setLights(0xff00ff00, 300, 100);
+            Notification notif = mBuilder.build();
 
-        nm.notify(LED_NOTIFICATION_ID, notif);
-//            new Handler().postDelayed(
-//                    new Runnable() {
-//                        public void run() {
-//                            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-//                            nm.cancel(LED_NOTIFICATION_ID);
-//                        }
-//                    },
-//                    500);
-////        }
+            notif.ledARGB = 0xFFff0000;
+            notif.flags = Notification.FLAG_SHOW_LIGHTS;
+            notif.ledOnMS = 100;
+            notif.ledOffMS = 100;
+
+            nm.notify(LED_NOTIFICATION_ID, notif);
+            new Handler().postDelayed(
+                    new Runnable() {
+                        public void run() {
+                            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                            nm.cancel(LED_NOTIFICATION_ID);
+                        }
+                    },
+                    500);
+        }
     }
 
     private Emitter.Listener onConnect = new Emitter.Listener() {
@@ -572,9 +684,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void connectSocket() {
         try {
-            if (mSocket != null) {
-                disconnectSocket();
-            }
+//            if (mSocket != null) {
+//                disconnectSocket();
+//            }
             showAnimationConnectingIfNotVisible();
             String server = serverTextEdit.getText().toString();
             mSocket = IO.socket(server);

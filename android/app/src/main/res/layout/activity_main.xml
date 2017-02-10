@@ -85,9 +85,9 @@
                                 android:layout_marginLeft="5dp">
 
                                 <com.wang.avi.AVLoadingIndicatorView
+                                    android:id="@+id/connection_logo_loading"
                                     android:layout_width="wrap_content"
                                     android:layout_height="30dp"
-                                    android:id="@+id/connection_logo_loading"
                                     android:layout_centerVertical="true"
                                     android:alpha="0"
                                     android:visibility="gone"
@@ -99,20 +99,20 @@
                                     android:id="@+id/connection_logo_connected"
                                     android:layout_width="30dp"
                                     android:layout_height="30dp"
-                                    android:alpha="0"
-                                    android:visibility="gone"
                                     android:layout_alignParentLeft="true"
-                                    android:src="@mipmap/connected"/>
+                                    android:alpha="0"
+                                    android:src="@mipmap/connected"
+                                    android:visibility="gone"/>
 
 
                                 <ImageView
                                     android:id="@+id/connection_logo_disconnected"
                                     android:layout_width="30dp"
                                     android:layout_height="30dp"
-                                    android:alpha="0"
-                                    android:visibility="gone"
                                     android:layout_alignParentLeft="true"
-                                    android:src="@mipmap/not_connected"/>
+                                    android:alpha="0"
+                                    android:src="@mipmap/not_connected"
+                                    android:visibility="gone"/>
 
                             </LinearLayout>
 
@@ -187,7 +187,6 @@
                                 android:layout_gravity="center_horizontal"
                                 android:hint="Server adress"
                                 android:maxLines="1"
-
                                 android:singleLine="true"/>
 
                             <TextView
@@ -200,7 +199,7 @@
                                 android:textAppearance="?android:attr/textAppearanceSmall"
                                 android:textColor="#5F0F40"
                                 android:textStyle="italic"
-                                android:visibility="visible"
+                                android:visibility="gone"
                                 />
 
                             <EditText
@@ -223,7 +222,7 @@
                                 android:textAppearance="?android:attr/textAppearanceSmall"
                                 android:textColor="#5F0F40"
                                 android:textStyle="italic"
-                                android:visibility="visible"
+                                android:visibility="gone"
                                 />
 
                         </LinearLayout>
@@ -275,7 +274,6 @@
                             android:layout_height="wrap_content"
                             >
 
-
                             <TextView
                                 android:id="@+id/tryOutText"
                                 android:layout_width="wrap_content"
@@ -310,75 +308,159 @@
 
                         </FrameLayout>
 
+
+                        <RelativeLayout
+                            android:id="@+id/advanced_options_led"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/tryout"
+                            android:visibility="gone">
+
+                            <View
+                                android:id="@+id/sep2"
+                                android:layout_width="fill_parent"
+                                android:layout_height="1dip"
+                                android:layout_marginTop="10dp"
+                                android:background="#11000000"/>
+
+                            <FrameLayout
+                                android:id="@+id/choose_color"
+                                android:layout_below="@id/sep2"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                >
+
+                                <TextView
+                                    android:id="@+id/choose_color_text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="left|top"
+                                    android:text="Choose color"
+                                    android:textAppearance="?android:attr/textAppearanceMedium"
+                                    android:textColor="@android:color/black"/>
+
+                                <TextView
+                                    android:id="@+id/choose_color_detail"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="left|bottom"
+                                    android:layout_marginTop="25dp"
+                                    android:text="Needs to be supported by your device"
+                                    android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+                            </FrameLayout>
+
+                            <LinearLayout
+                                android:id="@+id/led_choose"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_below="@id/choose_color"
+                                android:layout_gravity="center_horizontal|bottom"
+                                android:layout_marginTop="10dp"
+                                android:gravity="center"
+                                android:orientation="horizontal">
+
+                                <android.support.design.widget.FloatingActionButton
+                                    android:layout_width="50dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_margin="10dp"
+                                    app:backgroundTint="@android:color/holo_red_dark"
+                                    />
+
+                                <android.support.design.widget.FloatingActionButton
+                                    android:layout_width="50dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_margin="10dp"
+                                    app:backgroundTint="@android:color/holo_blue_dark"
+                                    />
+
+                                <android.support.design.widget.FloatingActionButton
+                                    android:layout_width="50dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_margin="10dp"
+                                    app:backgroundTint="@android:color/holo_green_dark"
+                                    />
+                            </LinearLayout>
+
+                            <RelativeLayout
+                                android:id="@+id/led_root_options"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_below="@id/led_choose">
+
+                                <View
+                                    android:id="@+id/sep5"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="1dip"
+                                    android:layout_marginTop="10dp"
+                                    android:background="#11000000"/>
+
+                                <FrameLayout
+                                    android:id="@+id/kernel_hack"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="50dp"
+                                    android:layout_below="@id/sep5"
+                                    android:layout_marginTop="15dp">
+
+
+                                    <TextView
+                                        android:id="@+id/textView422"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_gravity="left|top"
+                                        android:text="LED hack (root)"
+                                        android:textAppearance="?android:attr/textAppearanceMedium"
+                                        android:textColor="@android:color/black"/>
+
+                                    <TextView
+                                        android:id="@+id/textView5"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_alignParentStart="true"
+                                        android:layout_below="@+id/textView422"
+                                        android:layout_gravity="left|center_vertical"
+                                        android:layout_marginTop="10dp"
+                                        android:text="Use kernel LED trigger"
+                                        android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+                                    <Switch
+                                        android:id="@+id/switch1"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_alignParentBottom="true"
+                                        android:layout_alignParentEnd="true"
+                                        android:layout_alignParentTop="true"
+                                        android:layout_gravity="right|center_vertical"
+                                        android:checked="false"/>
+
+
+                                </FrameLayout>
+                            </RelativeLayout>
+                        </RelativeLayout>
+
+
                         <View
-                            android:id="@+id/sep2"
+                            android:id="@+id/sep3"
                             android:layout_width="fill_parent"
                             android:layout_height="1dip"
-                            android:layout_below="@id/tryout"
+                            android:layout_below="@id/advanced_options_led"
                             android:layout_marginTop="10dp"
                             android:background="#11000000"/>
 
 
-                        <FrameLayout
-
-                            android:id="@+id/choose_color"
+                        <TextView
+                            android:id="@+id/button_show_advanced_led"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_below="@id/sep2"
-                            android:layout_marginTop="10dp"
-                            >
-
-                            <TextView
-                                android:id="@+id/choose_color_text"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="left|top"
-                                android:text="Choose color"
-                                android:textAppearance="?android:attr/textAppearanceMedium"
-                                android:textColor="@android:color/black"/>
-
-                            <TextView
-                                android:id="@+id/choose_color_detail"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="left|bottom"
-                                android:layout_marginTop="25dp"
-                                android:text="Needs to be supported by your device"
-                                android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-                        </FrameLayout>
-
-                        <LinearLayout
-                            android:id="@+id/led_choose"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@id/choose_color"
-                            android:layout_gravity="center_horizontal|bottom"
-                            android:layout_marginTop="10dp"
-                            android:gravity="center"
-                            android:orientation="horizontal">
-
-                            <android.support.design.widget.FloatingActionButton
-                                android:layout_width="50dp"
-                                android:layout_height="wrap_content"
-                                android:layout_margin="10dp"
-                                app:backgroundTint="@android:color/holo_red_dark"
-                                />
-
-                            <android.support.design.widget.FloatingActionButton
-                                android:layout_width="50dp"
-                                android:layout_height="wrap_content"
-                                android:layout_margin="10dp"
-                                app:backgroundTint="@android:color/holo_blue_dark"
-                                />
-
-                            <android.support.design.widget.FloatingActionButton
-                                android:layout_width="50dp"
-                                android:layout_height="wrap_content"
-                                android:layout_margin="10dp"
-                                app:backgroundTint="@android:color/holo_green_dark"
-                                />
-                        </LinearLayout>
+                            android:layout_below="@id/sep3"
+                            android:layout_marginRight="5dp"
+                            android:layout_marginTop="13dp"
+                            android:gravity="right"
+                            android:text="ADVANCED"
+                            android:textColor="#5F0F40"
+                            android:textSize="16dp"
+                            android:textStyle="bold"/>
 
 
                     </RelativeLayout>
@@ -505,7 +587,7 @@
                                 <android.support.v7.widget.RecyclerView
                                     android:id="@+id/history_recycleview"
                                     android:layout_width="match_parent"
-                                    android:layout_height="150dp"
+                                    android:layout_height="wrap_content"
                                     android:layout_centerInParent="true"
                                     android:layout_margin="0dp"
                                     android:orientation="vertical"
@@ -620,47 +702,47 @@
                             <!--</FrameLayout>-->
 
 
-                            <FrameLayout
-                                android:id="@+id/history_group"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
+                            <View
+                                android:id="@+id/sep4"
+                                android:layout_width="fill_parent"
+                                android:layout_height="1dip"
                                 android:layout_below="@id/history_recycleview_container"
+                                android:layout_marginTop="10dp"
+                                android:background="#11000000"/>
+
+
+                            <LinearLayout
+                                android:id="@+id/history_group"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_alignParentEnd="true"
+                                android:layout_below="@id/sep4"
+                                android:layout_marginTop="13dp"
+                                android:gravity="right"
+                                android:orientation="horizontal"
                                 >
 
-                                <ImageView
-                                    android:layout_width="30dp"
-                                    android:layout_height="50dp"
-                                    android:layout_gravity="left|center_vertical"
-                                    android:src="@mipmap/history_end4"/>
-
-
-                                <Button
+                                <TextView
                                     android:id="@+id/clearHistoryButton"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_alignParentBottom="true"
-                                    android:layout_alignParentEnd="true"
-                                    android:layout_gravity="center|center_vertical"
-                                    android:backgroundTint="#321325"
+                                    android:layout_marginRight="40dp"
                                     android:text="CLEAR"
-                                    android:textColor="@android:color/white"
+                                    android:textColor="#5F0F40"
                                     android:textSize="16dp"
-                                    android:textStyle="normal"/>
+                                    android:textStyle="bold"/>
 
-
-                                <Button
+                                <TextView
                                     android:id="@+id/moreHistoryButton"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_alignParentBottom="true"
-                                    android:layout_alignParentEnd="true"
-                                    android:layout_gravity="right|center_vertical"
-                                    android:backgroundTint="#321325"
+                                    android:layout_marginRight="5dp"
                                     android:text="MORE"
-                                    android:textColor="@android:color/white"
+                                    android:textColor="#5F0F40"
                                     android:textSize="16dp"
-                                    android:textStyle="normal"/>
-                            </FrameLayout>
+                                    android:textStyle="bold"/>
+                            </LinearLayout>
 
 
                         </RelativeLayout>
