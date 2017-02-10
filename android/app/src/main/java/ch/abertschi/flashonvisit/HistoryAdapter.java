@@ -24,9 +24,6 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
     private List<HistoryEntry> model;
     private Context context;
     private RecyclerView recyclerView;
-
-    private boolean collapse;
-
     private DateFormat dateFormat = new android.text.format.DateFormat();
 
     public HistoryAdapter(List<HistoryEntry> model, Context context, RecyclerView recyclerView) {
@@ -58,7 +55,6 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         } else {
             imageId = R.mipmap.history;
         }
-
         holder.image.setImageDrawable(ContextCompat.getDrawable(this.context, imageId));
     }
 
@@ -100,15 +96,6 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
             }
             this.notifyItemRangeRemoved(0, size);
         }
-    }
-
-    public boolean isCollapse() {
-        return collapse;
-    }
-
-    public HistoryAdapter setCollapse(boolean collapse) {
-        this.collapse = collapse;
-        return this;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
