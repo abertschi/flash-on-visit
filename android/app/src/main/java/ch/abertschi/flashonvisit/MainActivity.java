@@ -1,10 +1,11 @@
 package ch.abertschi.flashonvisit;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -15,7 +16,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +26,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +35,7 @@ import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.kdb.ledcontrol.LEDManager;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int LED_NOTIFICATION_ID = 1;
     public static final long RECONNECT_FREQUENCY = 5000;
+    private static final int CONNECTION_ANIMATION_DURATION = 100;
     private Socket mSocket;
 
     private SharedPreferences prefs;
@@ -87,6 +90,9 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+    private ImageView indicatorDisconnected;
+    private ImageView indicatorConnected;
+    private AVLoadingIndicatorView indicatorConnecting;
 
     private void animate() {
 
@@ -196,6 +202,107 @@ public class MainActivity extends AppCompatActivity {
 //        statusBarText.setText(text);
 //    }
 
+    private void showAnimationConnectingIfNotVisible() {
+        if (indicatorConnecting.getVisibility() == View.VISIBLE)
+            return;
+
+        boolean hidePrevious = false;
+        if (indicatorConnected.getVisibility() != View.GONE) {
+            hideView(indicatorConnected, 0);
+            hidePrevious = true;
+        }
+        if (indicatorDisconnected.getVisibility() != View.GONE) {
+            hideView(indicatorDisconnected, 0);
+            hidePrevious = true;
+        }
+        showView(indicatorConnecting, hidePrevious ? CONNECTION_ANIMATION_DURATION * 2 : 0);
+    }
+
+    private void showAnimationConnectedIfNotVisible() {
+        if (indicatorConnected.getVisibility() == View.VISIBLE)
+            return;
+
+        boolean hidePrevious = false;
+        if (indicatorConnecting.getVisibility() != View.GONE) {
+            hideView(indicatorConnecting, 0);
+            hidePrevious = true;
+        }
+        if (indicatorDisconnected.getVisibility() != View.GONE) {
+            hideView(indicatorDisconnected, 0);
+            hidePrevious = true;
+        }
+        showView(indicatorConnected, hidePrevious ? CONNECTION_ANIMATION_DURATION * 2 : 0);
+    }
+
+    private void showAnimationDisconnectedIfNotVisible() {
+        if (indicatorDisconnected.getVisibility() == View.VISIBLE)
+            return;
+
+        boolean hidePrevious = false;
+        if (indicatorConnecting.getVisibility() != View.GONE) {
+            hideView(indicatorConnecting, 0);
+            hidePrevious = true;
+        }
+        if (indicatorConnected.getVisibility() != View.GONE) {
+            hideView(indicatorConnected, 0);
+            hidePrevious = true;
+        }
+        showView(indicatorDisconnected, hidePrevious ? CONNECTION_ANIMATION_DURATION * 2 : 0);
+    }
+
+    private void showView(final View view, int delay) {
+        System.out.println("show view: " + view.toString() + " with delay " + delay);
+
+        final ObjectAnimator fadeIn = ObjectAnimator.ofFloat(view, "alpha", 0f, 1f);
+        fadeIn.setInterpolator(new DecelerateInterpolator(0.5f));
+        fadeIn.setStartDelay(delay);
+        fadeIn.setDuration(CONNECTION_ANIMATION_DURATION);
+
+        fadeIn.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                view.setVisibility(View.VISIBLE);
+            }
+            @Override
+            public void onAnimationEnd(Animator animation) {
+            }
+            @Override
+            public void onAnimationCancel(Animator animation) {
+            }
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+            }
+        });
+        fadeIn.start();
+    }
+
+    private void hideView(final View view, int delay) {
+        System.out.println("hide view: " + view.toString() + " with delay " + delay);
+        final ObjectAnimator fadeIn = ObjectAnimator.ofFloat(view, "alpha", 1f, 0f);
+        fadeIn.setInterpolator(new DecelerateInterpolator(0.5f));
+        fadeIn.setStartDelay(delay);
+        fadeIn.setDuration(CONNECTION_ANIMATION_DURATION);
+        fadeIn.start();
+        fadeIn.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                view.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+            }
+        });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -216,6 +323,10 @@ public class MainActivity extends AppCompatActivity {
         final Button enableButton = (Button) this.findViewById(R.id.button);
         final Button tryOutLedButton = (Button) this.findViewById(R.id.tryoutButton);
         final Button clearHistoryButton = (Button) this.findViewById(R.id.clearHistoryButton);
+        this.indicatorConnected = (ImageView) this.findViewById(R.id.connection_logo_connected);
+        this.indicatorDisconnected = (ImageView) this.findViewById(R.id.connection_logo_disconnected);
+        this.indicatorConnecting = (AVLoadingIndicatorView) this.findViewById(R.id.connection_logo_loading);
+
         this.historyRecycleView = (RecyclerView) this.findViewById(R.id.history_recycleview);
         historyLayoutManager = new LinearLayoutManager(this);
         historyRecycleView.setLayoutManager(historyLayoutManager);
@@ -244,11 +355,12 @@ public class MainActivity extends AppCompatActivity {
 
         serverTextEdit.setText(prefs.getString(SERVER, DEFAULT_SERVER_NAME));
         channelTextEdit.setText(prefs.getString(CHANNEL, ""));
-        this.enableButton.setText(this.isEnabled ? "TURN OFF" : "TURN ON");
+        this.enableButton.setText(this.isEnabled ? "STOP" : "START");
 
         if (isEnabled) {
-            Toast.makeText(MainActivity.this, "Connecting ...", Toast.LENGTH_SHORT).show();
             connectToSocketAndRetryIfFailed();
+        } else {
+            showAnimationDisconnectedIfNotVisible();
         }
 
         enableButton.setOnClickListener(new View.OnClickListener() {
@@ -257,19 +369,14 @@ public class MainActivity extends AppCompatActivity {
                 final String toastMsg;
                 if (isEnabled) {
                     isEnabled = false;
-                    enableButton.setText("TURN ON");
-                    toastMsg = "Discnnecting ...";
-                    System.out.println("disconnecting ****");
+                    enableButton.setText("START");
                     disconnectSocket();
                 } else {
-                    System.out.println("connecting");
-                    toastMsg = "Connecting ...";
                     isEnabled = true;
-                    enableButton.setText("TURN OFF");
+                    enableButton.setText("STOP");
                     connectToSocketAndRetryIfFailed();
                 }
                 prefs.edit().putBoolean(ENABLED, isEnabled).commit();
-                Toast.makeText(MainActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -370,24 +477,22 @@ public class MainActivity extends AppCompatActivity {
 //                    },
 //                    100);
 //        } else {
-            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
-            //mBuilder.setLights(Color.RED, 1000, 1000); // will blink
-            mBuilder.setSmallIcon(R.mipmap.ic_launcher);
-            mBuilder.setPriority(Notification.PRIORITY_HIGH);
-        mBuilder .setOngoing(true);
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
+        //mBuilder.setLights(Color.RED, 1000, 1000); // will blink
+        mBuilder.setSmallIcon(R.mipmap.ic_launcher);
+        mBuilder.setPriority(Notification.PRIORITY_HIGH);
+        mBuilder.setOngoing(true);
         mBuilder.setLights(0xff00ff00, 300, 100);
-            Notification notif = mBuilder.build();
+        Notification notif = mBuilder.build();
 
-           // notif.ledARGB = 0xFFff0000;
-            //notif.flags = Notification.FLAG_SHOW_LIGHTS;
-            //notif.ledOnMS = 100;
-            //notif.ledOffMS = 100;
+        // notif.ledARGB = 0xFFff0000;
+        //notif.flags = Notification.FLAG_SHOW_LIGHTS;
+        //notif.ledOnMS = 100;
+        //notif.ledOffMS = 100;
 
-
-
-            nm.notify(LED_NOTIFICATION_ID, notif);
+        nm.notify(LED_NOTIFICATION_ID, notif);
 //            new Handler().postDelayed(
 //                    new Runnable() {
 //                        public void run() {
@@ -406,6 +511,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     try {
+                        showAnimationConnectedIfNotVisible();
                         String channel = MainActivity.this.channelTextEdit.getText().toString();
                         String server = MainActivity.this.serverTextEdit.getText().toString();
                         Toast.makeText(MainActivity.this, String.format("Connected to channel %s", channel), Toast.LENGTH_SHORT).show();
@@ -433,6 +539,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     System.out.println("Disconnected");
+                    showAnimationDisconnectedIfNotVisible();
                     String server = serverTextEdit.getText().toString();
                     historyAdapter.addAtFront(new HistoryEntry("Disconnected from " + server));
                     if (isEnabled) {
@@ -444,6 +551,8 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private void connectToSocketAndRetryIfFailed() {
+        String server = serverTextEdit.getText().toString();
+        historyAdapter.addAtFront(new HistoryEntry(String.format("Connecting to %s", server)));
         connectHandler.removeCallbacks(reconnectReunnable);
         if (isEnabled) {
             Runnable runnable = new Runnable() {
@@ -457,7 +566,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             };
-            connectHandler.postDelayed(runnable, RECONNECT_FREQUENCY);
+            connectHandler.postDelayed(runnable, 0);
         }
     }
 
@@ -466,9 +575,8 @@ public class MainActivity extends AppCompatActivity {
             if (mSocket != null) {
                 disconnectSocket();
             }
+            showAnimationConnectingIfNotVisible();
             String server = serverTextEdit.getText().toString();
-            historyAdapter.addAtFront(new HistoryEntry(String.format("Connecting to %s", server)));
-
             mSocket = IO.socket(server);
             mSocket.connect();
             mSocket.on("flash", onFlash);
@@ -482,6 +590,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void disconnectSocket() {
         if (mSocket != null) {
+            showAnimationDisconnectedIfNotVisible();
             mSocket.disconnect();
             mSocket.off("connect", onConnect);
             mSocket.off("disconnect", onDisconnect);
