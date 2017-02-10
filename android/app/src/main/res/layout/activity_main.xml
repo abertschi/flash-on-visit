@@ -325,9 +325,9 @@
 
                             <FrameLayout
                                 android:id="@+id/choose_color"
-                                android:layout_below="@id/sep2"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_below="@id/sep2"
                                 android:layout_marginTop="10dp"
                                 >
 
@@ -403,7 +403,6 @@
                                     android:layout_below="@id/sep5"
                                     android:layout_marginTop="15dp">
 
-
                                     <TextView
                                         android:id="@+id/textView422"
                                         android:layout_width="wrap_content"
@@ -425,7 +424,7 @@
                                         android:textAppearance="?android:attr/textAppearanceSmall"/>
 
                                     <Switch
-                                        android:id="@+id/switch1"
+                                        android:id="@+id/led_kernel_hack"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:layout_alignParentBottom="true"
