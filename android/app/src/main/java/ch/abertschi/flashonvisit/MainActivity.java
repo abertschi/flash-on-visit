@@ -57,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "flashonvisit";
 
     private static final String DEFAULT_SERVER_NAME = "http://213.136.81.179:3004";
+    private static final String DEFAULT_CHANNEL = "abertschi";
+
     private static final int LED_NOTIFICATION_ID = 1;
     private static final long RECONNECT_FREQUENCY = 5000;
     private static final int DEFAULT_ANIMATION_DURATION = 100;
@@ -314,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
                 public void run() {
                     showAnimationDisconnectedIfNotVisible();
                     String channel = getChannelName();
-                    historyAdapter.addAtFront(new HistoryEntry("Leaving <b>%s</b>" + channel));
+                    historyAdapter.addAtFront(new HistoryEntry(String.format("Leaving <b>%s</b>", channel)));
                     if (isRunning) {
                         connectToSocketAndRetryIfFailed();
                     }
@@ -612,7 +614,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initChannelView() {
         this.channelTextEdit = (EditText) this.findViewById(R.id.channel);
-        setChannelName(prefs.getString(CHANNEL, ""));
+        setChannelName(prefs.getString(CHANNEL, DEFAULT_CHANNEL));
         if (getChannelName().isEmpty()) {
             TextView view = (TextView) findViewById(R.id.channel_validation);
             showView(view, 0);
