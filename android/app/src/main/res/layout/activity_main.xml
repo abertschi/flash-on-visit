@@ -285,7 +285,7 @@
                     android:layout_marginLeft="7dp"
                     android:layout_marginTop="7dp"
                     android:paddingLeft="10dp"
-                    android:text="LED settings"
+                    android:text="Feedback settings"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:textColor="@android:color/black"/>
 
@@ -354,7 +354,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:backgroundTint="#321325"
-                                    android:text="FLASH"
+                                    android:text="TRY"
                                     android:textColor="@android:color/white"
                                     android:textSize="16dp"
                                     android:textStyle="normal"/>
@@ -370,11 +370,84 @@
                             android:layout_marginTop="10dp"
                             android:background="#11000000"/>
 
+
+                        <LinearLayout
+                            android:id="@+id/choose_feedback"
+                            android:layout_width="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/sep2"
+                            android:layout_marginTop="15dp"
+                            android:layout_marginBottom="5dp"
+                            android:orientation="horizontal">
+
+                            <com.andexert.library.RippleView
+                                android:layout_width="wrap_content"
+                                android:layout_marginRight="20dp"
+                                android:layout_height="wrap_content"
+                                >
+
+                                <Button
+                                    android:id="@+id/led_feedback"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:backgroundTint="#321325"
+                                    android:text="FLASH"
+                                    android:textColor="@android:color/white"
+                                    android:textSize="16dp"
+                                    android:textStyle="normal"/>
+                            </com.andexert.library.RippleView>
+
+                            <com.andexert.library.RippleView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginRight="20dp"
+                                >
+
+                                <Button
+                                    android:id="@+id/flash_feedback"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:backgroundTint="#321325"
+                                    android:text="LED"
+                                    android:textColor="@android:color/white"
+                                    android:textSize="16dp"
+                                    android:textStyle="normal"/>
+                            </com.andexert.library.RippleView>
+
+
+                            <com.andexert.library.RippleView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                >
+
+                                <Button
+                                    android:id="@+id/vibra_feedback"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:backgroundTint="#321325"
+                                    android:text="VIBRA"
+                                    android:textColor="@android:color/white"
+                                    android:textSize="16dp"
+                                    android:textStyle="normal"/>
+                            </com.andexert.library.RippleView>
+
+                        </LinearLayout>
+
+                        <View
+                            android:id="@+id/sep7"
+                            android:layout_width="fill_parent"
+                            android:layout_height="1dip"
+                            android:layout_below="@id/choose_feedback"
+                            android:layout_marginTop="10dp"
+                            android:background="#11000000"/>
+
+
                         <LinearLayout
                             android:id="@+id/led_hint"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_below="@id/sep2"
+                            android:layout_below="@id/sep7"
                             android:layout_marginTop="10dp"
                             android:orientation="horizontal">
 

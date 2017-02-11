@@ -153,48 +153,48 @@ public class MainActivity extends AppCompatActivity {
         historyAdapter.addAtFront(new HistoryEntry(content));
     }
 
-    private void flashLedLight() {
-        flashLedLight(500);
-    }
-
-    private void flashLedLight(int delayUntilHideNotification) {
-        if (ledManager.isDeviceSupported() && ledKernelHackSwitch.isChecked()) {
-            ledManager.setChoiseToOn();
-            ledManager.ApplyBrightness(10);
-            ledManager.Apply();
-
-            new Handler().postDelayed(
-                    new Runnable() {
-                        public void run() {
-                            ledManager.setChoiseToOff();
-                            ledManager.ApplyBrightness(10);
-                            ledManager.Apply();
-                        }
-                    },
-                    100);
-        } else {
-            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
-            mBuilder.setSmallIcon(R.mipmap.ic_launcher);
-            mBuilder.setContentTitle("Flash On Visit");
-            mBuilder.setPriority(Notification.PRIORITY_HIGH);
-
-            Notification notif = mBuilder.build();
-            notif.ledARGB = prefs.getInt(LED_COLOR, LED_COLOR_DEFAULT);
-            notif.flags = Notification.FLAG_SHOW_LIGHTS;
-            notif.ledOnMS = 100;
-            notif.ledOffMS = 0;
-            nm.notify(LED_NOTIFICATION_ID, notif);
-            new Handler().postDelayed(
-                    new Runnable() {
-                        public void run() {
-                            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                            nm.cancel(LED_NOTIFICATION_ID);
-                        }
-                    },
-                    delayUntilHideNotification);
-        }
-    }
+//    private void flashLedLight() {
+//        flashLedLight(500);
+//    }
+//
+//    private void flashLedLight(int delayUntilHideNotification) {
+//        if (ledManager.isDeviceSupported() && ledKernelHackSwitch.isChecked()) {
+//            ledManager.setChoiseToOn();
+//            ledManager.ApplyBrightness(10);
+//            ledManager.Apply();
+//
+//            new Handler().postDelayed(
+//                    new Runnable() {
+//                        public void run() {
+//                            ledManager.setChoiseToOff();
+//                            ledManager.ApplyBrightness(10);
+//                            ledManager.Apply();
+//                        }
+//                    },
+//                    100);
+//        } else {
+//            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
+//            mBuilder.setSmallIcon(R.mipmap.ic_launcher);
+//            mBuilder.setContentTitle("Flash On Visit");
+//            mBuilder.setPriority(Notification.PRIORITY_HIGH);
+//
+//            Notification notif = mBuilder.build();
+//            notif.ledARGB = prefs.getInt(LED_COLOR, LED_COLOR_DEFAULT);
+//            notif.flags = Notification.FLAG_SHOW_LIGHTS;
+//            notif.ledOnMS = 100;
+//            notif.ledOffMS = 0;
+//            nm.notify(LED_NOTIFICATION_ID, notif);
+//            new Handler().postDelayed(
+//                    new Runnable() {
+//                        public void run() {
+//                            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//                            nm.cancel(LED_NOTIFICATION_ID);
+//                        }
+//                    },
+//                    delayUntilHideNotification);
+//        }
+//    }
 
     private void connectToSocketAndRetryIfFailed() {
         historyAdapter.addAtFront(new HistoryEntry(String.format("Connecting with <b>%s</b>", getServerName())));
