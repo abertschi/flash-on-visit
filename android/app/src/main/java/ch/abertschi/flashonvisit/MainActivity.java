@@ -351,8 +351,11 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 MaterialDialog dialog = new MaterialDialog.Builder(MainActivity.this)
                         .title("About")
-                        .content("This app is made with <3 by abertschi.\nhttp://www.abertschi.ch")
-                        .positiveText("OK")
+                        .content("This app is made with <3 by abertschi\n"
+                                + "and is completely free as in free speech.\n\nFeedback and Code at \n"
+                                + "https://github.com/abertschi/flash-on-visit")
+
+                        .positiveText("ROCK ON")
                         .show();
             }
         });
