@@ -116,17 +116,26 @@
 
                             </LinearLayout>
 
-                            <Button
-                                android:id="@+id/button"
+                            <com.andexert.library.RippleView
+                                android:id="@+id/enableButtonWrapper"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
-                                android:layout_gravity="right"
-                                android:backgroundTint="#321325"
-                                android:text=""
-                                android:textColor="@android:color/white"
-                                android:textSize="16dp"
-                                android:textStyle="normal"/>
+                                android:layout_gravity="right">
+
+                                <Button
+                                    android:id="@+id/button"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:backgroundTint="#321325"
+                                    android:text="START"
+                                    android:textColor="@android:color/white"
+                                    android:textSize="16dp"
+                                    android:textStyle="normal">
+
+                                    <requestFocus/>
+                                </Button>
+                            </com.andexert.library.RippleView>
                         </RelativeLayout>
                     </RelativeLayout>
                 </RelativeLayout>
@@ -174,27 +183,45 @@
                             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
                         <LinearLayout
+                            android:id="@+id/serverTextEditGroup"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_below="@id/server_title"
                             android:orientation="vertical">
 
-                            <EditText
-                                android:id="@+id/serveradress"
+                            <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_below="@id/server_title"
-                                android:layout_gravity="center_horizontal"
-                                android:hint="Server adress"
-                                android:maxLines="1"
-                                android:singleLine="true"/>
+                                android:orientation="horizontal"
+                                >
+
+                                <ImageView
+                                    android:layout_width="30dp"
+                                    android:layout_height="30dp"
+                                    android:layout_gravity="center"
+                                    android:src="@mipmap/ic_developer_board_black_24dp"
+                                    />
+
+                                <EditText
+                                    android:id="@+id/serveradress"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_below="@id/server_title"
+                                    android:layout_gravity="center_horizontal|center_vertical"
+                                    android:layout_marginLeft="8dp"
+                                    android:hint="Server adress"
+                                    android:maxLines="1"
+                                    android:singleLine="true"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/address_validation"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_below="@id/serveradress"
-                                android:paddingLeft="4dp"
+                                android:layout_below="@id/serverTextEditGroup"
+                                android:layout_marginLeft="30dp"
+                                android:paddingLeft="10dp"
                                 android:text="Server not available"
                                 android:textAppearance="?android:attr/textAppearanceSmall"
                                 android:textColor="#5F0F40"
@@ -202,22 +229,43 @@
                                 android:visibility="gone"
                                 />
 
-                            <EditText
-                                android:id="@+id/channel"
+
+                            <LinearLayout
+                                android:id="@+id/channelTextEditContainer"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_horizontal"
+                                android:layout_below="@id/address_validation"
                                 android:layout_marginTop="10dp"
-                                android:hint="Channel"
-                                android:maxLines="1"
-                                android:singleLine="true"/>
+                                android:orientation="horizontal"
+                                >
+
+                                <ImageView
+                                    android:layout_width="30dp"
+                                    android:layout_height="30dp"
+                                    android:layout_gravity="center"
+                                    android:src="@mipmap/ic_group_black_24dp"
+                                    />
+
+
+                                <EditText
+                                    android:id="@+id/channel"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_horizontal|center_vertical"
+                                    android:layout_marginLeft="8dp"
+                                    android:hint="Channel"
+                                    android:maxLines="1"
+                                    android:singleLine="true"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/channel_validation"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_below="@id/channel"
-                                android:paddingLeft="4dp"
+                                android:layout_below="@id/channelTextEditContainer"
+                                android:layout_marginLeft="30dp"
+                                android:paddingLeft="10dp"
                                 android:text="No valid channel"
                                 android:textAppearance="?android:attr/textAppearanceSmall"
                                 android:textColor="#5F0F40"
@@ -293,52 +341,110 @@
                                 android:textAppearance="?android:attr/textAppearanceSmall"/>
 
 
-                            <Button
-                                android:id="@+id/tryoutButton"
+                            <com.andexert.library.RippleView
+                                android:id="@+id/tryoutButtonWrapper"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentBottom="true"
                                 android:layout_alignParentEnd="true"
-                                android:layout_gravity="right|center_vertical"
-                                android:backgroundTint="#321325"
-                                android:text="FLASH"
-                                android:textColor="@android:color/white"
-                                android:textSize="16dp"
-                                android:textStyle="normal"/>
+                                android:layout_gravity="right|center_vertical">
+
+                                <Button
+                                    android:id="@+id/tryoutButton"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:backgroundTint="#321325"
+                                    android:text="FLASH"
+                                    android:textColor="@android:color/white"
+                                    android:textSize="16dp"
+                                    android:textStyle="normal"/>
+                            </com.andexert.library.RippleView>
 
                         </FrameLayout>
 
+                        <View
+                            android:id="@+id/sep2"
+                            android:layout_width="fill_parent"
+                            android:layout_height="1dip"
+                            android:layout_below="@id/tryout"
+                            android:layout_marginTop="10dp"
+                            android:background="#11000000"/>
+
+                        <LinearLayout
+                            android:id="@+id/led_hint"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/sep2"
+                            android:layout_marginTop="10dp"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="35dp"
+                                android:id="@+id/lightbulp"
+                                android:layout_marginLeft="0dp"
+                                android:layout_height="wrap_content"
+                                android:backgroundTintMode="add"
+                                android:layout_gravity="left"
+                                android:src="@mipmap/lightbulb"
+                                />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginLeft="5dp"
+                                android:text="Some devices only flash the notification light if the screen is off."
+                                android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+
+                        </LinearLayout>
 
                         <RelativeLayout
                             android:id="@+id/advanced_options_led"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_below="@id/tryout"
+                            android:layout_below="@id/led_hint"
                             android:visibility="gone">
 
+
                             <View
-                                android:id="@+id/sep2"
+                                android:id="@+id/sep6"
                                 android:layout_width="fill_parent"
                                 android:layout_height="1dip"
                                 android:layout_marginTop="10dp"
                                 android:background="#11000000"/>
 
+
                             <FrameLayout
                                 android:id="@+id/choose_color"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_below="@id/sep2"
+                                android:layout_below="@id/sep6"
                                 android:layout_marginTop="10dp"
                                 >
 
-                                <TextView
-                                    android:id="@+id/choose_color_text"
+                                <LinearLayout
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_gravity="left|top"
-                                    android:text="Choose color"
-                                    android:textAppearance="?android:attr/textAppearanceMedium"
-                                    android:textColor="@android:color/black"/>
+                                    android:orientation="horizontal">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Choose "
+                                        android:textAppearance="?android:attr/textAppearanceMedium"
+                                        android:textColor="@android:color/black"/>
+
+                                    <TextView
+                                        android:id="@+id/led_color_text"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="color"
+                                        android:textAppearance="?android:attr/textAppearanceMedium"
+                                        android:textColor="@android:color/holo_red_dark"/>
+
+                                </LinearLayout>
 
                                 <TextView
                                     android:id="@+id/choose_color_detail"
@@ -346,7 +452,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_gravity="left|bottom"
                                     android:layout_marginTop="25dp"
-                                    android:text="Needs to be supported by your device"
+                                    android:text="Availability is device dependent"
                                     android:textAppearance="?android:attr/textAppearanceSmall"/>
 
                             </FrameLayout>
@@ -361,26 +467,49 @@
                                 android:gravity="center"
                                 android:orientation="horizontal">
 
-                                <android.support.design.widget.FloatingActionButton
-                                    android:layout_width="50dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_margin="10dp"
-                                    app:backgroundTint="@android:color/holo_red_dark"
-                                    />
 
-                                <android.support.design.widget.FloatingActionButton
-                                    android:layout_width="50dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_margin="10dp"
-                                    app:backgroundTint="@android:color/holo_blue_dark"
-                                    />
+                                <com.andexert.library.RippleView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content">
 
-                                <android.support.design.widget.FloatingActionButton
-                                    android:layout_width="50dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_margin="10dp"
-                                    app:backgroundTint="@android:color/holo_green_dark"
-                                    />
+                                    <android.support.design.widget.FloatingActionButton
+                                        android:id="@+id/led_red"
+                                        android:layout_width="50dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_margin="10dp"
+                                        app:backgroundTint="@android:color/holo_red_dark"
+                                        />
+
+                                </com.andexert.library.RippleView>
+
+
+                                <com.andexert.library.RippleView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content">
+
+                                    <android.support.design.widget.FloatingActionButton
+                                        android:id="@+id/led_blue"
+                                        android:layout_width="50dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_margin="10dp"
+                                        app:backgroundTint="@android:color/holo_blue_dark"
+                                        />
+
+                                </com.andexert.library.RippleView>
+
+                                <com.andexert.library.RippleView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content">
+
+                                    <android.support.design.widget.FloatingActionButton
+                                        android:id="@+id/led_green"
+                                        android:layout_width="50dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_margin="10dp"
+                                        app:backgroundTint="@android:color/holo_green_dark"
+                                        />
+
+                                </com.andexert.library.RippleView>
                             </LinearLayout>
 
                             <RelativeLayout
@@ -488,7 +617,6 @@
 
                     <RelativeLayout
                         android:layout_width="match_parent"
-
                         android:layout_height="wrap_content">
 
 
@@ -509,79 +637,10 @@
                             android:paddingRight="20dp"
                             android:paddingTop="20dp">
 
-
-                            <!--<FrameLayout-->
-                            <!--android:layout_width="match_parent"-->
-                            <!--android:layout_height="wrap_content"-->
-                            <!--android:id="@+id/history_group"-->
-                            <!--&gt;-->
-
-
-                            <!--<TextView-->
-                            <!--android:id="@+id/historyTitle"-->
-                            <!--android:layout_width="wrap_content"-->
-                            <!--android:layout_height="wrap_content"-->
-                            <!--android:layout_gravity="left|center_vertical"-->
-                            <!--android:text="See passed events"-->
-                            <!--android:textAppearance="?android:attr/textAppearanceMedium"-->
-                            <!--android:textColor="@android:color/black" />-->
-
-                            <!--&lt;!&ndash;<TextView&ndash;&gt;-->
-                            <!--&lt;!&ndash;android:id="@+id/historyText"&ndash;&gt;-->
-                            <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
-                            <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
-                            <!--&lt;!&ndash;android:layout_gravity="left|center"&ndash;&gt;-->
-                            <!--&lt;!&ndash;android:layout_marginTop="10dp"&ndash;&gt;-->
-                            <!--&lt;!&ndash;android:text="See passed flashes"&ndash;&gt;-->
-                            <!--&lt;!&ndash;android:textAppearance="?android:attr/textAppearanceSmall" />&ndash;&gt;-->
-
-
-                            <!--<Button-->
-                            <!--android:id="@+id/clearHistoryButton"-->
-                            <!--android:layout_width="wrap_content"-->
-                            <!--android:layout_height="wrap_content"-->
-                            <!--android:layout_alignParentBottom="true"-->
-                            <!--android:layout_alignParentEnd="true"-->
-                            <!--android:layout_gravity="right|center_vertical"-->
-                            <!--android:backgroundTint="#321325"-->
-                            <!--android:text="CLEAR"-->
-                            <!--android:textColor="@android:color/white"-->
-                            <!--android:textSize="16dp"-->
-                            <!--android:textStyle="normal" />-->
-
-                            <!--</FrameLayout>-->
-
-
-                            <!--<View-->
-                            <!--android:layout_width="fill_parent"-->
-                            <!--android:layout_height="1dip"-->
-                            <!--android:layout_below="@id/history_group"-->
-                            <!--android:id="@+id/sep2"-->
-                            <!--android:layout_marginTop="10dp"-->
-                            <!--android:background="#11000000" />-->
-
-
-                            <!--<android.support.v7.widget.RecyclerView-->
-                            <!--android:id="@+id/recyclerView"-->
-                            <!--android:layout_width="match_parent"-->
-                            <!--android:layout_height="match_parent"-->
-                            <!--android:padding="0dp"-->
-                            <!--android:scrollbars="vertical"/>-->
-
                             <RelativeLayout
                                 android:id="@+id/history_recycleview_container"
                                 android:layout_width="match_parent"
                                 android:layout_height="150dp">
-
-                                <!--<ImageView-->
-                                <!--android:id="@+id/img_empty"-->
-                                <!--android:layout_centerInParent="true"-->
-                                <!--android:layout_width="fill_parent"-->
-                                <!--android:layout_height="wrap_content"-->
-                                <!--android:alpha=".3"-->
-                                <!--android:adjustViewBounds="true"-->
-                                <!--android:src="@mipmap/empty"-->
-                                <!--android:scaleType="fitCenter" />-->
 
                                 <android.support.v7.widget.RecyclerView
                                     android:id="@+id/history_recycleview"
@@ -596,110 +655,6 @@
 
 
                             </RelativeLayout>
-
-
-                            <!--<LinearLayout-->
-                            <!--android:layout_width="match_parent"-->
-                            <!--android:layout_height="wrap_content"-->
-                            <!--android:layout_margin="0dp"-->
-                            <!--android:orientation="vertical"-->
-                            <!--android:padding="0dp">-->
-
-                            <!--<FrameLayout-->
-                            <!--android:id="@+id/f1"-->
-                            <!--android:layout_width="match_parent"-->
-                            <!--android:layout_height="50dp"-->
-                            <!--android:layout_margin="0dip"-->
-                            <!--android:padding="0dip">-->
-
-
-                            <!--<ImageView-->
-                            <!--android:id="@+id/border"-->
-                            <!--android:layout_width="30dp"-->
-                            <!--android:layout_height="50dp"-->
-                            <!--android:layout_gravity="left|center_vertical"-->
-                            <!--android:src="@mipmap/history_start"/>-->
-
-                            <!--<LinearLayout-->
-                            <!--android:layout_width="match_parent"-->
-                            <!--android:layout_height="50dp"-->
-                            <!--android:layout_gravity="left|center_vertical"-->
-                            <!--android:layout_marginLeft="40dp"-->
-                            <!--android:layout_marginRight="5dp"-->
-                            <!--android:orientation="horizontal"-->
-                            <!--&gt;-->
-
-
-                            <!--<TextView-->
-
-                            <!--android:layout_width="wrap_content"-->
-                            <!--android:layout_height="wrap_content"-->
-                            <!--android:layout_gravity="center_vertical"-->
-                            <!--android:text="8 Feb. \n11:48:12 PM"-->
-                            <!--android:textAppearance="?android:attr/textAppearanceSmall"-->
-                            <!--/>-->
-
-                            <!--<TextView-->
-
-                            <!--android:layout_width="wrap_content"-->
-                            <!--android:layout_height="wrap_content"-->
-                            <!--android:layout_gravity="center_vertical"-->
-                            <!--android:layout_marginLeft="20dp"-->
-                            <!--android:text="Try out flash"-->
-                            <!--android:textAppearance="?android:attr/textAppearanceSmall"-->
-                            <!--android:textColor="@android:color/black"/>-->
-
-                            <!--</LinearLayout>-->
-
-
-                            <!--</FrameLayout>-->
-
-                            <!--<FrameLayout-->
-                            <!--android:layout_width="match_parent"-->
-                            <!--android:layout_height="50dp"-->
-                            <!--android:layout_below="@+id/f1"-->
-                            <!--android:layout_margin="0dip"-->
-                            <!--android:padding="0dip">-->
-
-
-                            <!--<ImageView-->
-                            <!--android:layout_width="30dp"-->
-                            <!--android:layout_height="50dp"-->
-                            <!--android:layout_gravity="left|center_vertical"-->
-                            <!--android:src="@mipmap/history"/>-->
-
-                            <!--<LinearLayout-->
-                            <!--android:layout_width="match_parent"-->
-                            <!--android:layout_height="50dp"-->
-                            <!--android:layout_gravity="left|center_vertical"-->
-                            <!--android:layout_marginLeft="40dp"-->
-                            <!--android:layout_marginRight="5dp"-->
-                            <!--android:orientation="horizontal"-->
-                            <!--&gt;-->
-
-
-                            <!--<TextView-->
-
-                            <!--android:layout_width="wrap_content"-->
-                            <!--android:layout_height="wrap_content"-->
-                            <!--android:layout_gravity="center_vertical"-->
-                            <!--android:text="8 Feb. 17\n11:48:12 PM"-->
-                            <!--android:textAppearance="?android:attr/textAppearanceSmall"-->
-                            <!--/>-->
-
-                            <!--<TextView-->
-
-                            <!--android:layout_width="wrap_content"-->
-                            <!--android:layout_height="wrap_content"-->
-                            <!--android:layout_gravity="center_vertical"-->
-                            <!--android:layout_marginLeft="20dp"-->
-                            <!--android:text="Flash in channel abertschi by ::ffff:46.127.158.4"-->
-                            <!--android:textAppearance="?android:attr/textAppearanceSmall"-->
-                            <!--android:textColor="@android:color/black"/>-->
-
-                            <!--</LinearLayout>-->
-                            <!--</FrameLayout>-->
-
 
                             <View
                                 android:id="@+id/sep4"

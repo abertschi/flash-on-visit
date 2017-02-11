@@ -6,10 +6,12 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
@@ -27,9 +29,11 @@ import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,7 +58,12 @@ public class MainActivity extends AppCompatActivity {
     private static final int LED_NOTIFICATION_ID = 1;
     public static final long RECONNECT_FREQUENCY = 5000;
     private static final int CONNECTION_ANIMATION_DURATION = 100;
+    public static final int LED_COLOR_BLUE = 0xff0099cc;
+    public static final int LED_COLOR_GREEN = 0xff669900;
+    public static final int LED_COLOR_RED = 0xffcc0000;
+    public static final int LED_COLOR_DEFAULT = LED_COLOR_RED;
     private Socket mSocket;
+    private static final String TAG = "flashonvisit";
 
     private SharedPreferences prefs;
     private EditText serverTextEdit;
@@ -67,6 +76,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String SERVER = "server_name";
     private static final String CHANNEL = "channel_name";
     private static final String ENABLED = "is_enabled";
+    private static final String LED_COLOR = "led_color";
+    private static final String LED_KERNEL_HACK = "led_kernel_hack";
 
     public static final int STARTUP_DELAY = 300;
     public static final int ANIM_ITEM_DURATION = 1000;
@@ -102,9 +113,10 @@ public class MainActivity extends AppCompatActivity {
     private ImageView indicatorConnected;
     private AVLoadingIndicatorView indicatorConnecting;
     private boolean isAdvancedLedOptionsCollapsed = true;
+    private Switch ledKernelHackSwitch;
+    private TextView ledTextColor;
 
-    private void animate() {
-
+    private void spalshAnimation() {
         for (int i = 0; i < container.getChildCount(); i++) {
             View v = container.getChildAt(i);
 
@@ -130,87 +142,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    private void showStatusBar(String text) {
-//        statusBarText.setText(text);
-//        statusBar.setVisibility(View.VISIBLE);
-//
-//        //ObjectAnimator fadeOut = ObjectAnimator.ofFloat(statusBar, "alpha",  1f, .3f);
-//        //fadeOut.setDuration(2000);
-//        final ObjectAnimator fadeIn = ObjectAnimator.ofFloat(statusBar, "alpha", 0f, 1f);
-//        fadeIn.setDuration(500);
-//
-//        final Handler connectHandler = new Handler(Looper.getMainLooper());
-//        Runnable runnable = new Runnable() {
-//            @Override
-//            public void run() {
-//                // Do the task...
-//                //connectHandler.postDelayed(this);
-//                ObjectAnimator fadeOut = ObjectAnimator.ofFloat(statusBar, "alpha", 1f, 0f);
-//                fadeOut.setDuration(500);
-//                fadeOut.start();
-//                fadeOut.addListener(new Animator.AnimatorListener() {
-//                    @Override
-//                    public void onAnimationStart(Animator animation) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onAnimationEnd(Animator animation) {
-//                        statusBar.setVisibility(View.GONE);
-//                    }
-//
-//                    @Override
-//                    public void onAnimationCancel(Animator animation) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onAnimationRepeat(Animator animation) {
-//
-//                    }
-//                });
-//            }
-//        };
-//        connectHandler.postDelayed(runnable, 5000);
-//
-//// Stop a repeating task like this.
-//        //hander.removeCallbacks(runnable);
-//
-////        TranslateAnimation animation = new TranslateAnimation(0, 0, -300, 0);
-////        animation.setDuration(500);
-////        animation.setFillAfter(false);
-////        statusBar.setAnimation(animation);
-////        animation.start();
-////        fadeIn.start();
-//    }
-//
-//    private void hideStatusBar() {
-//        TranslateAnimation animation = new TranslateAnimation(0, 0, 0, -300);
-//        animation.setDuration(500);
-//        animation.setFillAfter(false);
-//        statusBar.setAnimation(animation);
-//        animation.start();
-//        animation.setAnimationListener(new Animation.AnimationListener() {
-//            @Override
-//            public void onAnimationStart(Animation animation) {
-//
-//            }
-//
-//            @Override
-//            public void onAnimationEnd(Animation animation) {
-//                statusBar.setVisibility(View.GONE);
-//            }
-//
-//            @Override
-//            public void onAnimationRepeat(Animation animation) {
-//            }
-//        });
-//    }
-//
-//    private void updateStatusBar(String text) {
-//        statusBarText.setText(text);
-//    }
-
     private void showAnimationConnectingIfNotVisible() {
         if (indicatorConnecting.getVisibility() == View.VISIBLE)
             return;
@@ -231,15 +162,12 @@ public class MainActivity extends AppCompatActivity {
         if (indicatorConnected.getVisibility() == View.VISIBLE)
             return;
 
-        boolean hidePrevious = false;
         hideView(indicatorConnecting, 0);
         if (indicatorConnecting.getVisibility() != View.GONE) {
             hideView(indicatorConnecting, 0);
-            hidePrevious = true;
         }
         if (indicatorDisconnected.getVisibility() != View.GONE) {
             hideView(indicatorDisconnected, 0);
-            hidePrevious = true;
         }
         showView(indicatorConnected, CONNECTION_ANIMATION_DURATION * 5);
     }
@@ -318,11 +246,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        Resources r = getResources();
-        float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 200, r.getDisplayMetrics());
-        System.out.println(px + " DP TO PX");
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.ledManager = new LEDManager(this);
@@ -338,6 +261,23 @@ public class MainActivity extends AppCompatActivity {
         final View clearHistoryButton = this.findViewById(R.id.clearHistoryButton);
         final TextView expandHistoryButton = (TextView) this.findViewById(R.id.moreHistoryButton);
         final TextView expandLedOptions = (TextView) this.findViewById(R.id.button_show_advanced_led);
+        this.ledKernelHackSwitch = (Switch) this.findViewById(R.id.led_kernel_hack);
+        ledKernelHackSwitch.setChecked(prefs.getBoolean(LED_KERNEL_HACK, false));
+        ledTextColor = (TextView) findViewById(R.id.led_color_text);
+        ledTextColor.setTextColor(prefs.getInt(LED_COLOR, LED_COLOR_DEFAULT));
+
+        ledKernelHackSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                prefs.edit().putBoolean(LED_KERNEL_HACK, isChecked).commit();
+                if (isChecked) {
+                    addHistoryEntry("Change LED mode to <b>hack</b>");
+                } else {
+                    addHistoryEntry("Change LED mode to <b>normal</b>");
+                }
+
+            }
+        });
 
         this.indicatorConnected = (ImageView) this.findViewById(R.id.connection_logo_connected);
         this.indicatorDisconnected = (ImageView) this.findViewById(R.id.connection_logo_disconnected);
@@ -350,6 +290,44 @@ public class MainActivity extends AppCompatActivity {
         this.logoHeader = this.findViewById(R.id.logo_card);
         container = (ViewGroup) this.findViewById(R.id.container);
 
+        final View ledRedButton = this.findViewById(R.id.led_red);
+        final View ledBlueButton = this.findViewById(R.id.led_blue);
+        final View ledGreenButton = this.findViewById(R.id.led_green);
+
+        final View kernelHackView = this.findViewById(R.id.kernel_hack);
+        kernelHackView.setVisibility(ledManager.isDeviceSupported() ? View.VISIBLE : View.GONE);
+
+        ledRedButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int color = LED_COLOR_RED;
+                ledTextColor.setTextColor(color);
+                prefs.edit().putInt(LED_COLOR, color).commit();
+                addHistoryEntry(String.format("Change LED <b>%s</b>", colorTextInHtml("color", color)));
+                flashLedLight();
+            }
+        });
+
+        ledBlueButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int color = LED_COLOR_BLUE;
+                ledTextColor.setTextColor(color);
+                prefs.edit().putInt(LED_COLOR, color).commit();
+                addHistoryEntry(String.format("Change LED <b>%s</b>", colorTextInHtml("color", color)));
+                flashLedLight();
+            }
+        });
+        ledGreenButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int color = LED_COLOR_GREEN;
+                ledTextColor.setTextColor(color);
+                prefs.edit().putInt(LED_COLOR, LED_COLOR_GREEN).commit();
+                addHistoryEntry(String.format("Change LED <b>%s</b>", colorTextInHtml("color", color)));
+                flashLedLight();
+            }
+        });
         List<HistoryEntry> historyEntries = new ArrayList<>();
 
         historyAdapter = new HistoryAdapter(historyEntries, this, historyRecycleView);
@@ -387,6 +365,7 @@ public class MainActivity extends AppCompatActivity {
                     enableButton.setText("START");
                     disconnectSocket();
                 } else {
+                    new CheckServerAvailabilityTask().execute(serverTextEdit.getText().toString());
                     isEnabled = true;
                     enableButton.setText("STOP");
                     connectToSocketAndRetryIfFailed();
@@ -445,61 +424,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                new AsyncTask<String, Void, Boolean>() {
-                    @Override
-                    protected Boolean doInBackground(String... params) {
-                        boolean reachable = false;
-                        String host = params[0];
-                        int port = 0;
-                        try {
-                            if (!host.startsWith("http://") && !host.startsWith("https://")) {
-                                host = "http://" + host;
-                            }
-                            System.out.println(host.lastIndexOf(":"));
-                            if (host.lastIndexOf(":") < 6) {
-
-                                port = 80;
-                            } else {
-                                String p = host.substring(host.lastIndexOf(":") + 1, host.length());
-                                if (p.endsWith("/")) {
-                                    p = p.substring(0, p.length() - 1);
-                                }
-                                port = Integer.valueOf(p);
-                                host = host.substring(0, host.length() - p.length() - 1);
-                            }
-
-                            System.out.println(host + " / " + port);
-                            URL url = new URL(host + ":" + port);
-                            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                            connection.setRequestMethod("GET");
-                            connection.connect();
-                            reachable = true;
-
-                        } catch (Exception e) {
-                            System.out.println(e);
-                        }
-                        return reachable;
-                    }
-
-                    @Override
-                    protected void onPostExecute(Boolean result) {
-                        TextView txt = (TextView) findViewById(R.id.address_validation);
-                        if (result) {
-                            hideView(txt, 0);
-                        } else {
-                            showView(txt, 0);
-                        }
-                    }
-
-                    @Override
-                    protected void onPreExecute() {
-                    }
-
-                    @Override
-                    protected void onProgressUpdate(Void... values) {
-                    }
-                }.execute(s.toString());
-
+                new CheckServerAvailabilityTask().execute(s.toString());
                 prefs.edit().putString(SERVER, s.toString()).commit();
             }
         });
@@ -530,8 +455,17 @@ public class MainActivity extends AppCompatActivity {
         tryOutLedButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                flashLedLight();
+                flashLedLight(4000);
                 historyAdapter.addAtFront(new HistoryEntry("Try out LED"));
+                final ImageView view = (ImageView) findViewById(R.id.lightbulp);
+                view.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.mipmap.lightbulb_y2));
+                Handler handler = new Handler(Looper.getMainLooper());
+                final Runnable r = new Runnable() {
+                    public void run() {
+                        view.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.mipmap.lightbulb));
+                    }
+                };
+                handler.postDelayed(r, 150);
             }
         });
 
@@ -542,7 +476,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        animate();
+        spalshAnimation();
+        new CheckServerAvailabilityTask().execute(serverTextEdit.getText().toString());
+    }
+
+    private void addHistoryEntry(String content) {
+        historyAdapter.addAtFront(new HistoryEntry(content));
+    }
+
+    private String colorTextInHtml(String text, int color) {
+        String hexColor = String.format("#%06X", (0xFFFFFF & color));
+        return String.format("<font color=\"%s\">%s</font>", hexColor, text);
     }
 
     private Emitter.Listener onFlash = new Emitter.Listener() {
@@ -559,8 +503,7 @@ public class MainActivity extends AppCompatActivity {
                         who = data.getString("ip");
                         channel = data.getString("channel");
                         flashLedLight();
-
-                        historyAdapter.addAtFront(new HistoryEntry(String.format("Flash in channel %s by %s ", channel, who)));
+                        addHistoryEntry(String.format("%s visits <b>%s</b>", who, channel));
 
                     } catch (JSONException e) {
                         return;
@@ -573,7 +516,11 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private void flashLedLight() {
-        if (ledManager.isDeviceSupported()) {
+        flashLedLight(500);
+    }
+
+    private void flashLedLight(int delayUntilHideNotification) {
+        if (ledManager.isDeviceSupported() && ledKernelHackSwitch.isChecked()) {
             ledManager.setChoiseToOn();
             ledManager.ApplyBrightness(10);
             ledManager.Apply();
@@ -590,20 +537,15 @@ public class MainActivity extends AppCompatActivity {
                     100);
         } else {
             NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
-            //mBuilder.setLights(Color.RED, 1000, 1000); // will blink
             mBuilder.setSmallIcon(R.mipmap.ic_launcher);
+            mBuilder.setContentTitle("Flash On Visit");
             mBuilder.setPriority(Notification.PRIORITY_HIGH);
-//        mBuilder.setOngoing(true);
-//        mBuilder.setLights(0xff00ff00, 300, 100);
             Notification notif = mBuilder.build();
-
-            notif.ledARGB = 0xFFff0000;
+            notif.ledARGB = prefs.getInt(LED_COLOR, LED_COLOR_DEFAULT);
             notif.flags = Notification.FLAG_SHOW_LIGHTS;
             notif.ledOnMS = 100;
-            notif.ledOffMS = 100;
-
+            notif.ledOffMS = 0;
             nm.notify(LED_NOTIFICATION_ID, notif);
             new Handler().postDelayed(
                     new Runnable() {
@@ -612,7 +554,7 @@ public class MainActivity extends AppCompatActivity {
                             nm.cancel(LED_NOTIFICATION_ID);
                         }
                     },
-                    500);
+                    delayUntilHideNotification);
         }
     }
 
@@ -627,7 +569,7 @@ public class MainActivity extends AppCompatActivity {
                         String channel = MainActivity.this.channelTextEdit.getText().toString();
                         String server = MainActivity.this.serverTextEdit.getText().toString();
                         Toast.makeText(MainActivity.this, String.format("Connected to channel %s", channel), Toast.LENGTH_SHORT).show();
-                        historyAdapter.addAtFront(new HistoryEntry(String.format("Connected to channel %s", channel, server)));
+                        historyAdapter.addAtFront(new HistoryEntry(String.format("Joining <b>%s</b>", channel, server)));
 
                         System.out.println("On connect");
                         JSONObject payload = new JSONObject();
@@ -650,10 +592,9 @@ public class MainActivity extends AppCompatActivity {
             MainActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    System.out.println("Disconnected");
                     showAnimationDisconnectedIfNotVisible();
-                    String server = serverTextEdit.getText().toString();
-                    historyAdapter.addAtFront(new HistoryEntry("Disconnected from " + server));
+                    String channel = channelTextEdit.getText().toString();
+                    historyAdapter.addAtFront(new HistoryEntry("Leaving <b>%s</b>" + channel));
                     if (isEnabled) {
                         connectToSocketAndRetryIfFailed();
                     }
@@ -664,7 +605,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void connectToSocketAndRetryIfFailed() {
         String server = serverTextEdit.getText().toString();
-        historyAdapter.addAtFront(new HistoryEntry(String.format("Connecting to %s", server)));
+        historyAdapter.addAtFront(new HistoryEntry(String.format("Connecting with <b>%s</b>", server)));
         connectHandler.removeCallbacks(reconnectReunnable);
         if (isEnabled) {
             Runnable runnable = new Runnable() {
@@ -703,6 +644,7 @@ public class MainActivity extends AppCompatActivity {
     private void disconnectSocket() {
         if (mSocket != null) {
             showAnimationDisconnectedIfNotVisible();
+            historyAdapter.addAtFront(new HistoryEntry(String.format("Leaving <b>%s</b>", channelTextEdit.getText())));
             mSocket.disconnect();
             mSocket.off("connect", onConnect);
             mSocket.off("disconnect", onDisconnect);
@@ -714,5 +656,61 @@ public class MainActivity extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
         disconnectSocket();
+    }
+
+    private class CheckServerAvailabilityTask extends AsyncTask<String, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            boolean reachable = false;
+            String host = params[0];
+            int port = 0;
+            try {
+                if (!host.startsWith("http://") && !host.startsWith("https://")) {
+                    host = "http://" + host;
+                }
+                System.out.println(host.lastIndexOf(":"));
+                if (host.lastIndexOf(":") < 6) {
+
+                    port = 80;
+                } else {
+                    String p = host.substring(host.lastIndexOf(":") + 1, host.length());
+                    if (p.endsWith("/")) {
+                        p = p.substring(0, p.length() - 1);
+                    }
+                    port = Integer.valueOf(p);
+                    host = host.substring(0, host.length() - p.length() - 1);
+                }
+
+                System.out.println(host + " / " + port);
+                URL url = new URL(host + ":" + port);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.connect();
+                reachable = true;
+
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+            return reachable;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            TextView txt = (TextView) findViewById(R.id.address_validation);
+            if (result) {
+                hideView(txt, 0);
+            } else {
+                showView(txt, 0);
+            }
+        }
+
+        @Override
+        protected void onPreExecute() {
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+        }
     }
 }

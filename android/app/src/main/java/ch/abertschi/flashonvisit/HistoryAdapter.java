@@ -3,8 +3,10 @@ package ch.abertschi.flashonvisit;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,7 +49,11 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         String time = dateFormat.format("hh:mm:ss a", entry.getDate()).toString();
 
         holder.dateLabel.setText(date + "\n" + time);
-        holder.detailLabel.setText(entry.getMessage());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            holder.detailLabel.setText(Html.fromHtml(entry.getMessage(), Html.FROM_HTML_MODE_COMPACT));
+        } else {
+            holder.detailLabel.setText(Html.fromHtml(entry.getMessage()));
+        }
 
         int imageId;
         if (position == 0) {
@@ -131,12 +137,12 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
 
             if (parent.getChildAdapterPosition(view) == 0) {
                 if (adapter.getModel().size() == 1) {
-                    imageId = R.mipmap.history_circle;
+                    imageId = R.mipmap.history_thick2;
                 } else {
-                    imageId = R.mipmap.history_start;
+                    imageId = R.mipmap.history_thick2_top;
                 }
             } else {
-                imageId = R.mipmap.history;
+                imageId = R.mipmap.history_thick2;
             }
 
             System.out.println(imageId);
