@@ -5,8 +5,6 @@ import android.animation.ObjectAnimator;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -55,53 +53,197 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int LED_NOTIFICATION_ID = 1;
-    public static final long RECONNECT_FREQUENCY = 5000;
-    private static final int CONNECTION_ANIMATION_DURATION = 100;
-    public static final int LED_COLOR_BLUE = 0xff0099cc;
-    public static final int LED_COLOR_GREEN = 0xff669900;
-    public static final int LED_COLOR_RED = 0xffcc0000;
-    public static final int LED_COLOR_DEFAULT = LED_COLOR_RED;
-    private Socket mSocket;
     private static final String TAG = "flashonvisit";
 
-    private SharedPreferences prefs;
-    private EditText serverTextEdit;
-    private EditText channelTextEdit;
-    private Button enableButton;
-    private boolean isEnabled = false;
+    private static final String DEFAULT_SERVER_NAME = "http://213.136.81.179:3004";
+    private static final int LED_NOTIFICATION_ID = 1;
+    private static final long RECONNECT_FREQUENCY = 5000;
+    private static final int CONNECTION_ANIMATION_DURATION = 100;
+    private static final int HISTORY_COLLAPSED_HEIGHT_DP = 150;
 
-    private boolean isHistoryCollapsed = true;
+    private static final int LED_COLOR_BLUE = 0xff0099cc;
+    private static final int LED_COLOR_GREEN = 0xff669900;
+    private static final int LED_COLOR_RED = 0xffcc0000;
+    private static final int LED_COLOR_DEFAULT = LED_COLOR_RED;
 
     private static final String SERVER = "server_name";
     private static final String CHANNEL = "channel_name";
     private static final String ENABLED = "is_enabled";
     private static final String LED_COLOR = "led_color";
     private static final String LED_KERNEL_HACK = "led_kernel_hack";
-
-    public static final int STARTUP_DELAY = 300;
-    public static final int ANIM_ITEM_DURATION = 1000;
-    public static final int ITEM_DELAY = 300;
-    public static final int HISTORY_COLLAPSED_HEIGHT_DP = 150;
-
-    private static final String DEFAULT_SERVER_NAME = "http://213.136.81.179:3004";
+    private SharedPreferences prefs;
 
     private LEDManager ledManager;
-
-    private RecyclerView historyRecycleView;
-    private HistoryAdapter historyAdapter;
-    private RecyclerView.LayoutManager historyLayoutManager;
-
-    private View statusBar;
-    private Button statusBarText;
-    private View logoHeader;
-    private ViewGroup container;
-
+    private Socket mSocket;
+    private boolean isRunning = false;
+    private boolean isHistoryCollapsed = true;
     private final Handler connectHandler = new Handler(Looper.getMainLooper());
-    private Runnable reconnectReunnable = new Runnable() {
+
+    private boolean isAdvancedLedOptionsCollapsed = true;
+    private RecyclerView historyRecycleView;
+    private ViewGroup rootViewContainer;
+    private EditText serverTextEdit;
+    private EditText channelTextEdit;
+    private Switch ledKernelHackSwitch;
+
+    private TextView ledTextColor;
+    private ImageView indicatorDisconnected;
+    private ImageView indicatorConnected;
+
+    private AVLoadingIndicatorView indicatorConnecting;
+    private HistoryAdapter historyAdapter;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        this.ledManager = new LEDManager(this);
+        this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        this.isRunning = this.prefs.getBoolean(ENABLED, false);
+
+        List<HistoryEntry> historyModel = new ArrayList<>();
+
+        initializeViews(historyModel);
+        showSplashAnimation();
+
+        if (isRunning) {
+            connectToSocketAndRetryIfFailed();
+        } else {
+            showAnimationDisconnectedIfNotVisible();
+        }
+
+        new CheckServerAvailabilityTask().execute(getServerName());
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        disconnectSocket();
+    }
+
+    private void initializeViews(List<HistoryEntry> historyModel) {
+        rootViewContainer = (ViewGroup) this.findViewById(R.id.container);
+        initHistoryRecycleView(historyModel);
+
+        indicatorConnected = (ImageView) this.findViewById(R.id.connection_logo_connected);
+        indicatorDisconnected = (ImageView) this.findViewById(R.id.connection_logo_disconnected);
+        indicatorConnecting = (AVLoadingIndicatorView) this.findViewById(R.id.connection_logo_loading);
+
+        ledTextColor = (TextView) findViewById(R.id.led_color_text);
+        ledTextColor.setTextColor(prefs.getInt(LED_COLOR, LED_COLOR_DEFAULT));
+
+        initPowerView();
+        initAboutView();
+        initLedKernelHackView();
+        initLedColorChangeViews();
+        initHistoryCollapseButton();
+        initLedOptionsCollapseButton();
+        initLedTryOutView();
+        initServerEditText();
+        initChannelView();
+
+        final View kernelHackView = this.findViewById(R.id.kernel_hack);
+        kernelHackView.setVisibility(ledManager.isDeviceSupported() ? View.VISIBLE : View.GONE);
+    }
+
+    private void addHistoryEntry(String content) {
+        historyAdapter.addAtFront(new HistoryEntry(content));
+    }
+
+    private void flashLedLight() {
+        flashLedLight(500);
+    }
+
+    private void flashLedLight(int delayUntilHideNotification) {
+        if (ledManager.isDeviceSupported() && ledKernelHackSwitch.isChecked()) {
+            ledManager.setChoiseToOn();
+            ledManager.ApplyBrightness(10);
+            ledManager.Apply();
+
+            new Handler().postDelayed(
+                    new Runnable() {
+                        public void run() {
+                            ledManager.setChoiseToOff();
+                            ledManager.ApplyBrightness(10);
+                            ledManager.Apply();
+                        }
+                    },
+                    100);
+        } else {
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
+            mBuilder.setSmallIcon(R.mipmap.ic_launcher);
+            mBuilder.setContentTitle("Flash On Visit");
+            mBuilder.setPriority(Notification.PRIORITY_HIGH);
+
+            Notification notif = mBuilder.build();
+            notif.ledARGB = prefs.getInt(LED_COLOR, LED_COLOR_DEFAULT);
+            notif.flags = Notification.FLAG_SHOW_LIGHTS;
+            notif.ledOnMS = 100;
+            notif.ledOffMS = 0;
+            nm.notify(LED_NOTIFICATION_ID, notif);
+            new Handler().postDelayed(
+                    new Runnable() {
+                        public void run() {
+                            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                            nm.cancel(LED_NOTIFICATION_ID);
+                        }
+                    },
+                    delayUntilHideNotification);
+        }
+    }
+
+    private void connectToSocketAndRetryIfFailed() {
+        historyAdapter.addAtFront(new HistoryEntry(String.format("Connecting with <b>%s</b>", getServerName())));
+        connectHandler.removeCallbacks(reconnectRunnable);
+
+        if (isRunning) {
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (isRunning) {
+                        if (mSocket == null || !mSocket.connected()) {
+                            connectSocket();
+                            connectHandler.postDelayed(this, RECONNECT_FREQUENCY);
+                        }
+                    }
+                }
+            };
+            connectHandler.postDelayed(runnable, 0);
+        }
+    }
+
+    private void connectSocket() {
+        try {
+            showAnimationConnectingIfNotVisible();
+            String server = getServerName();
+            mSocket = IO.socket(server);
+            mSocket.connect();
+            mSocket.on("flash", onFlashEvent);
+            mSocket.on("connect", onConnectEvent);
+            mSocket.on("disconnect", onDisconnectEvent);
+
+        } catch (URISyntaxException e) {
+            System.out.println(e);
+        }
+    }
+
+    private void disconnectSocket() {
+        if (mSocket != null) {
+            showAnimationDisconnectedIfNotVisible();
+            historyAdapter.addAtFront(new HistoryEntry(String.format("Leaving <b>%s</b>", getChannelName())));
+            mSocket.disconnect();
+            mSocket.off("connect", onConnectEvent);
+            mSocket.off("disconnect", onDisconnectEvent);
+            mSocket.off("flash", onFlashEvent);
+        }
+    }
+
+    private Runnable reconnectRunnable = new Runnable() {
         @Override
         public void run() {
-            if (isEnabled) {
+            if (isRunning) {
                 if (mSocket == null || !mSocket.connected()) {
                     connectSocket();
                     connectHandler.postDelayed(this, RECONNECT_FREQUENCY);
@@ -109,16 +251,318 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
-    private ImageView indicatorDisconnected;
-    private ImageView indicatorConnected;
-    private AVLoadingIndicatorView indicatorConnecting;
-    private boolean isAdvancedLedOptionsCollapsed = true;
-    private Switch ledKernelHackSwitch;
-    private TextView ledTextColor;
 
-    private void spalshAnimation() {
-        for (int i = 0; i < container.getChildCount(); i++) {
-            View v = container.getChildAt(i);
+    private Emitter.Listener onConnectEvent = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            MainActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        showAnimationConnectedIfNotVisible();
+                        String channel = getChannelName();
+                        String server = getServerName();
+                        Toast.makeText(MainActivity.this, String.format("Connected to channel %s", channel), Toast.LENGTH_SHORT).show();
+                        historyAdapter.addAtFront(new HistoryEntry(String.format("Joining <b>%s</b>", channel, server)));
+
+                        System.out.println("On connect");
+                        JSONObject payload = new JSONObject();
+
+                        payload.put("channel", channel);
+                        System.out.println("channel " + payload);
+                        mSocket.emit("regist", payload);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onFlashEvent = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            MainActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("On flash");
+                    JSONObject data = (JSONObject) args[0];
+                    String who;
+                    String channel;
+                    try {
+                        who = data.getString("ip");
+                        channel = data.getString("channel");
+                        flashLedLight();
+                        addHistoryEntry(String.format("%s visits <b>%s</b>", who, channel));
+
+                    } catch (JSONException e) {
+                        return;
+                    }
+                    // add the message to view
+                    System.out.println(who + " " + channel);
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onDisconnectEvent = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            MainActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    showAnimationDisconnectedIfNotVisible();
+                    String channel = getChannelName();
+                    historyAdapter.addAtFront(new HistoryEntry("Leaving <b>%s</b>" + channel));
+                    if (isRunning) {
+                        connectToSocketAndRetryIfFailed();
+                    }
+                }
+            });
+        }
+    };
+
+    private void initHistoryRecycleView(List<HistoryEntry> model) {
+        this.historyRecycleView = (RecyclerView) this.findViewById(R.id.history_recycleview);
+        historyRecycleView.setNestedScrollingEnabled(false);
+
+        historyAdapter = new HistoryAdapter(model, this, historyRecycleView);
+        historyRecycleView.setAdapter(historyAdapter);
+        historyRecycleView.addItemDecoration(new HistoryAdapter.HistoryItemDecorator(this, historyAdapter));
+
+        LinearLayoutManager historyLayout = new LinearLayoutManager(this);
+        historyRecycleView.setLayoutManager(historyLayout);
+
+        this.findViewById(R.id.clearHistoryButton)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        historyAdapter.clearModel();
+                    }
+                });
+    }
+
+    private void initAboutView() {
+        final TextView dots = (TextView) this.findViewById(R.id.dots);
+        dots.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MaterialDialog dialog = new MaterialDialog.Builder(MainActivity.this)
+                        .title("About")
+                        .content("This app is made with <3 by abertschi.\nhttp://www.abertschi.ch")
+                        .positiveText("OK")
+                        .show();
+            }
+        });
+    }
+
+    private void initPowerView() {
+        final Button powerButton = (Button) findViewById(R.id.button);
+        powerButton.setText(this.isRunning ? "STOP" : "START");
+
+        powerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isRunning) {
+                    isRunning = false;
+                    powerButton.setText("START");
+                    disconnectSocket();
+                } else {
+                    new CheckServerAvailabilityTask().execute(getServerName());
+                    isRunning = true;
+                    powerButton.setText("STOP");
+                    connectToSocketAndRetryIfFailed();
+                }
+                prefs.edit().putBoolean(ENABLED, isRunning).commit();
+            }
+        });
+    }
+
+    private void initLedKernelHackView() {
+        this.ledKernelHackSwitch = (Switch) this.findViewById(R.id.led_kernel_hack);
+        ledKernelHackSwitch.setChecked(prefs.getBoolean(LED_KERNEL_HACK, false));
+
+        ledKernelHackSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                prefs.edit().putBoolean(LED_KERNEL_HACK, isChecked).commit();
+                if (isChecked) {
+                    addHistoryEntry("Change LED mode to <b>hack</b>");
+                } else {
+                    addHistoryEntry("Change LED mode to <b>normal</b>");
+                }
+            }
+        });
+    }
+
+    private void initHistoryCollapseButton() {
+        final TextView historyCollapseButton = (TextView) this.findViewById(R.id.moreHistoryButton);
+        historyCollapseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RelativeLayout container = (RelativeLayout) findViewById(R.id.history_recycleview_container);
+                RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) container.getLayoutParams();
+                if (isHistoryCollapsed) {
+                    historyCollapseButton.setText("LESS");
+                    isHistoryCollapsed = false;
+                    layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                } else {
+                    isHistoryCollapsed = true;
+                    historyCollapseButton.setText("MORE");
+                    int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                            HISTORY_COLLAPSED_HEIGHT_DP, getResources().getDisplayMetrics());
+                    layoutParams.height = height;
+                }
+                container.setLayoutParams(layoutParams);
+            }
+        });
+    }
+
+    private void initLedOptionsCollapseButton() {
+        final TextView button = (TextView) this.findViewById(R.id.button_show_advanced_led);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                View container = findViewById(R.id.advanced_options_led);
+                TextView textView = (TextView) findViewById(R.id.button_show_advanced_led);
+                if (isAdvancedLedOptionsCollapsed) {
+                    showView(container, 0);
+                    textView.setText("BASIC");
+                    isAdvancedLedOptionsCollapsed = false;
+                } else {
+                    hideView(container, 0);
+                    textView.setText("ADVANCED");
+                    isAdvancedLedOptionsCollapsed = true;
+                }
+            }
+        });
+    }
+
+    private void initLedColorChangeViews() {
+        final View ledRedButton = this.findViewById(R.id.led_red);
+        final View ledBlueButton = this.findViewById(R.id.led_blue);
+        final View ledGreenButton = this.findViewById(R.id.led_green);
+
+        ledRedButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int color = LED_COLOR_RED;
+                ledTextColor.setTextColor(color);
+                prefs.edit().putInt(LED_COLOR, color).commit();
+                addHistoryEntry(String.format("Change LED <b>%s</b>", Utils.colorTextInHtml("color", color)));
+                flashLedLight();
+            }
+        });
+
+        ledBlueButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int color = LED_COLOR_BLUE;
+                ledTextColor.setTextColor(color);
+                prefs.edit().putInt(LED_COLOR, color).commit();
+                addHistoryEntry(String.format("Change LED <b>%s</b>", Utils.colorTextInHtml("color", color)));
+                flashLedLight();
+            }
+        });
+        ledGreenButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int color = LED_COLOR_GREEN;
+                ledTextColor.setTextColor(color);
+                prefs.edit().putInt(LED_COLOR, LED_COLOR_GREEN).commit();
+                addHistoryEntry(String.format("Change LED <b>%s</b>", Utils.colorTextInHtml("color", color)));
+                flashLedLight();
+            }
+        });
+    }
+
+    private void initLedTryOutView() {
+        final View tryOutLedButton = this.findViewById(R.id.tryoutButton);
+        tryOutLedButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                flashLedLight(4000);
+                historyAdapter.addAtFront(new HistoryEntry("Try out LED"));
+                final ImageView view = (ImageView) findViewById(R.id.lightbulp);
+                view.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.mipmap.lightbulb_y2));
+                Handler handler = new Handler(Looper.getMainLooper());
+                final Runnable r = new Runnable() {
+                    public void run() {
+                        view.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.mipmap.lightbulb));
+                    }
+                };
+                handler.postDelayed(r, 150);
+            }
+        });
+    }
+
+    private void initServerEditText() {
+        serverTextEdit = (EditText) this.findViewById(R.id.serveradress);
+        setServerName(prefs.getString(SERVER, DEFAULT_SERVER_NAME));
+
+        serverTextEdit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                new CheckServerAvailabilityTask().execute(s.toString());
+                prefs.edit().putString(SERVER, s.toString()).commit();
+            }
+        });
+    }
+
+    private String getServerName() {
+        return serverTextEdit.getText().toString();
+    }
+
+    private void setServerName(String name) {
+        serverTextEdit.setText(name);
+    }
+
+    private void initChannelView() {
+        this.channelTextEdit = (EditText) this.findViewById(R.id.channel);
+        setChannelName(prefs.getString(CHANNEL, ""));
+
+        channelTextEdit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                TextView view = (TextView) findViewById(R.id.channel_validation);
+                if (s.toString().isEmpty()) {
+                    showView(view, 0);
+                } else {
+                    hideView(view, 0);
+                }
+                prefs.edit().putString(CHANNEL, s.toString()).commit();
+            }
+        });
+    }
+
+    private void setChannelName(String name) {
+        channelTextEdit.setText(name);
+    }
+
+    private String getChannelName() {
+        return channelTextEdit.getText().toString();
+    }
+
+    private void showSplashAnimation() {
+        for (int i = 0; i < rootViewContainer.getChildCount(); i++) {
+            View v = rootViewContainer.getChildAt(i);
 
             TranslateAnimation animation = new TranslateAnimation(0, 0, 400, 0);
             animation.setDuration(300);
@@ -138,7 +582,6 @@ public class MainActivity extends AppCompatActivity {
             set.setFillAfter(true);
             v.setAnimation(set);
             set.start();
-
         }
     }
 
@@ -242,420 +685,6 @@ public class MainActivity extends AppCompatActivity {
             public void onAnimationRepeat(Animator animation) {
             }
         });
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        this.ledManager = new LEDManager(this);
-        this.prefs = PreferenceManager
-                .getDefaultSharedPreferences(this);
-
-        this.enableButton = (Button) findViewById(R.id.button);
-        this.isEnabled = this.prefs.getBoolean(ENABLED, false);
-        this.serverTextEdit = (EditText) this.findViewById(R.id.serveradress);
-        this.channelTextEdit = (EditText) this.findViewById(R.id.channel);
-        final Button enableButton = (Button) this.findViewById(R.id.button);
-        final View tryOutLedButton = this.findViewById(R.id.tryoutButton);
-        final View clearHistoryButton = this.findViewById(R.id.clearHistoryButton);
-        final TextView expandHistoryButton = (TextView) this.findViewById(R.id.moreHistoryButton);
-        final TextView expandLedOptions = (TextView) this.findViewById(R.id.button_show_advanced_led);
-        this.ledKernelHackSwitch = (Switch) this.findViewById(R.id.led_kernel_hack);
-        ledKernelHackSwitch.setChecked(prefs.getBoolean(LED_KERNEL_HACK, false));
-        ledTextColor = (TextView) findViewById(R.id.led_color_text);
-        ledTextColor.setTextColor(prefs.getInt(LED_COLOR, LED_COLOR_DEFAULT));
-
-        ledKernelHackSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                prefs.edit().putBoolean(LED_KERNEL_HACK, isChecked).commit();
-                if (isChecked) {
-                    addHistoryEntry("Change LED mode to <b>hack</b>");
-                } else {
-                    addHistoryEntry("Change LED mode to <b>normal</b>");
-                }
-
-            }
-        });
-
-        this.indicatorConnected = (ImageView) this.findViewById(R.id.connection_logo_connected);
-        this.indicatorDisconnected = (ImageView) this.findViewById(R.id.connection_logo_disconnected);
-        this.indicatorConnecting = (AVLoadingIndicatorView) this.findViewById(R.id.connection_logo_loading);
-
-        this.historyRecycleView = (RecyclerView) this.findViewById(R.id.history_recycleview);
-        historyLayoutManager = new LinearLayoutManager(this);
-        historyRecycleView.setLayoutManager(historyLayoutManager);
-
-        this.logoHeader = this.findViewById(R.id.logo_card);
-        container = (ViewGroup) this.findViewById(R.id.container);
-
-        final View ledRedButton = this.findViewById(R.id.led_red);
-        final View ledBlueButton = this.findViewById(R.id.led_blue);
-        final View ledGreenButton = this.findViewById(R.id.led_green);
-
-        final View kernelHackView = this.findViewById(R.id.kernel_hack);
-        kernelHackView.setVisibility(ledManager.isDeviceSupported() ? View.VISIBLE : View.GONE);
-
-        ledRedButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int color = LED_COLOR_RED;
-                ledTextColor.setTextColor(color);
-                prefs.edit().putInt(LED_COLOR, color).commit();
-                addHistoryEntry(String.format("Change LED <b>%s</b>", colorTextInHtml("color", color)));
-                flashLedLight();
-            }
-        });
-
-        ledBlueButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int color = LED_COLOR_BLUE;
-                ledTextColor.setTextColor(color);
-                prefs.edit().putInt(LED_COLOR, color).commit();
-                addHistoryEntry(String.format("Change LED <b>%s</b>", colorTextInHtml("color", color)));
-                flashLedLight();
-            }
-        });
-        ledGreenButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int color = LED_COLOR_GREEN;
-                ledTextColor.setTextColor(color);
-                prefs.edit().putInt(LED_COLOR, LED_COLOR_GREEN).commit();
-                addHistoryEntry(String.format("Change LED <b>%s</b>", colorTextInHtml("color", color)));
-                flashLedLight();
-            }
-        });
-        List<HistoryEntry> historyEntries = new ArrayList<>();
-
-        historyAdapter = new HistoryAdapter(historyEntries, this, historyRecycleView);
-        historyRecycleView.setAdapter(historyAdapter);
-        historyRecycleView.setNestedScrollingEnabled(false);
-        historyRecycleView.addItemDecoration(new HistoryAdapter.HistoryItemDecorator(this, historyAdapter));
-
-        TextView dotsTextview = (TextView) this.findViewById(R.id.dots);
-        dotsTextview.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MaterialDialog dialog = new MaterialDialog.Builder(MainActivity.this)
-                        .title("About")
-                        .content("This app is made with <3 by abertschi.\nhttp://www.abertschi.ch")
-                        .positiveText("OK")
-                        .show();
-            }
-        });
-
-        serverTextEdit.setText(prefs.getString(SERVER, DEFAULT_SERVER_NAME));
-        channelTextEdit.setText(prefs.getString(CHANNEL, ""));
-        this.enableButton.setText(this.isEnabled ? "STOP" : "START");
-
-        if (isEnabled) {
-            connectToSocketAndRetryIfFailed();
-        } else {
-            showAnimationDisconnectedIfNotVisible();
-        }
-
-        enableButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isEnabled) {
-                    isEnabled = false;
-                    enableButton.setText("START");
-                    disconnectSocket();
-                } else {
-                    new CheckServerAvailabilityTask().execute(serverTextEdit.getText().toString());
-                    isEnabled = true;
-                    enableButton.setText("STOP");
-                    connectToSocketAndRetryIfFailed();
-                }
-                prefs.edit().putBoolean(ENABLED, isEnabled).commit();
-            }
-        });
-
-        expandHistoryButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                RelativeLayout container = (RelativeLayout) findViewById(R.id.history_recycleview_container);
-                RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) container.getLayoutParams();
-                if (isHistoryCollapsed) {
-                    expandHistoryButton.setText("LESS");
-                    isHistoryCollapsed = false;
-                    layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                } else {
-                    isHistoryCollapsed = true;
-                    expandHistoryButton.setText("MORE");
-                    int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                            HISTORY_COLLAPSED_HEIGHT_DP, getResources().getDisplayMetrics());
-                    layoutParams.height = height;
-                }
-                container.setLayoutParams(layoutParams);
-            }
-        });
-
-        expandLedOptions.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                View container = findViewById(R.id.advanced_options_led);
-                TextView textView = (TextView) findViewById(R.id.button_show_advanced_led);
-                if (isAdvancedLedOptionsCollapsed) {
-                    showView(container, 0);
-                    textView.setText("BASIC");
-                    isAdvancedLedOptionsCollapsed = false;
-                } else {
-                    hideView(container, 0);
-                    textView.setText("ADVANCED");
-                    isAdvancedLedOptionsCollapsed = true;
-                }
-            }
-        });
-
-        serverTextEdit.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before,
-                                      int count) {
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count,
-                                          int after) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                new CheckServerAvailabilityTask().execute(s.toString());
-                prefs.edit().putString(SERVER, s.toString()).commit();
-            }
-        });
-
-        channelTextEdit.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before,
-                                      int count) {
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count,
-                                          int after) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                TextView view = (TextView) findViewById(R.id.channel_validation);
-                if (s.toString().isEmpty()) {
-                    showView(view, 0);
-                } else {
-                    hideView(view, 0);
-                }
-                prefs.edit().putString(CHANNEL, s.toString()).commit();
-            }
-        });
-
-        tryOutLedButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                flashLedLight(4000);
-                historyAdapter.addAtFront(new HistoryEntry("Try out LED"));
-                final ImageView view = (ImageView) findViewById(R.id.lightbulp);
-                view.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.mipmap.lightbulb_y2));
-                Handler handler = new Handler(Looper.getMainLooper());
-                final Runnable r = new Runnable() {
-                    public void run() {
-                        view.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.mipmap.lightbulb));
-                    }
-                };
-                handler.postDelayed(r, 150);
-            }
-        });
-
-        clearHistoryButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                historyAdapter.clearModel();
-            }
-        });
-
-        spalshAnimation();
-        new CheckServerAvailabilityTask().execute(serverTextEdit.getText().toString());
-    }
-
-    private void addHistoryEntry(String content) {
-        historyAdapter.addAtFront(new HistoryEntry(content));
-    }
-
-    private String colorTextInHtml(String text, int color) {
-        String hexColor = String.format("#%06X", (0xFFFFFF & color));
-        return String.format("<font color=\"%s\">%s</font>", hexColor, text);
-    }
-
-    private Emitter.Listener onFlash = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            MainActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    System.out.println("On flash");
-                    JSONObject data = (JSONObject) args[0];
-                    String who;
-                    String channel;
-                    try {
-                        who = data.getString("ip");
-                        channel = data.getString("channel");
-                        flashLedLight();
-                        addHistoryEntry(String.format("%s visits <b>%s</b>", who, channel));
-
-                    } catch (JSONException e) {
-                        return;
-                    }
-                    // add the message to view
-                    System.out.println(who + " " + channel);
-                }
-            });
-        }
-    };
-
-    private void flashLedLight() {
-        flashLedLight(500);
-    }
-
-    private void flashLedLight(int delayUntilHideNotification) {
-        if (ledManager.isDeviceSupported() && ledKernelHackSwitch.isChecked()) {
-            ledManager.setChoiseToOn();
-            ledManager.ApplyBrightness(10);
-            ledManager.Apply();
-
-            new Handler().postDelayed(
-                    new Runnable() {
-                        public void run() {
-                            Log.i("tag", "This'll run 300 milliseconds later");
-                            ledManager.setChoiseToOff();
-                            ledManager.ApplyBrightness(10);
-                            ledManager.Apply();
-                        }
-                    },
-                    100);
-        } else {
-            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
-            mBuilder.setSmallIcon(R.mipmap.ic_launcher);
-            mBuilder.setContentTitle("Flash On Visit");
-            mBuilder.setPriority(Notification.PRIORITY_HIGH);
-            Notification notif = mBuilder.build();
-            notif.ledARGB = prefs.getInt(LED_COLOR, LED_COLOR_DEFAULT);
-            notif.flags = Notification.FLAG_SHOW_LIGHTS;
-            notif.ledOnMS = 100;
-            notif.ledOffMS = 0;
-            nm.notify(LED_NOTIFICATION_ID, notif);
-            new Handler().postDelayed(
-                    new Runnable() {
-                        public void run() {
-                            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                            nm.cancel(LED_NOTIFICATION_ID);
-                        }
-                    },
-                    delayUntilHideNotification);
-        }
-    }
-
-    private Emitter.Listener onConnect = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            MainActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        showAnimationConnectedIfNotVisible();
-                        String channel = MainActivity.this.channelTextEdit.getText().toString();
-                        String server = MainActivity.this.serverTextEdit.getText().toString();
-                        Toast.makeText(MainActivity.this, String.format("Connected to channel %s", channel), Toast.LENGTH_SHORT).show();
-                        historyAdapter.addAtFront(new HistoryEntry(String.format("Joining <b>%s</b>", channel, server)));
-
-                        System.out.println("On connect");
-                        JSONObject payload = new JSONObject();
-
-                        payload.put("channel", channel);
-                        System.out.println("channel " + payload);
-                        mSocket.emit("regist", payload);
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener onDisconnect = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            MainActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    showAnimationDisconnectedIfNotVisible();
-                    String channel = channelTextEdit.getText().toString();
-                    historyAdapter.addAtFront(new HistoryEntry("Leaving <b>%s</b>" + channel));
-                    if (isEnabled) {
-                        connectToSocketAndRetryIfFailed();
-                    }
-                }
-            });
-        }
-    };
-
-    private void connectToSocketAndRetryIfFailed() {
-        String server = serverTextEdit.getText().toString();
-        historyAdapter.addAtFront(new HistoryEntry(String.format("Connecting with <b>%s</b>", server)));
-        connectHandler.removeCallbacks(reconnectReunnable);
-        if (isEnabled) {
-            Runnable runnable = new Runnable() {
-                @Override
-                public void run() {
-                    if (isEnabled) {
-                        if (mSocket == null || !mSocket.connected()) {
-                            connectSocket();
-                            connectHandler.postDelayed(this, RECONNECT_FREQUENCY);
-                        }
-                    }
-                }
-            };
-            connectHandler.postDelayed(runnable, 0);
-        }
-    }
-
-    private void connectSocket() {
-        try {
-//            if (mSocket != null) {
-//                disconnectSocket();
-//            }
-            showAnimationConnectingIfNotVisible();
-            String server = serverTextEdit.getText().toString();
-            mSocket = IO.socket(server);
-            mSocket.connect();
-            mSocket.on("flash", onFlash);
-            mSocket.on("connect", onConnect);
-            mSocket.on("disconnect", onDisconnect);
-
-        } catch (URISyntaxException e) {
-            System.out.println(e);
-        }
-    }
-
-    private void disconnectSocket() {
-        if (mSocket != null) {
-            showAnimationDisconnectedIfNotVisible();
-            historyAdapter.addAtFront(new HistoryEntry(String.format("Leaving <b>%s</b>", channelTextEdit.getText())));
-            mSocket.disconnect();
-            mSocket.off("connect", onConnect);
-            mSocket.off("disconnect", onDisconnect);
-            mSocket.off("flash", onFlash);
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        disconnectSocket();
     }
 
     private class CheckServerAvailabilityTask extends AsyncTask<String, Void, Boolean> {
