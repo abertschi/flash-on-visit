@@ -218,6 +218,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void connectSocket() {
         try {
+            if (mSocket != null) {
+                disconnectSocket();
+            }
             showAnimationConnectingIfNotVisible();
             String server = getServerName();
             mSocket = IO.socket(server);
@@ -239,6 +242,7 @@ public class MainActivity extends AppCompatActivity {
             mSocket.off("connect", onConnectEvent);
             mSocket.off("disconnect", onDisconnectEvent);
             mSocket.off("flash", onFlashEvent);
+            mSocket = null;
         }
     }
 
