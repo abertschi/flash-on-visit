@@ -5,7 +5,7 @@ android {
     buildToolsVersion "24.0.2"
 
     defaultConfig {
-        applicationId "flashonvisit.abertschi.ch.flash_on_visit"
+        applicationId "ch.abertschi.flashonvisit"
         minSdkVersion 19
         targetSdkVersion 24
         versionCode 1
