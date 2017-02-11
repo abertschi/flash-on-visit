@@ -5,7 +5,6 @@ import android.animation.ObjectAnimator;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -17,7 +16,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,9 +45,7 @@ import com.wang.avi.AVLoadingIndicatorView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String DEFAULT_SERVER_NAME = "http://213.136.81.179:3004";
     private static final int LED_NOTIFICATION_ID = 1;
     private static final long RECONNECT_FREQUENCY = 5000;
-    private static final int CONNECTION_ANIMATION_DURATION = 100;
+    private static final int DEFAULT_ANIMATION_DURATION = 100;
     private static final int HISTORY_COLLAPSED_HEIGHT_DP = 150;
 
     private static final int LED_COLOR_BLUE = 0xff0099cc;
@@ -146,8 +142,9 @@ public class MainActivity extends AppCompatActivity {
         initServerEditText();
         initChannelView();
 
-        final View kernelHackView = this.findViewById(R.id.kernel_hack);
-        kernelHackView.setVisibility(ledManager.isDeviceSupported() ? View.VISIBLE : View.GONE);
+        final View kernelHackView = this.findViewById(R.id.led_root_options);
+        kernelHackView.setVisibility(ledManager.rooted ? View.VISIBLE : View.GONE);
+        addHistoryEntry("Welcome to flash-on-visit <b>:D</b>");
     }
 
     private void addHistoryEntry(String content) {
@@ -342,6 +339,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         historyAdapter.clearModel();
+                        addHistoryEntry("Welcome to flash-on-visit <b>:D</b>");
                     }
                 });
     }
@@ -460,14 +458,59 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                View container = findViewById(R.id.advanced_options_led);
+                final View container = findViewById(R.id.advanced_options_led);
                 TextView textView = (TextView) findViewById(R.id.button_show_advanced_led);
                 if (isAdvancedLedOptionsCollapsed) {
-                    showView(container, 0);
+//                    ScaleAnimation anim = new ScaleAnimation(1, 1, 0, 1);
+//                    container.setAnimation(anim);
+//                    anim.setDuration(500);
+//                    anim.setAnimationListener(new Animation.AnimationListener() {
+//                        @Override
+//                        public void onAnimationStart(Animation animation) {
+//
+//                        }
+//
+//                        @Override
+//                        public void onAnimationEnd(Animation animation) {
+//
+//                        }
+//
+//                        @Override
+//                        public void onAnimationRepeat(Animation animation) {
+//
+//                        }
+//                    });
+//                    anim.start();
+//                    container.setVisibility(View.VISIBLE);
+
+                    showView(container, 0, 50);
                     textView.setText("BASIC");
                     isAdvancedLedOptionsCollapsed = false;
                 } else {
-                    hideView(container, 0);
+                    hideView(container, 0, 50);
+//                    ScaleAnimation anim = new ScaleAnimation(1, 1, 1, 0);
+//                    container.setAnimation(anim);
+//                    anim.setDuration(500);
+//                    anim.setAnimationListener(new Animation.AnimationListener() {
+//                        @Override
+//                        public void onAnimationStart(Animation animation) {
+//                            System.out.println("ON START");
+//                        }
+//
+//                        @Override
+//                        public void onAnimationEnd(Animation animation) {
+//                            System.out.println("ENDED");
+//                            container.setVisibility(View.GONE);
+//                        }
+//
+//                        @Override
+//                        public void onAnimationRepeat(Animation animation) {
+//
+//                        }
+//                    });
+//                    anim.startNow();
+//                    System.out.println("started");
+
                     textView.setText("ADVANCED");
                     isAdvancedLedOptionsCollapsed = true;
                 }
@@ -639,7 +682,7 @@ public class MainActivity extends AppCompatActivity {
             hideView(indicatorDisconnected, 0);
             hidePrevious = true;
         }
-        showView(indicatorConnecting, hidePrevious ? CONNECTION_ANIMATION_DURATION * 2 : 0);
+        showView(indicatorConnecting, hidePrevious ? DEFAULT_ANIMATION_DURATION * 2 : 0);
     }
 
     private void showAnimationConnectedIfNotVisible() {
@@ -653,7 +696,7 @@ public class MainActivity extends AppCompatActivity {
         if (indicatorDisconnected.getVisibility() != View.GONE) {
             hideView(indicatorDisconnected, 0);
         }
-        showView(indicatorConnected, CONNECTION_ANIMATION_DURATION * 5);
+        showView(indicatorConnected, DEFAULT_ANIMATION_DURATION * 5);
     }
 
     private void showAnimationDisconnectedIfNotVisible() {
@@ -669,16 +712,20 @@ public class MainActivity extends AppCompatActivity {
             hideView(indicatorConnected, 0);
             hidePrevious = true;
         }
-        showView(indicatorDisconnected, hidePrevious ? CONNECTION_ANIMATION_DURATION * 2 : 0);
+        showView(indicatorDisconnected, hidePrevious ? DEFAULT_ANIMATION_DURATION * 2 : 0);
     }
 
     private void showView(final View view, int delay) {
+        showView(view, delay, DEFAULT_ANIMATION_DURATION);
+    }
+
+    private void showView(final View view, int delay, int duration) {
         System.out.println("show view: " + view.toString() + " with delay " + delay);
 
         final ObjectAnimator fadeIn = ObjectAnimator.ofFloat(view, "alpha", 0f, 1f);
         fadeIn.setInterpolator(new DecelerateInterpolator(0.5f));
         fadeIn.setStartDelay(delay);
-        fadeIn.setDuration(CONNECTION_ANIMATION_DURATION);
+        fadeIn.setDuration(duration);
 
         fadeIn.addListener(new Animator.AnimatorListener() {
             @Override
@@ -702,11 +749,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void hideView(final View view, int delay) {
+        hideView(view, delay, DEFAULT_ANIMATION_DURATION);
+    }
+
+    private void hideView(final View view, int delay, int duration) {
         System.out.println("hide view: " + view.toString() + " with delay " + delay);
         final ObjectAnimator fadeIn = ObjectAnimator.ofFloat(view, "alpha", 1f, 0f);
         fadeIn.setInterpolator(new DecelerateInterpolator(0.5f));
         fadeIn.setStartDelay(delay);
-        fadeIn.setDuration(CONNECTION_ANIMATION_DURATION);
+        fadeIn.setDuration(duration);
         fadeIn.start();
         fadeIn.addListener(new Animator.AnimatorListener() {
             @Override
