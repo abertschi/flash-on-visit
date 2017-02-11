@@ -36,6 +36,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
@@ -51,6 +53,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * MainActivity
+ */
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "flashonvisit";
@@ -382,9 +387,28 @@ public class MainActivity extends AppCompatActivity {
                     disconnectSocket();
                 } else {
                     checkIfServerAddressIsValid(getServerName());
-                    isRunning = true;
-                    powerButton.setText("STOP");
-                    connectToSocketAndRetryIfFailed();
+                    boolean validInput = true;
+                    if (getChannelName().isEmpty()) {
+                        validInput = false;
+                        channelTextEdit.requestFocus();
+                        channelTextEdit.setSelection(0);
+                        YoYo.with(Techniques.Shake)
+                                .duration(700)
+                                .playOn(findViewById(R.id.channel_validation));
+                    }
+                    if (getServerName().isEmpty()) {
+                        validInput = false;
+                        serverTextEdit.requestFocus();
+                        serverTextEdit.setSelection(0);
+                        YoYo.with(Techniques.Shake)
+                                .duration(700)
+                                .playOn(findViewById(R.id.address_validation));
+                    }
+                    if (validInput) {
+                        isRunning = true;
+                        powerButton.setText("STOP");
+                        connectToSocketAndRetryIfFailed();
+                    }
                 }
                 prefs.edit().putBoolean(ENABLED, isRunning).commit();
             }
@@ -543,7 +567,10 @@ public class MainActivity extends AppCompatActivity {
     private void initChannelView() {
         this.channelTextEdit = (EditText) this.findViewById(R.id.channel);
         setChannelName(prefs.getString(CHANNEL, ""));
-
+        if (getChannelName().isEmpty()) {
+            TextView view = (TextView) findViewById(R.id.channel_validation);
+            showView(view, 0);
+        }
         channelTextEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
