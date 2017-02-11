@@ -103,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
         this.isRunning = this.prefs.getBoolean(ENABLED, false);
 
         List<HistoryEntry> historyModel = new ArrayList<>();
-
         initializeViews(historyModel);
         showSplashAnimation();
 
@@ -112,8 +111,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             showAnimationDisconnectedIfNotVisible();
         }
-
-        new CheckServerAvailabilityTask().execute(getServerName());
+        checkIfServerAddressIsValid(getServerName());
     }
 
     @Override
@@ -357,6 +355,20 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void checkIfServerAddressIsValid(String server) {
+        new CheckServerAvailabilityTask(new CheckServerAvailabilityTask.Argument() {
+            @Override
+            public void apply(boolean isValid) {
+                TextView txt = (TextView) findViewById(R.id.address_validation);
+                if (isValid) {
+                    hideView(txt, 0);
+                } else {
+                    showView(txt, 0);
+                }
+            }
+        }).execute(server);
+    }
+
     private void initPowerView() {
         final Button powerButton = (Button) findViewById(R.id.button);
         powerButton.setText(this.isRunning ? "STOP" : "START");
@@ -369,7 +381,7 @@ public class MainActivity extends AppCompatActivity {
                     powerButton.setText("START");
                     disconnectSocket();
                 } else {
-                    new CheckServerAvailabilityTask().execute(getServerName());
+                    checkIfServerAddressIsValid(getServerName());
                     isRunning = true;
                     powerButton.setText("STOP");
                     connectToSocketAndRetryIfFailed();
@@ -454,7 +466,6 @@ public class MainActivity extends AppCompatActivity {
                 flashLedLight();
             }
         });
-
         ledBlueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -479,15 +490,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void initLedTryOutView() {
         final View tryOutLedButton = this.findViewById(R.id.tryoutButton);
+        final int tryoutDuration = 4000;
+
         tryOutLedButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                flashLedLight(4000);
+                flashLedLight(tryoutDuration);
                 historyAdapter.addAtFront(new HistoryEntry("Try out LED"));
                 final ImageView view = (ImageView) findViewById(R.id.lightbulp);
                 view.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.mipmap.lightbulb_y2));
                 Handler handler = new Handler(Looper.getMainLooper());
                 final Runnable r = new Runnable() {
+                    @Override
                     public void run() {
                         view.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.mipmap.lightbulb));
                     }
@@ -512,7 +526,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                new CheckServerAvailabilityTask().execute(s.toString());
+                checkIfServerAddressIsValid(s.toString());
                 prefs.edit().putString(SERVER, s.toString()).commit();
             }
         });
@@ -685,61 +699,5 @@ public class MainActivity extends AppCompatActivity {
             public void onAnimationRepeat(Animator animation) {
             }
         });
-    }
-
-    private class CheckServerAvailabilityTask extends AsyncTask<String, Void, Boolean> {
-
-        @Override
-        protected Boolean doInBackground(String... params) {
-            boolean reachable = false;
-            String host = params[0];
-            int port = 0;
-            try {
-                if (!host.startsWith("http://") && !host.startsWith("https://")) {
-                    host = "http://" + host;
-                }
-                System.out.println(host.lastIndexOf(":"));
-                if (host.lastIndexOf(":") < 6) {
-
-                    port = 80;
-                } else {
-                    String p = host.substring(host.lastIndexOf(":") + 1, host.length());
-                    if (p.endsWith("/")) {
-                        p = p.substring(0, p.length() - 1);
-                    }
-                    port = Integer.valueOf(p);
-                    host = host.substring(0, host.length() - p.length() - 1);
-                }
-
-                System.out.println(host + " / " + port);
-                URL url = new URL(host + ":" + port);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.connect();
-                reachable = true;
-
-            } catch (Exception e) {
-                System.out.println(e);
-            }
-            return reachable;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-            TextView txt = (TextView) findViewById(R.id.address_validation);
-            if (result) {
-                hideView(txt, 0);
-            } else {
-                showView(txt, 0);
-            }
-        }
-
-        @Override
-        protected void onPreExecute() {
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-        }
     }
 }

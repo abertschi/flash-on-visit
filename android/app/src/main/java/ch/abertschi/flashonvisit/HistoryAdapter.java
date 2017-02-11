@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * History RecycleView
+ *
  * Created by abertschi on 09.02.17.
  */
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHolder> {

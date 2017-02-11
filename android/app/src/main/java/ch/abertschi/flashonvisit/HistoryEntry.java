@@ -3,6 +3,8 @@ package ch.abertschi.flashonvisit;
 import java.util.Date;
 
 /**
+ * Model for history entries
+ *
  * Created by abertschi on 09.02.17.
  */
 public class HistoryEntry {
