@@ -3,3 +3,4 @@ client/node_modules
 npm-debug.log
 misc.xml
 android/.idea
+app-release.apk
