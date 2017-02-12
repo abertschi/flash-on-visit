@@ -2,8 +2,6 @@ package ch.abertschi.flashonvisit;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
@@ -11,7 +9,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -49,6 +46,11 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import ch.abertschi.flashonvisit.feedback.FeedbackService;
+import ch.abertschi.flashonvisit.feedback.FlashFeedback;
+import ch.abertschi.flashonvisit.feedback.LedFeedback;
+import ch.abertschi.flashonvisit.feedback.VibraFeedback;
+
 /**
  * MainActivity
  */
@@ -59,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String DEFAULT_SERVER_NAME = "http://213.136.81.179:3004";
     private static final String DEFAULT_CHANNEL = "abertschi";
 
-    private static final int LED_NOTIFICATION_ID = 1;
     private static final long RECONNECT_FREQUENCY = 5000;
     private static final int DEFAULT_ANIMATION_DURATION = 100;
     private static final int HISTORY_COLLAPSED_HEIGHT_DP = 150;
@@ -68,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int LED_COLOR_GREEN = 0xff669900;
     private static final int LED_COLOR_RED = 0xffcc0000;
     private static final int LED_COLOR_DEFAULT = LED_COLOR_RED;
+
+    private static final int FEEDBACK_DURATION = 100;
 
     private static final String SERVER = "server_name";
     private static final String CHANNEL = "channel_name";
@@ -96,14 +99,25 @@ public class MainActivity extends AppCompatActivity {
     private AVLoadingIndicatorView indicatorConnecting;
     private HistoryAdapter historyAdapter;
 
+    private LedFeedback ledService;
+    private VibraFeedback vibraService;
+    private FlashFeedback flashService;
+    private FeedbackService feedbackService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        new RequestUserPermission(this).verifyStoragePermissions();
 
         this.ledManager = new LEDManager(this);
         this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
         this.isRunning = this.prefs.getBoolean(ENABLED, false);
+        ledService = new LedFeedback(this)
+                .setDuration(FEEDBACK_DURATION);
+        vibraService = new VibraFeedback(this);
+        flashService = new FlashFeedback(this);
+        feedbackService = flashService;
 
         List<HistoryEntry> historyModel = new ArrayList<>();
         initializeViews(historyModel);
@@ -131,9 +145,6 @@ public class MainActivity extends AppCompatActivity {
         indicatorDisconnected = (ImageView) this.findViewById(R.id.connection_logo_disconnected);
         indicatorConnecting = (AVLoadingIndicatorView) this.findViewById(R.id.connection_logo_loading);
 
-        ledTextColor = (TextView) findViewById(R.id.led_color_text);
-        ledTextColor.setTextColor(prefs.getInt(LED_COLOR, LED_COLOR_DEFAULT));
-
         initPowerView();
         initAboutView();
         initLedKernelHackView();
@@ -152,49 +163,6 @@ public class MainActivity extends AppCompatActivity {
     private void addHistoryEntry(String content) {
         historyAdapter.addAtFront(new HistoryEntry(content));
     }
-
-//    private void flashLedLight() {
-//        flashLedLight(500);
-//    }
-//
-//    private void flashLedLight(int delayUntilHideNotification) {
-//        if (ledManager.isDeviceSupported() && ledKernelHackSwitch.isChecked()) {
-//            ledManager.setChoiseToOn();
-//            ledManager.ApplyBrightness(10);
-//            ledManager.Apply();
-//
-//            new Handler().postDelayed(
-//                    new Runnable() {
-//                        public void run() {
-//                            ledManager.setChoiseToOff();
-//                            ledManager.ApplyBrightness(10);
-//                            ledManager.Apply();
-//                        }
-//                    },
-//                    100);
-//        } else {
-//            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-//            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
-//            mBuilder.setSmallIcon(R.mipmap.ic_launcher);
-//            mBuilder.setContentTitle("Flash On Visit");
-//            mBuilder.setPriority(Notification.PRIORITY_HIGH);
-//
-//            Notification notif = mBuilder.build();
-//            notif.ledARGB = prefs.getInt(LED_COLOR, LED_COLOR_DEFAULT);
-//            notif.flags = Notification.FLAG_SHOW_LIGHTS;
-//            notif.ledOnMS = 100;
-//            notif.ledOffMS = 0;
-//            nm.notify(LED_NOTIFICATION_ID, notif);
-//            new Handler().postDelayed(
-//                    new Runnable() {
-//                        public void run() {
-//                            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-//                            nm.cancel(LED_NOTIFICATION_ID);
-//                        }
-//                    },
-//                    delayUntilHideNotification);
-//        }
-//    }
 
     private void connectToSocketAndRetryIfFailed() {
         historyAdapter.addAtFront(new HistoryEntry(String.format("Connecting with <b>%s</b>", getServerName())));
@@ -299,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         who = data.getString("ip");
                         channel = data.getString("channel");
-                        flashLedLight();
+                        feedbackService.feedback();
                         addHistoryEntry(String.format("%s visits <b>%s</b>", who, channel));
 
                     } catch (JSONException e) {
@@ -425,11 +393,13 @@ public class MainActivity extends AppCompatActivity {
     private void initLedKernelHackView() {
         this.ledKernelHackSwitch = (Switch) this.findViewById(R.id.led_kernel_hack);
         ledKernelHackSwitch.setChecked(prefs.getBoolean(LED_KERNEL_HACK, false));
+        ledService.setKernelTrigger(ledKernelHackSwitch.isChecked());
 
         ledKernelHackSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 prefs.edit().putBoolean(LED_KERNEL_HACK, isChecked).commit();
+                ledService.setKernelTrigger(isChecked);
                 if (isChecked) {
                     addHistoryEntry("Change LED mode to <b>hack</b>");
                 } else {
@@ -532,6 +502,11 @@ public class MainActivity extends AppCompatActivity {
         final View ledBlueButton = this.findViewById(R.id.led_blue);
         final View ledGreenButton = this.findViewById(R.id.led_green);
 
+        int storedColor = prefs.getInt(LED_COLOR, LED_COLOR_DEFAULT);
+        ledTextColor = (TextView) findViewById(R.id.led_color_text);
+        ledTextColor.setTextColor(storedColor);
+        ledService.setLedColor(storedColor);
+
         ledRedButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -539,7 +514,8 @@ public class MainActivity extends AppCompatActivity {
                 ledTextColor.setTextColor(color);
                 prefs.edit().putInt(LED_COLOR, color).commit();
                 addHistoryEntry(String.format("Change LED <b>%s</b>", Utils.colorTextInHtml("color", color)));
-                flashLedLight();
+                ledService.setLedColor(color);
+                feedbackService.feedback();
             }
         });
         ledBlueButton.setOnClickListener(new View.OnClickListener() {
@@ -549,7 +525,8 @@ public class MainActivity extends AppCompatActivity {
                 ledTextColor.setTextColor(color);
                 prefs.edit().putInt(LED_COLOR, color).commit();
                 addHistoryEntry(String.format("Change LED <b>%s</b>", Utils.colorTextInHtml("color", color)));
-                flashLedLight();
+                ledService.setLedColor(color);
+                feedbackService.feedback();
             }
         });
         ledGreenButton.setOnClickListener(new View.OnClickListener() {
@@ -559,19 +536,19 @@ public class MainActivity extends AppCompatActivity {
                 ledTextColor.setTextColor(color);
                 prefs.edit().putInt(LED_COLOR, LED_COLOR_GREEN).commit();
                 addHistoryEntry(String.format("Change LED <b>%s</b>", Utils.colorTextInHtml("color", color)));
-                flashLedLight();
+                ledService.setLedColor(color);
+                feedbackService.feedback();
             }
         });
     }
 
     private void initLedTryOutView() {
         final View tryOutLedButton = this.findViewById(R.id.tryoutButton);
-        final int tryoutDuration = 4000;
 
         tryOutLedButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                flashLedLight(tryoutDuration);
+                feedbackService.exampleFeedback();
                 historyAdapter.addAtFront(new HistoryEntry("Try out LED"));
                 final ImageView view = (ImageView) findViewById(R.id.lightbulp);
                 view.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.mipmap.lightbulb_y2));

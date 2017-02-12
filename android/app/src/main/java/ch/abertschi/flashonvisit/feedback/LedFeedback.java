@@ -8,23 +8,26 @@ import android.support.v7.app.NotificationCompat;
 
 import com.kdb.ledcontrol.LEDManager;
 
-import java.util.Map;
-
 import ch.abertschi.flashonvisit.R;
 
 /**
+ * LED feedback service
+ * <p/>
  * Created by abertschi on 11.02.17
  */
 public class LedFeedback implements FeedbackService {
 
-    private static final int LED_COLOR_DEFAULT = 0xffcc0000;
-    private static final int DELAY_UNTIL_HIDE_DEFAULT = 500;
+    public static final int LED_COLOR_DEFAULT = 0xffcc0000;
+    public static final int DEFAULT_DURATION = 100;
+
     private static final int LED_NOTIFICATION_ID = 1;
 
+    private int ledColor = LED_COLOR_DEFAULT;
+    private Integer duration = new Integer(DEFAULT_DURATION);
+    private Integer tempDuration;
     private LEDManager ledManager;
     private Context context;
     private boolean kernelTrigger = false;
-    private int ledColor;
 
     public LedFeedback(Context context) {
         ledManager = new LEDManager(context);
@@ -32,17 +35,23 @@ public class LedFeedback implements FeedbackService {
     }
 
     @Override
-    public void exampleFeedback(Map<String, Object> params) {
+    public void exampleFeedback() {
         doFeedback(ledColor, 5000);
     }
 
     @Override
-    public void feedback(Map<String, Object> params) {
+    public void feedback() {
         doFeedback(ledColor, 500);
     }
 
     protected void doFeedback(int ledColor, int delayUntilHide) {
-        if (ledManager.isDeviceSupported() && kernelTrigger) {
+        int feedbackDuration = duration;
+        if (tempDuration != null) {
+            feedbackDuration = tempDuration;
+            tempDuration = null;
+        }
+
+        if (kernelTrigger && ledManager.isDeviceSupported()) {
             ledManager.setChoiseToOn();
             ledManager.ApplyBrightness(10);
             ledManager.Apply();
@@ -54,7 +63,7 @@ public class LedFeedback implements FeedbackService {
                             ledManager.Apply();
                         }
                     },
-                    100);
+                    feedbackDuration);
         } else {
             NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);
@@ -66,7 +75,7 @@ public class LedFeedback implements FeedbackService {
 
             notif.ledARGB = ledColor;
             notif.flags = Notification.FLAG_SHOW_LIGHTS;
-            notif.ledOnMS = 100;
+            notif.ledOnMS = feedbackDuration;
             notif.ledOffMS = 0;
             nm.notify(LED_NOTIFICATION_ID, notif);
 
@@ -97,5 +106,18 @@ public class LedFeedback implements FeedbackService {
     public LedFeedback setLedColor(int ledColor) {
         this.ledColor = ledColor;
         return this;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public LedFeedback setDuration(int duration) {
+        this.duration = duration;
+        return this;
+    }
+
+    public void setDurationForNextFeedback(int duration) {
+        this.tempDuration = duration;
     }
 }

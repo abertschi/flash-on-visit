@@ -9,7 +9,7 @@ import java.util.Map;
  */
 public interface FeedbackService {
 
-    void exampleFeedback(Map<String, Object> params);
+    void feedback();
 
-    void feedback(Map<String, Object> params);
+    void exampleFeedback();
 }
