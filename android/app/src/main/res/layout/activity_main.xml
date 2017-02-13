@@ -141,11 +141,59 @@
                 </RelativeLayout>
             </android.support.v7.widget.CardView>
 
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/error_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/logo_card"
+                android:layout_centerVertical="false"
+                android:layout_gravity="center_horizontal|center_vertical"
+                android:layout_margin="7dp"
+                android:layout_marginTop="20dp"
+                android:visibility="gone"
+                app:cardCornerRadius="3dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#5F0F40"
+                    android:padding="20dp"
+                    >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        >
+
+                        <ImageView
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+
+                            android:layout_gravity="center"
+                            android:src="@mipmap/ic_error_outline_white_48dp"
+                            />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginLeft="20dp"
+                            android:text="Server can not be reached"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:textColor="@android:color/white"/>
+
+                    </LinearLayout>
+
+                </RelativeLayout>
+            </android.support.v7.widget.CardView>
+
             <LinearLayout
                 android:id="@+id/settings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/logo_card"
+                android:layout_below="@id/error_card"
                 android:orientation="vertical">
 
                 <TextView
@@ -177,9 +225,9 @@
                             android:id="@+id/server_title"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="5dp"
+                            android:layout_marginBottom="0dp"
                             android:gravity="top|left"
-                            android:text="Server and Channel"
+                            android:text="Select channel to join"
                             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
                         <LinearLayout
@@ -193,6 +241,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
+                                android:visibility="gone"
                                 >
 
                                 <ImageView
@@ -273,7 +322,56 @@
                                 android:visibility="gone"
                                 />
 
+
+                            <View
+                                android:id="@+id/sep9"
+                                android:layout_width="fill_parent"
+                                android:layout_height="1dip"
+                                android:layout_marginTop="15dp"
+                                android:background="#11000000"/>
+
+                            <FrameLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp">
+
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="left"
+                                    android:orientation="horizontal"
+                                    >
+
+                                    <ImageView
+                                        android:layout_width="30dp"
+                                        android:layout_height="30dp"
+                                        android:layout_gravity="center"
+                                        android:src="@mipmap/ic_developer_board_black_24dp"
+                                        />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_gravity="center"
+                                        android:layout_marginLeft="9dp"
+                                        android:text="Start on Boot"
+                                        android:textAppearance="?android:attr/textAppearanceMedium"
+                                        android:textColor="@android:color/black"/>
+
+                                </LinearLayout>
+
+                                <Switch
+                                    android:id="@+id/start_on_boot_swtich"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_alignParentRight="true"
+                                    android:layout_gravity="right"
+                                    android:checked="false"
+                                    android:gravity="right"/>
+                            </FrameLayout>
                         </LinearLayout>
+
                     </RelativeLayout>
                 </android.support.v7.widget.CardView>
 
@@ -403,9 +501,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical"
-
                                 >
-
 
                                 <com.andexert.library.RippleView
                                     android:layout_width="wrap_content"
@@ -429,12 +525,8 @@
                                     android:layout_height="2dip"
                                     android:layout_marginTop="2dp"
                                     android:background="#5F0F40"/>
-
-
                             </LinearLayout>
-
                         </LinearLayout>
-
 
                         <TextView
                             android:id="@+id/feedback_channel_validation"
@@ -451,6 +543,44 @@
                             android:visibility="visible"
                             />
 
+
+                        <View
+                            android:id="@+id/sep2"
+                            android:layout_width="fill_parent"
+                            android:layout_height="1dip"
+                            android:layout_below="@id/feedback_channel_validation"
+                            android:layout_marginTop="10dp"
+                            android:background="#11000000"/>
+
+
+                        <LinearLayout
+                            android:id="@+id/led_hint"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/sep2"
+                            android:layout_marginTop="10dp"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/lightbulp"
+                                android:layout_width="35dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="left"
+                                android:layout_marginLeft="0dp"
+                                android:backgroundTintMode="add"
+                                android:src="@mipmap/lightbulb"
+                                />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginLeft="5dp"
+                                android:text="Some devices only flash the notification LED if the screen is off."
+                                android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+
+                        </LinearLayout>
 
                     </RelativeLayout>
                 </android.support.v7.widget.CardView>
@@ -541,49 +671,12 @@
 
                         </FrameLayout>
 
-                        <View
-                            android:id="@+id/sep2"
-                            android:layout_width="fill_parent"
-                            android:layout_height="1dip"
-                            android:layout_below="@id/tryout"
-                            android:layout_marginTop="10dp"
-                            android:background="#11000000"/>
-
-
-                        <LinearLayout
-                            android:id="@+id/led_hint"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@id/sep2"
-                            android:layout_marginTop="10dp"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:id="@+id/lightbulp"
-                                android:layout_width="35dp"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="left"
-                                android:layout_marginLeft="0dp"
-                                android:backgroundTintMode="add"
-                                android:src="@mipmap/lightbulb"
-                                />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginLeft="5dp"
-                                android:text="Some devices only flash the notification light if the screen is off."
-                                android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-
-                        </LinearLayout>
 
                         <RelativeLayout
                             android:id="@+id/advanced_options_led"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_below="@id/led_hint"
+                            android:layout_below="@id/tryout"
                             android:visibility="gone">
 
 

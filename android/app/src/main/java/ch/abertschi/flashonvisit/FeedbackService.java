@@ -3,7 +3,9 @@ package ch.abertschi.flashonvisit;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -22,6 +24,10 @@ import ch.abertschi.flashonvisit.feedback.VibraFeedback;
 public class FeedbackService extends Service {
 
     private static final int FEEDBACK_DURATION = 100;
+
+    private Handler mStatusHandler;
+
+    public static int STATUS_HANDLER_MSG_FEEDBACK = 1;
 
     public class LocalBinder extends Binder {
         public FeedbackService getService() {
@@ -110,6 +116,16 @@ public class FeedbackService extends Service {
     public void doFeedback() {
         for (Feedback s : feedbackServices) {
             s.feedback();
+
+        }
+    }
+
+    private void publishStatusMessage(String message) {
+        if (mStatusHandler != null) {
+            Message m = mStatusHandler.obtainMessage();
+            m.what = STATUS_HANDLER_MSG_FEEDBACK;
+            m.obj = message;
+            mStatusHandler.dispatchMessage(m);
         }
     }
 
@@ -138,6 +154,15 @@ public class FeedbackService extends Service {
 
     public FeedbackService setLedColor(int ledColor) {
         this.ledService.setLedColor(ledColor);
+        return this;
+    }
+
+    public Handler getmStatusHandler() {
+        return mStatusHandler;
+    }
+
+    public FeedbackService setmStatusHandler(Handler mStatusHandler) {
+        this.mStatusHandler = mStatusHandler;
         return this;
     }
 }

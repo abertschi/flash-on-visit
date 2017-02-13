@@ -106,16 +106,19 @@ public class MainActivity extends AppCompatActivity {
             // init service configuration
             mFeedbackService.setLedKernelHack(prefs.getBoolean(App.PREFS_LED_KERNEL_HACK_ENABLED, false));
             mFeedbackService.setLedColor(prefs.getInt(App.PREFS_LED_COLOR, App.LED_COLOR_DEFAULT));
+            //showAnimationConnectedIfNotVisible();
         }
 
         public void onServiceDisconnected(ComponentName className) {
             System.out.println("onServiceDisconnected");
             mFeedbackService = null;
+            //showAnimationDisconnectedIfNotVisible();
         }
     };
     private boolean isEnabledOnBoot;
 
     public void doBindService() {
+        //showAnimationConnectingIfNotVisible();
         Intent intent = new Intent(this, FeedbackService.class);
         startService(intent);
         this.bindService(intent, mConnection, Context.BIND_ABOVE_CLIENT);
@@ -139,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
 
         this.ledManager = new LEDManager(this);
         this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        this.isEnabled = this.prefs.getBoolean(App.PREFS_ENABLED, false);
+        this.isEnabled = this.prefs.getBoolean(App.PREFS_ENABLED, Boolean.FALSE);
         this.isEnabledOnBoot = this.prefs.getBoolean(App.PREFS_START_ON_BOOT, false);
 
         this.isVibraEnabled = this.prefs.getBoolean(App.PREFS_FEEDBACK_VIBRA_ENABLED, false);
@@ -160,14 +163,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void subscribeToService() {
-        isEnabled = true;
-        FirebaseMessaging.getInstance().subscribeToTopic(getChannelName());
-
+        String channel = getChannelName(); // TODO validate better
+        if (!channel.isEmpty()) {
+            isEnabled = true;
+            FirebaseMessaging.getInstance().subscribeToTopic(getChannelName());
+        }
     }
 
     private void unsubscribeFromService() {
         isEnabled = false;
-        FirebaseMessaging.getInstance().unsubscribeFromTopic(getChannelName());
+        String channel = getChannelName(); // TODO validate better
+        if (!channel.isEmpty()) {
+            FirebaseMessaging.getInstance().unsubscribeFromTopic(getChannelName());
+        }
     }
 
     @Override
@@ -185,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
         indicatorConnecting = (AVLoadingIndicatorView) this.findViewById(R.id.connection_logo_loading);
 
         initPowerView();
+        initStartOnBootView();
         initAboutView();
         initLedKernelHackView();
         initLedColorChangeViews();
@@ -286,7 +295,7 @@ public class MainActivity extends AppCompatActivity {
                     color = colorSelected;
                     mFeedbackService.addFeedbackService(FeedbackService.TYPE.VIBRA);
                     mFeedbackService.doExampleFeedback(FeedbackService.TYPE.VIBRA);
-                    addHistoryEntry("Enable <b>LED</b> feedback");
+                    addHistoryEntry("Enable <b>VIBRA</b> feedback");
                 }
                 vibraButton.getBackground().setColorFilter(color, PorterDuff.Mode.SRC_OVER);
                 isVibraEnabled = !isVibraEnabled;
@@ -361,9 +370,28 @@ public class MainActivity extends AppCompatActivity {
         }).execute(server);
     }
 
+    private void initStartOnBootView() {
+        final Switch view = (Switch) findViewById(R.id.start_on_boot_swtich);
+        this.isEnabledOnBoot = this.prefs.getBoolean(App.PREFS_START_ON_BOOT, false);
+        view.setChecked(isEnabledOnBoot);
+
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isEnabledOnBoot = !isEnabledOnBoot;
+                prefs.edit().putBoolean(App.PREFS_START_ON_BOOT, isEnabledOnBoot).commit();
+            }
+        });
+    }
+
     private void initPowerView() {
         final Button powerButton = (Button) findViewById(R.id.button);
         powerButton.setText(this.isEnabled ? "STOP" : "START");
+        if (isEnabled) {
+            showAnimationConnectedIfNotVisible();
+        } else {
+            showAnimationDisconnectedIfNotVisible();
+        }
 
         powerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -593,7 +621,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 checkIfServerAddressIsValid(s.toString());
-                prefs.edit().putString(App.PREFS_ENABLED, s.toString()).commit();
+                prefs.edit().putString(App.PREFS_SERVER, s.toString()).commit();
             }
         });
     }
