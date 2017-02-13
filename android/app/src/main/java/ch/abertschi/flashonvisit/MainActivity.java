@@ -3,6 +3,8 @@ package ch.abertschi.flashonvisit;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -44,7 +46,9 @@ import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import ch.abertschi.flashonvisit.feedback.FeedbackService;
 import ch.abertschi.flashonvisit.feedback.FlashFeedback;
@@ -102,7 +106,13 @@ public class MainActivity extends AppCompatActivity {
     private LedFeedback ledService;
     private VibraFeedback vibraService;
     private FlashFeedback flashService;
-    private FeedbackService feedbackService;
+    private Set<FeedbackService> feedbackServices = new LinkedHashSet<>();
+
+    private enum FeedbackServiceType {
+        FLASH,
+        LED,
+        VIBRA
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,11 +123,7 @@ public class MainActivity extends AppCompatActivity {
         this.ledManager = new LEDManager(this);
         this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
         this.isRunning = this.prefs.getBoolean(ENABLED, false);
-        ledService = new LedFeedback(this)
-                .setDuration(FEEDBACK_DURATION);
-        vibraService = new VibraFeedback(this);
-        flashService = new FlashFeedback(this);
-        feedbackService = flashService;
+        initFeedbackServices();
 
         List<HistoryEntry> historyModel = new ArrayList<>();
         initializeViews(historyModel);
@@ -137,6 +143,15 @@ public class MainActivity extends AppCompatActivity {
         disconnectSocket();
     }
 
+    private void initFeedbackServices() {
+        ledService = new LedFeedback(this).setDuration(FEEDBACK_DURATION);
+        vibraService = new VibraFeedback(this);
+        flashService = new FlashFeedback(this);
+        addFeedbackService(FeedbackServiceType.FLASH);
+        addFeedbackService(FeedbackServiceType.LED);
+        addFeedbackService(FeedbackServiceType.VIBRA);
+    }
+
     private void initializeViews(List<HistoryEntry> historyModel) {
         rootViewContainer = (ViewGroup) this.findViewById(R.id.container);
         initHistoryRecycleView(historyModel);
@@ -154,10 +169,110 @@ public class MainActivity extends AppCompatActivity {
         initLedTryOutView();
         initServerEditText();
         initChannelView();
+        initServiceSelectionView();
 
         final View kernelHackView = this.findViewById(R.id.led_root_options);
         kernelHackView.setVisibility(ledManager.rooted ? View.VISIBLE : View.GONE);
         addHistoryEntry("Welcome to flash-on-visit <b>:D</b>");
+    }
+
+    private void initServiceSelectionView() {
+        final int colorSelected = Color.parseColor("#5F0F40");
+        final int colorUnselected = Color.parseColor("#321325");
+        final Button flashButton = (Button) findViewById(R.id.flash_feedback);
+        final Button ledButton = (Button) findViewById(R.id.led_feedback);
+        final Button vibraButton = (Button) findViewById(R.id.vibra_feedback);
+
+        final View selectionIndicatorLed = findViewById(R.id.feedback_channel_selection_led);
+        final View selectionIndicatorVibra = findViewById(R.id.feedback_channel_selection_vibra);
+        final View selectionIndicatorFlash = findViewById(R.id.feedback_channel_selection_flash);
+        final int SELECTION_INDICATOR_DURATION = 300;
+
+        selectionIndicatorLed.setVisibility(isServiceActive(FeedbackServiceType.LED) ? View.VISIBLE : View.GONE);
+        selectionIndicatorVibra.setVisibility(isServiceActive(FeedbackServiceType.VIBRA) ? View.VISIBLE : View.GONE);
+        selectionIndicatorFlash.setVisibility(isServiceActive(FeedbackServiceType.FLASH) ? View.VISIBLE : View.GONE);
+
+        flashButton.getBackground()
+                .setColorFilter(isServiceActive(FeedbackServiceType.FLASH)
+                        ? colorSelected : colorUnselected, PorterDuff.Mode.SRC_OVER);
+        ledButton.getBackground()
+                .setColorFilter(isServiceActive(FeedbackServiceType.LED)
+                        ? colorSelected : colorUnselected, PorterDuff.Mode.SRC_OVER);
+        vibraButton.getBackground()
+                .setColorFilter(isServiceActive(FeedbackServiceType.VIBRA)
+                        ? colorSelected : colorUnselected, PorterDuff.Mode.SRC_OVER);
+
+        showFeedbackValidationMessageIfRequired();
+
+        flashButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int color;
+                if (isServiceActive(FeedbackServiceType.FLASH)) {
+                    hideView(selectionIndicatorFlash, 0, SELECTION_INDICATOR_DURATION);
+                    removeFeedbackService(FeedbackServiceType.FLASH);
+                    color = colorUnselected;
+                    addHistoryEntry("Disable <b>FLASH</b> feedback");
+                } else {
+                    showView(selectionIndicatorFlash, 0, SELECTION_INDICATOR_DURATION);
+                    addFeedbackService(FeedbackServiceType.FLASH);
+                    color = colorSelected;
+                    doExampleFeedback(FeedbackServiceType.FLASH);
+                    addHistoryEntry("Enable <b>FLASH</b> feedback");
+                }
+                flashButton.getBackground().setColorFilter(color, PorterDuff.Mode.SRC_OVER);
+                showFeedbackValidationMessageIfRequired();
+            }
+        });
+        ledButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int color;
+                if (isServiceActive(FeedbackServiceType.LED)) {
+                    hideView(selectionIndicatorLed, 0, SELECTION_INDICATOR_DURATION);
+                    removeFeedbackService(FeedbackServiceType.LED);
+                    color = colorUnselected;
+                    addHistoryEntry("Disable <b>LED</b> feedback");
+                } else {
+                    showView(selectionIndicatorLed, 0, SELECTION_INDICATOR_DURATION);
+                    addFeedbackService(FeedbackServiceType.LED);
+                    color = colorSelected;
+                    doExampleFeedback(FeedbackServiceType.LED);
+                    addHistoryEntry("Enable <b>LED</b> feedback");
+                }
+                ledButton.getBackground().setColorFilter(color, PorterDuff.Mode.SRC_OVER);
+                showFeedbackValidationMessageIfRequired();
+            }
+        });
+        vibraButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int color;
+                if (isServiceActive(FeedbackServiceType.VIBRA)) {
+                    hideView(selectionIndicatorVibra, 0, SELECTION_INDICATOR_DURATION);
+                    removeFeedbackService(FeedbackServiceType.VIBRA);
+                    color = colorUnselected;
+                    addHistoryEntry("Disable <b>VIBRA</b> feedback");
+                } else {
+                    showView(selectionIndicatorVibra, 0, SELECTION_INDICATOR_DURATION);
+                    color = colorSelected;
+                    addFeedbackService(FeedbackServiceType.VIBRA);
+                    doExampleFeedback(FeedbackServiceType.VIBRA);
+                    addHistoryEntry("Enable <b>LED</b> feedback");
+                }
+                vibraButton.getBackground().setColorFilter(color, PorterDuff.Mode.SRC_OVER);
+                showFeedbackValidationMessageIfRequired();
+            }
+        });
+    }
+
+    private void showFeedbackValidationMessageIfRequired() {
+        final View view = findViewById(R.id.feedback_channel_validation);
+        if (feedbackServices.size() == 0) {
+            showView(view, 300, 50);
+        } else {
+            hideView(view, 0, 50);
+        }
     }
 
     private void addHistoryEntry(String content) {
@@ -267,7 +382,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         who = data.getString("ip");
                         channel = data.getString("channel");
-                        feedbackService.feedback();
+                        doFeedback();
                         addHistoryEntry(String.format("%s visits <b>%s</b>", who, channel));
 
                     } catch (JSONException e) {
@@ -296,6 +411,55 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     };
+
+    private void addFeedbackService(FeedbackServiceType type) {
+        feedbackServices.add(getFeedbackServiceImpl(type));
+    }
+
+    private void removeFeedbackService(FeedbackServiceType type) {
+        feedbackServices.remove(getFeedbackServiceImpl(type));
+    }
+
+    private boolean isServiceActive(FeedbackServiceType type) {
+        return feedbackServices.contains(getFeedbackServiceImpl(type));
+    }
+
+    private <T extends FeedbackService> T getFeedbackServiceImpl(FeedbackServiceType type) {
+        switch (type) {
+            case FLASH:
+                return (T) flashService;
+            case LED:
+                return (T) ledService;
+            case VIBRA:
+                return (T) vibraService;
+            default:
+                throw new UnsupportedOperationException("Unknown feedback service");
+        }
+    }
+
+    private void doFeedback() {
+        for (FeedbackService s : feedbackServices) {
+            s.feedback();
+        }
+    }
+
+    private void doFeedback(FeedbackServiceType... types) {
+        for (FeedbackServiceType s : types) {
+            getFeedbackServiceImpl(s).feedback();
+        }
+    }
+
+    private void doExampleFeedback(FeedbackServiceType... types) {
+        for (FeedbackServiceType s : types) {
+            getFeedbackServiceImpl(s).exampleFeedback();
+        }
+    }
+
+    private void doExampleFeedback() {
+        for (FeedbackService s : feedbackServices) {
+            s.exampleFeedback();
+        }
+    }
 
     private void initHistoryRecycleView(List<HistoryEntry> model) {
         this.historyRecycleView = (RecyclerView) this.findViewById(R.id.history_recycleview);
@@ -515,7 +679,7 @@ public class MainActivity extends AppCompatActivity {
                 prefs.edit().putInt(LED_COLOR, color).commit();
                 addHistoryEntry(String.format("Change LED <b>%s</b>", Utils.colorTextInHtml("color", color)));
                 ledService.setLedColor(color);
-                feedbackService.feedback();
+                doFeedback();
             }
         });
         ledBlueButton.setOnClickListener(new View.OnClickListener() {
@@ -526,7 +690,7 @@ public class MainActivity extends AppCompatActivity {
                 prefs.edit().putInt(LED_COLOR, color).commit();
                 addHistoryEntry(String.format("Change LED <b>%s</b>", Utils.colorTextInHtml("color", color)));
                 ledService.setLedColor(color);
-                feedbackService.feedback();
+                doFeedback();
             }
         });
         ledGreenButton.setOnClickListener(new View.OnClickListener() {
@@ -537,7 +701,7 @@ public class MainActivity extends AppCompatActivity {
                 prefs.edit().putInt(LED_COLOR, LED_COLOR_GREEN).commit();
                 addHistoryEntry(String.format("Change LED <b>%s</b>", Utils.colorTextInHtml("color", color)));
                 ledService.setLedColor(color);
-                feedbackService.feedback();
+                doFeedback();
             }
         });
     }
@@ -548,7 +712,7 @@ public class MainActivity extends AppCompatActivity {
         tryOutLedButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                feedbackService.exampleFeedback();
+                doExampleFeedback();
                 historyAdapter.addAtFront(new HistoryEntry("Try out LED"));
                 final ImageView view = (ImageView) findViewById(R.id.lightbulp);
                 view.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.mipmap.lightbulb_y2));
@@ -763,5 +927,23 @@ public class MainActivity extends AppCompatActivity {
             public void onAnimationRepeat(Animator animation) {
             }
         });
+    }
+
+    private class ChangeViewVisibilityListener implements View.OnClickListener {
+
+        private View underlineView;
+
+        private ChangeViewVisibilityListener(View underlineView) {
+            this.underlineView = underlineView;
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (underlineView.getVisibility() == View.GONE) {
+                showView(underlineView, 0, 100);
+            } else {
+                hideView(underlineView, 0, 100);
+            }
+        }
     }
 }

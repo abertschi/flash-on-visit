@@ -11,7 +11,7 @@ public class VibraFeedback implements FeedbackService {
     public static final int DEFAULT_DURATION = 100;
 
     private Context context;
-    private int duration;
+    private int duration = DEFAULT_DURATION;
 
     public VibraFeedback(Context context) {
         this.context = context;

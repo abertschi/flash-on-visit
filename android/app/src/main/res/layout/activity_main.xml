@@ -285,6 +285,184 @@
                     android:layout_marginLeft="7dp"
                     android:layout_marginTop="7dp"
                     android:paddingLeft="10dp"
+                    android:text="Feedback channel"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@android:color/black"/>
+
+
+                <android.support.v7.widget.CardView
+                    android:id="@+id/feedback_channel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="7dp"
+                    app:cardCornerRadius="3dp">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#FFFFFF"
+                        android:paddingBottom="15dp"
+                        android:paddingLeft="20dp"
+                        android:paddingRight="20dp"
+                        android:paddingTop="20dp">
+
+                        <TextView
+                            android:id="@+id/choose_service_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:gravity="top|left"
+                            android:text="Choose feedback channels"
+                            android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+                        <!--<TextView-->
+                        <!--android:id="@+id/choose_service_text"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:text="Choose feedback type"-->
+                        <!--android:textAppearance="?android:attr/textAppearanceMedium"-->
+                        <!--android:textColor="@android:color/black"/>-->
+
+                        <LinearLayout
+                            android:id="@+id/choose_feedback"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/choose_service_text"
+                            android:layout_marginBottom="5dp"
+                            android:orientation="horizontal">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginRight="20dp"
+                                android:orientation="vertical"
+                                >
+
+
+                                <com.andexert.library.RippleView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+
+                                    >
+
+                                    <Button
+                                        android:id="@+id/led_feedback"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:backgroundTint="#321325"
+                                        android:text="LED"
+                                        android:textColor="@android:color/white"
+                                        android:textSize="16dp"
+                                        android:textStyle="normal"/>
+                                </com.andexert.library.RippleView>
+
+
+                                <View
+                                    android:id="@+id/feedback_channel_selection_led"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="2dip"
+                                    android:layout_marginTop="2dp"
+                                    android:background="#5F0F40"/>
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginRight="20dp"
+                                android:orientation="vertical"
+                                >
+
+                                <com.andexert.library.RippleView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    >
+
+                                    <Button
+                                        android:id="@+id/flash_feedback"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:backgroundTint="#321325"
+                                        android:text="FLASH"
+                                        android:textColor="@android:color/white"
+                                        android:textSize="16dp"
+                                        android:textStyle="normal"/>
+                                </com.andexert.library.RippleView>
+
+
+                                <View
+                                    android:id="@+id/feedback_channel_selection_flash"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="2dip"
+                                    android:layout_marginTop="2dp"
+                                    android:background="#5F0F40"/>
+
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+
+                                >
+
+
+                                <com.andexert.library.RippleView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    >
+
+                                    <Button
+                                        android:id="@+id/vibra_feedback"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:backgroundTint="#321325"
+                                        android:text="VIBRA"
+                                        android:textColor="@android:color/white"
+                                        android:textSize="16dp"
+                                        android:textStyle="normal"/>
+                                </com.andexert.library.RippleView>
+
+                                <View
+                                    android:id="@+id/feedback_channel_selection_vibra"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="2dip"
+                                    android:layout_marginTop="2dp"
+                                    android:background="#5F0F40"/>
+
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+
+                        <TextView
+                            android:id="@+id/feedback_channel_validation"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/choose_feedback"
+                            android:layout_marginLeft="0dp"
+                            android:layout_marginTop="1dp"
+                            android:paddingLeft="0dp"
+                            android:text="No feedback channel selected"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:textColor="#5F0F40"
+                            android:textStyle="italic"
+                            android:visibility="visible"
+                            />
+
+
+                    </RelativeLayout>
+                </android.support.v7.widget.CardView>
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left|top"
+                    android:layout_marginLeft="7dp"
+                    android:layout_marginTop="7dp"
+                    android:paddingLeft="10dp"
                     android:text="Feedback settings"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:textColor="@android:color/black"/>
@@ -320,6 +498,7 @@
                             android:id="@+id/tryout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+
                             >
 
                             <TextView
@@ -327,7 +506,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="left|top"
-                                android:text="Try out"
+                                android:text="Give it a shot"
                                 android:textAppearance="?android:attr/textAppearanceMedium"
                                 android:textColor="@android:color/black"/>
 
@@ -337,7 +516,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="left|center"
                                 android:layout_marginTop="10dp"
-                                android:text="Check if the LED works"
+                                android:text="Show example feedback"
                                 android:textAppearance="?android:attr/textAppearanceSmall"/>
 
 
@@ -372,92 +551,20 @@
 
 
                         <LinearLayout
-                            android:id="@+id/choose_feedback"
-                            android:layout_width="wrap_content"
-                            android:layout_centerInParent="true"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@id/sep2"
-                            android:layout_marginTop="15dp"
-                            android:layout_marginBottom="5dp"
-                            android:orientation="horizontal">
-
-                            <com.andexert.library.RippleView
-                                android:layout_width="wrap_content"
-                                android:layout_marginRight="20dp"
-                                android:layout_height="wrap_content"
-                                >
-
-                                <Button
-                                    android:id="@+id/led_feedback"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:backgroundTint="#321325"
-                                    android:text="FLASH"
-                                    android:textColor="@android:color/white"
-                                    android:textSize="16dp"
-                                    android:textStyle="normal"/>
-                            </com.andexert.library.RippleView>
-
-                            <com.andexert.library.RippleView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginRight="20dp"
-                                >
-
-                                <Button
-                                    android:id="@+id/flash_feedback"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:backgroundTint="#321325"
-                                    android:text="LED"
-                                    android:textColor="@android:color/white"
-                                    android:textSize="16dp"
-                                    android:textStyle="normal"/>
-                            </com.andexert.library.RippleView>
-
-
-                            <com.andexert.library.RippleView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                >
-
-                                <Button
-                                    android:id="@+id/vibra_feedback"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:backgroundTint="#321325"
-                                    android:text="VIBRA"
-                                    android:textColor="@android:color/white"
-                                    android:textSize="16dp"
-                                    android:textStyle="normal"/>
-                            </com.andexert.library.RippleView>
-
-                        </LinearLayout>
-
-                        <View
-                            android:id="@+id/sep7"
-                            android:layout_width="fill_parent"
-                            android:layout_height="1dip"
-                            android:layout_below="@id/choose_feedback"
-                            android:layout_marginTop="10dp"
-                            android:background="#11000000"/>
-
-
-                        <LinearLayout
                             android:id="@+id/led_hint"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_below="@id/sep7"
+                            android:layout_below="@id/sep2"
                             android:layout_marginTop="10dp"
                             android:orientation="horizontal">
 
                             <ImageView
-                                android:layout_width="35dp"
                                 android:id="@+id/lightbulp"
-                                android:layout_marginLeft="0dp"
+                                android:layout_width="35dp"
                                 android:layout_height="wrap_content"
-                                android:backgroundTintMode="add"
                                 android:layout_gravity="left"
+                                android:layout_marginLeft="0dp"
+                                android:backgroundTintMode="add"
                                 android:src="@mipmap/lightbulb"
                                 />
 
