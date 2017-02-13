@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.NotificationCompat;
 
 import com.kdb.ledcontrol.LEDManager;
@@ -15,7 +16,7 @@ import ch.abertschi.flashonvisit.R;
  * <p/>
  * Created by abertschi on 11.02.17
  */
-public class LedFeedback implements FeedbackService {
+public class LedFeedback implements Feedback {
 
     public static final int LED_COLOR_DEFAULT = 0xffcc0000;
     public static final int DEFAULT_DURATION = 100;
@@ -55,7 +56,7 @@ public class LedFeedback implements FeedbackService {
             ledManager.setChoiseToOn();
             ledManager.ApplyBrightness(10);
             ledManager.Apply();
-            new Handler().postDelayed(
+            new Handler(Looper.getMainLooper()).postDelayed(
                     new Runnable() {
                         public void run() {
                             ledManager.setChoiseToOff();
@@ -79,7 +80,7 @@ public class LedFeedback implements FeedbackService {
             notif.ledOffMS = 0;
             nm.notify(LED_NOTIFICATION_ID, notif);
 
-            new Handler().postDelayed(
+            new Handler(Looper.getMainLooper()).postDelayed(
                     new Runnable() {
                         public void run() {
                             NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

@@ -1,8 +1,7 @@
-package ch.abertschi.flashonvisit;
+package ch.abertschi.flashonvisit.view;
 
 import android.content.Context;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -14,9 +13,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
+
+import ch.abertschi.flashonvisit.HistoryEntry;
+import ch.abertschi.flashonvisit.R;
 
 /**
  * History RecycleView

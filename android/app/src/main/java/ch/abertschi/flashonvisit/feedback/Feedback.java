@@ -7,7 +7,7 @@ import java.util.Map;
 /**
  * Created by abertschi on 11.02.17.
  */
-public interface FeedbackService {
+public interface Feedback {
 
     void feedback();
 

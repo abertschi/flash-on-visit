@@ -1,4 +1,4 @@
-package ch.abertschi.flashonvisit;
+package ch.abertschi.flashonvisit.view;
 
 import android.Manifest;
 import android.app.Activity;

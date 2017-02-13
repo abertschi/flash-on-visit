@@ -6,7 +6,7 @@ import android.os.Vibrator;
 /**
  * Created by abertschi on 12.02.17.
  */
-public class VibraFeedback implements FeedbackService {
+public class VibraFeedback implements Feedback {
 
     public static final int DEFAULT_DURATION = 100;
 

@@ -4,3 +4,5 @@ npm-debug.log
 misc.xml
 android/.idea
 app-release.apk
+gcs_server_key.js
+google-services.json
