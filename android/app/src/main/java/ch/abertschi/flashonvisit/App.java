@@ -6,16 +6,14 @@ package ch.abertschi.flashonvisit;
 public class App {
 
     public static final String TAG_NAME = "flash-on-visit";
+
     public static final String PREFS_START_ON_BOOT = "start_on_boot";
     public static final String PREFS_ENABLED = "is_enabeld";
     public static final String PREFS_FEEDBACK_LED_ENABLED = "led_enabled";
     public static final String PREFS_FEEDBACK_FLASH_ENABLED = "flash_enabled";
     public static final String PREFS_FEEDBACK_VIBRA_ENABLED = "vibra_enabled";
-
-    public static final String SENT_TOKEN_TO_SERVER = "gcs_sent_token_to_server";
     public static final String PREFS_LED_KERNEL_HACK_ENABLED = "led_kernel_hack_enabled";
     public static final String PREFS_LED_COLOR = "led_color";
-
     public static final String PREFS_SERVER = "server_name";
     public static final String PREFS_CHANNEL = "channel_name";
 

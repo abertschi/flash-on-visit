@@ -1,24 +1,26 @@
 package ch.abertschi.flashonvisit.firebase;
 
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.IBinder;
+import android.os.Message;
 import android.preference.PreferenceManager;
-import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
 import ch.abertschi.flashonvisit.App;
-import ch.abertschi.flashonvisit.FeedbackService;
+import ch.abertschi.flashonvisit.feedback.FeedbackService;
+import ch.abertschi.flashonvisit.view.MainActivity;
 
 /**
  * Created by abertschi on 13.02.17.
@@ -31,14 +33,23 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private boolean mServiceIsBound;
     private SharedPreferences prefs;
 
+    private List<RemoteMessage> queuedRequests = new LinkedList<>();
+
     @Override
     public void onCreate() {
         super.onCreate();
         prefs = PreferenceManager.getDefaultSharedPreferences(MyFirebaseMessagingService.this);
-        if (prefs.getBoolean(App.PREFS_START_ON_BOOT, false) || prefs.getBoolean(App.PREFS_ENABLED, false)) {
-            doBindService();
+        if (isAllowedToRun()) {
+            System.out.println("BINDING SERVICE");
             FirebaseMessaging.getInstance().subscribeToTopic(prefs.getString(App.PREFS_CHANNEL, App.DEFAULT_CHANNEL));
+            doBindService();
         }
+    }
+
+    private boolean isAllowedToRun() {
+        return prefs.getBoolean(App.PREFS_START_ON_BOOT, false) ||
+                (prefs.getBoolean(App.PREFS_ENABLED, false && MainActivity.get() != null));
+
     }
 
     @Override
@@ -47,24 +58,39 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         doUnbindService();
     }
 
-    @Override
-    public void onMessageReceived(RemoteMessage remoteMessage) {
-        Log.d(TAG, "From: " + remoteMessage.getFrom());
-
-        if (mFeedbackService == null) {
-            Log.e(TAG, "Can not do feedback because mFeedbackService is null!");
-            return;
-        }
-
+    private void processMessage(RemoteMessage remoteMessage) {
         if (remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
             String ip = remoteMessage.getData().get("ip");
             String channel = remoteMessage.getData().get("channel");
+            if (MainActivity.get() != null) {
+                MainActivity.MessageHandler handler = MainActivity.get().getUiHandler();
+                Message message = handler.obtainMessage();
+                message.obj = String.format("New request in <b>%s</b> by %s", channel, ip);
+                message.what = MainActivity.MessageHandler.NEW_REQUEST;
+                handler.dispatchMessage(message);
+            }
             mFeedbackService.doFeedback();
         }
 
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
+        }
+    }
+
+    @Override
+    public void onMessageReceived(RemoteMessage remoteMessage) {
+        if (!isAllowedToRun()) {
+            return;
+        }
+        Log.d(TAG, "From: " + remoteMessage.getFrom());
+
+        if (mFeedbackService == null) {
+            Log.e(TAG, "Can not do feedback because mFeedbackService is null!. Queuing requests ...");
+            queuedRequests.add(remoteMessage);
+            return;
+        } else {
+            processMessage(remoteMessage);
         }
     }
 
@@ -74,7 +100,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             mFeedbackService.setLedKernelHack(prefs.getBoolean(App.PREFS_LED_KERNEL_HACK_ENABLED, false));
             mFeedbackService.setLedColor(prefs.getInt(App.PREFS_LED_COLOR, App.LED_COLOR_DEFAULT));
 
-            System.out.println("onServiceConnected");
+            Iterator<RemoteMessage> iterator = queuedRequests.iterator();
+            while (iterator.hasNext()) {
+                RemoteMessage m = iterator.next();
+                processMessage(m);
+                iterator.remove();
+            }
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -84,9 +115,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     };
 
     protected void doBindService() { // TODO: Battery optimization, because this service runs all the time
-        this.bindService(new Intent(this, FeedbackService.class), mConnection, Context.BIND_IMPORTANT);
+        Intent i = new Intent(this, FeedbackService.class);
+        this.bindService(i, mConnection, Context.BIND_AUTO_CREATE);
         mServiceIsBound = true;
-        System.out.println("doBindService");
     }
 
     protected void doUnbindService() {

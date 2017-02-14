@@ -1,4 +1,4 @@
-package ch.abertschi.flashonvisit;
+package ch.abertschi.flashonvisit.feedback;
 
 import android.app.Service;
 import android.content.Intent;
@@ -7,16 +7,11 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
-import ch.abertschi.flashonvisit.feedback.Feedback;
-import ch.abertschi.flashonvisit.feedback.FlashFeedback;
-import ch.abertschi.flashonvisit.feedback.LedFeedback;
-import ch.abertschi.flashonvisit.feedback.VibraFeedback;
+import ch.abertschi.flashonvisit.App;
 
 /**
  * Created by abertschi on 13.02.17.
@@ -55,7 +50,6 @@ public class FeedbackService extends Service {
 
     public void onDestroy() {
         super.onDestroy();
-        Toast.makeText(this, "My Service Stopped", Toast.LENGTH_LONG).show();
         Log.d(App.TAG_NAME, "onDestroy");
     }
 

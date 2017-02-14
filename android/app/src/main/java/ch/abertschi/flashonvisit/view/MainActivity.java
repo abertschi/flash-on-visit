@@ -12,6 +12,7 @@ import android.graphics.PorterDuff;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -49,7 +50,7 @@ import java.util.List;
 
 import ch.abertschi.flashonvisit.App;
 import ch.abertschi.flashonvisit.CheckServerAvailabilityTask;
-import ch.abertschi.flashonvisit.FeedbackService;
+import ch.abertschi.flashonvisit.feedback.FeedbackService;
 import ch.abertschi.flashonvisit.HistoryEntry;
 import ch.abertschi.flashonvisit.R;
 import ch.abertschi.flashonvisit.Utils;
@@ -71,13 +72,8 @@ public class MainActivity extends AppCompatActivity {
 
     private SharedPreferences prefs;
 
-    private LEDManager ledManager;
-    private Socket mSocket;
-    private boolean isEnabled = false;
-    private boolean isHistoryCollapsed = true;
-    private final Handler connectHandler = new Handler(Looper.getMainLooper());
-
     private boolean isAdvancedLedOptionsCollapsed = true;
+    private boolean isHistoryCollapsed = true;
     private RecyclerView historyRecycleView;
     private ViewGroup rootViewContainer;
     private EditText serverTextEdit;
@@ -91,54 +87,32 @@ public class MainActivity extends AppCompatActivity {
     private AVLoadingIndicatorView indicatorConnecting;
     private HistoryAdapter historyAdapter;
 
+    private LEDManager ledManager;
+
     private FeedbackService mFeedbackService;
     private boolean mServiceIsBound;
 
     boolean isFlashEnabled;
     boolean isLedEnabled;
     boolean isVibraEnabled;
-
-    private ServiceConnection mConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            mFeedbackService = ((FeedbackService.LocalBinder) service).getService();
-            System.out.println("onServiceConnected");
-
-            // init service configuration
-            mFeedbackService.setLedKernelHack(prefs.getBoolean(App.PREFS_LED_KERNEL_HACK_ENABLED, false));
-            mFeedbackService.setLedColor(prefs.getInt(App.PREFS_LED_COLOR, App.LED_COLOR_DEFAULT));
-            //showAnimationConnectedIfNotVisible();
-        }
-
-        public void onServiceDisconnected(ComponentName className) {
-            System.out.println("onServiceDisconnected");
-            mFeedbackService = null;
-            //showAnimationDisconnectedIfNotVisible();
-        }
-    };
     private boolean isEnabledOnBoot;
+    private boolean isEnabled = false;
 
-    public void doBindService() {
-        //showAnimationConnectingIfNotVisible();
-        Intent intent = new Intent(this, FeedbackService.class);
-        startService(intent);
-        this.bindService(intent, mConnection, Context.BIND_ABOVE_CLIENT);
-        mServiceIsBound = true;
-        System.out.println("doBindService");
-    }
+    private static MainActivity instance;
 
-    public void doUnbindService() {
-        if (mServiceIsBound) {
-            this.unbindService(mConnection);
-            mServiceIsBound = false;
-        }
+    private MessageHandler mUiHandler;
+
+    public static MainActivity get() {
+        return instance;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        instance = this;
+        mUiHandler = new MessageHandler(Looper.getMainLooper());
+
         setContentView(R.layout.activity_main);
-        new RequestUserPermission(this).verifyStoragePermissions();
-        doBindService();
 
         this.ledManager = new LEDManager(this);
         this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -152,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
         List<HistoryEntry> historyModel = new ArrayList<>();
         initializeViews(historyModel);
         showSplashAnimation();
+        doBindService();
 
         if (isEnabled) {
             subscribeToService();
@@ -163,6 +138,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void subscribeToService() {
+        new RequestUserPermission(this).verifyStoragePermissions();
+
         String channel = getChannelName(); // TODO validate better
         if (!channel.isEmpty()) {
             isEnabled = true;
@@ -182,6 +159,45 @@ public class MainActivity extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
         doUnbindService();
+        instance = null;
+    }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            mFeedbackService = ((FeedbackService.LocalBinder) service).getService();
+            System.out.println("onServiceConnected");
+
+            // init service configuration
+            mFeedbackService.setLedKernelHack(prefs.getBoolean(App.PREFS_LED_KERNEL_HACK_ENABLED, false));
+            mFeedbackService.setLedColor(prefs.getInt(App.PREFS_LED_COLOR, App.LED_COLOR_DEFAULT));
+            //showAnimationConnectedIfNotVisible();
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            System.out.println("onServiceDisconnected");
+            mFeedbackService = null;
+            //showAnimationDisconnectedIfNotVisible();
+        }
+    };
+
+    private void doBindService() {
+        //showAnimationConnectingIfNotVisible();
+        Intent intent = new Intent(this, FeedbackService.class);
+        startService(intent);
+        this.bindService(intent, mConnection, Context.BIND_ABOVE_CLIENT);
+        mServiceIsBound = true;
+        System.out.println("doBindService");
+    }
+
+    private void doUnbindService() {
+        if (mServiceIsBound) {
+            this.unbindService(mConnection);
+            mServiceIsBound = false;
+        }
+    }
+
+    public MessageHandler getUiHandler() {
+        return mUiHandler;
     }
 
     private void initializeViews(List<HistoryEntry> historyModel) {
@@ -804,5 +820,29 @@ public class MainActivity extends AppCompatActivity {
             public void onAnimationRepeat(Animator animation) {
             }
         });
+    }
+
+    public class MessageHandler extends Handler {
+
+        public static final int NEW_REQUEST = 1;
+
+        public MessageHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(final Message message) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    int state = message.what;
+                    switch (state) {
+                        case NEW_REQUEST:
+                            addHistoryEntry(message.obj.toString());
+                            break;
+                    }
+                }
+            });
+        }
     }
 }
