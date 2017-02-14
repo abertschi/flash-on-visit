@@ -43,8 +43,17 @@
             </intent-filter>
         </service>
 
+
+        <activity android:name=".view.MainActivity">
+            <!--Default Intent Filter-->
+            <intent-filter>
+                <action android:name="android.intent.action.DEFAULT"/>
+            </intent-filter>
+        </activity>
+
+
         <activity
-            android:name=".view.MainActivity"
+            android:name=".view.IntroView"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden">
 

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#151718"
+                android:orientation="vertical">
+
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="60dp"
+        android:textAlignment="center"
+
+        android:text="INTEGRATE ON YOUR SITE"
+        android:textColor="@android:color/white"
+        android:textSize="30dp"
+        android:textStyle="bold"/>
+
+
+    <ImageView
+        android:id="@+id/img"
+        android:layout_width="wrap_content"
+        android:layout_height="200dp"
+        android:layout_below="@id/title"
+        android:layout_marginTop="0dp"
+        android:padding="10dp"
+        android:src="@mipmap/setup"
+        android:layout_centerHorizontal="true"/>
+
+    <ch.abertschi.flashonvisit.view.TypewriterView
+        android:id="@+id/tagline_typewriter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/img"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:editable="false"
+        android:focusable="false"
+        android:gravity="center"
+        android:padding="30dp"
+        android:text=""
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:windowSoftInputMode="stateHidden"/>
+
+</RelativeLayout>

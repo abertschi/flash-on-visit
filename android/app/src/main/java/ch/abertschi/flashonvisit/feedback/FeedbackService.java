@@ -69,9 +69,6 @@ public class FeedbackService extends Service {
         ledService = new LedFeedback(this).setDuration(FEEDBACK_DURATION);
         vibraService = new VibraFeedback(this);
         flashService = new FlashFeedback(this);
-        addFeedbackService(TYPE.FLASH);
-        addFeedbackService(TYPE.LED);
-        addFeedbackService(TYPE.VIBRA);
     }
 
     public void addFeedbackService(TYPE type) {

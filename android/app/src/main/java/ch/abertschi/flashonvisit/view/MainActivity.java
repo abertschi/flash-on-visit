@@ -87,8 +87,6 @@ public class MainActivity extends AppCompatActivity {
     private AVLoadingIndicatorView indicatorConnecting;
     private HistoryAdapter historyAdapter;
 
-    private LEDManager ledManager;
-
     private FeedbackService mFeedbackService;
     private boolean mServiceIsBound;
 
@@ -113,8 +111,6 @@ public class MainActivity extends AppCompatActivity {
         mUiHandler = new MessageHandler(Looper.getMainLooper());
 
         setContentView(R.layout.activity_main);
-
-        this.ledManager = new LEDManager(this);
         this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
         this.isEnabled = this.prefs.getBoolean(App.PREFS_ENABLED, Boolean.FALSE);
         this.isEnabledOnBoot = this.prefs.getBoolean(App.PREFS_START_ON_BOOT, false);
@@ -127,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
         initializeViews(historyModel);
         showSplashAnimation();
         doBindService();
+        checkIfRootedAndApplySettings();
 
         if (isEnabled) {
             subscribeToService();
@@ -166,10 +163,7 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName className, IBinder service) {
             mFeedbackService = ((FeedbackService.LocalBinder) service).getService();
             System.out.println("onServiceConnected");
-
-            // init service configuration
-            mFeedbackService.setLedKernelHack(prefs.getBoolean(App.PREFS_LED_KERNEL_HACK_ENABLED, false));
-            mFeedbackService.setLedColor(prefs.getInt(App.PREFS_LED_COLOR, App.LED_COLOR_DEFAULT));
+            initFeedbackServices(MainActivity.this, mFeedbackService);
             //showAnimationConnectedIfNotVisible();
         }
 
@@ -179,6 +173,21 @@ public class MainActivity extends AppCompatActivity {
             //showAnimationDisconnectedIfNotVisible();
         }
     };
+
+    public static void initFeedbackServices(Context c, FeedbackService service) {
+        SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(c);
+        service.setLedKernelHack(p.getBoolean(App.PREFS_LED_KERNEL_HACK_ENABLED, false));
+        service.setLedColor(p.getInt(App.PREFS_LED_COLOR, App.LED_COLOR_DEFAULT));
+        if (p.getBoolean(App.PREFS_FEEDBACK_LED_ENABLED, false)) {
+            service.addFeedbackService(FeedbackService.TYPE.LED);
+        }
+        if (p.getBoolean(App.PREFS_FEEDBACK_VIBRA_ENABLED, false)) {
+            service.addFeedbackService(FeedbackService.TYPE.VIBRA);
+        }
+        if (p.getBoolean(App.PREFS_FEEDBACK_FLASH_ENABLED, false)) {
+            service.addFeedbackService(FeedbackService.TYPE.FLASH);
+        }
+    }
 
     private void doBindService() {
         //showAnimationConnectingIfNotVisible();
@@ -220,9 +229,21 @@ public class MainActivity extends AppCompatActivity {
         initChannelView();
         initServiceSelectionView();
 
-        final View kernelHackView = this.findViewById(R.id.led_root_options);
-        kernelHackView.setVisibility(ledManager.rooted ? View.VISIBLE : View.GONE);
         addHistoryEntry("Welcome to flash-on-visit <b>:D</b>");
+    }
+
+    private void checkIfRootedAndApplySettings() {
+        final View kernelHackView = findViewById(R.id.led_root_options);
+        if (prefs.contains(App.PREFS_IS_ROOTED)) {
+            kernelHackView.setVisibility(prefs.getBoolean(App.PREFS_IS_ROOTED, true) ? View.VISIBLE : View.GONE);
+        }
+        Utils.checkIfRooted(new Utils.Argument<Boolean>() {
+            @Override
+            public void apply(Boolean arg) {
+                kernelHackView.setVisibility(arg ? View.VISIBLE : View.GONE);
+                prefs.edit().putBoolean(App.PREFS_IS_ROOTED, arg).commit();
+            }
+        }, this);
     }
 
     private void initServiceSelectionView() {
@@ -258,12 +279,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 int color;
                 if (isFlashEnabled) {
-                    hideView(selectionIndicatorFlash, 0, SELECTION_INDICATOR_DURATION);
+                    Utils.hideView(selectionIndicatorFlash, 0, SELECTION_INDICATOR_DURATION);
                     mFeedbackService.removeFeedbackService(FeedbackService.TYPE.FLASH);
                     color = colorUnselected;
                     addHistoryEntry("Disable <b>FLASH</b> feedback");
                 } else {
-                    showView(selectionIndicatorFlash, 0, SELECTION_INDICATOR_DURATION);
+                    Utils.showView(selectionIndicatorFlash, 0, SELECTION_INDICATOR_DURATION);
                     mFeedbackService.addFeedbackService(FeedbackService.TYPE.FLASH);
                     color = colorSelected;
                     mFeedbackService.doExampleFeedback(FeedbackService.TYPE.FLASH);
@@ -280,12 +301,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 int color;
                 if (isLedEnabled) {
-                    hideView(selectionIndicatorLed, 0, SELECTION_INDICATOR_DURATION);
+                    Utils.hideView(selectionIndicatorLed, 0, SELECTION_INDICATOR_DURATION);
                     mFeedbackService.removeFeedbackService(FeedbackService.TYPE.LED);
                     color = colorUnselected;
                     addHistoryEntry("Disable <b>LED</b> feedback");
                 } else {
-                    showView(selectionIndicatorLed, 0, SELECTION_INDICATOR_DURATION);
+                    Utils.showView(selectionIndicatorLed, 0, SELECTION_INDICATOR_DURATION);
                     mFeedbackService.addFeedbackService(FeedbackService.TYPE.LED);
                     color = colorSelected;
                     mFeedbackService.doExampleFeedback(FeedbackService.TYPE.LED);
@@ -302,12 +323,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 int color;
                 if (isVibraEnabled) {
-                    hideView(selectionIndicatorVibra, 0, SELECTION_INDICATOR_DURATION);
+                    Utils.hideView(selectionIndicatorVibra, 0, SELECTION_INDICATOR_DURATION);
                     mFeedbackService.removeFeedbackService(FeedbackService.TYPE.VIBRA);
                     color = colorUnselected;
                     addHistoryEntry("Disable <b>VIBRA</b> feedback");
                 } else {
-                    showView(selectionIndicatorVibra, 0, SELECTION_INDICATOR_DURATION);
+                    Utils.showView(selectionIndicatorVibra, 0, SELECTION_INDICATOR_DURATION);
                     color = colorSelected;
                     mFeedbackService.addFeedbackService(FeedbackService.TYPE.VIBRA);
                     mFeedbackService.doExampleFeedback(FeedbackService.TYPE.VIBRA);
@@ -323,10 +344,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void showFeedbackValidationMessageIfRequired() {
         final View view = findViewById(R.id.feedback_channel_validation);
+        final View feedbackSettingsContainer = findViewById(R.id.settings_container);
         if (!isFlashEnabled && !isLedEnabled && !isVibraEnabled) {
-            showView(view, 300, 50);
+            Utils.hideView(feedbackSettingsContainer, 0, 200);
+            Utils.showView(view, 800, 200);
         } else {
-            hideView(view, 0, 50);
+            Utils.showView(feedbackSettingsContainer, 0, 200);
+            Utils.hideView(view, 800, 200);
         }
     }
 
@@ -373,14 +397,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkIfServerAddressIsValid(String server) {
-        new CheckServerAvailabilityTask(new CheckServerAvailabilityTask.Argument() {
+        new CheckServerAvailabilityTask(new Utils.Argument<Boolean>() {
             @Override
-            public void apply(boolean isValid) {
+            public void apply(Boolean isValid) {
                 TextView txt = (TextView) findViewById(R.id.address_validation);
                 if (isValid) {
-                    hideView(txt, 0);
+                    Utils.hideView(txt, 0);
                 } else {
-                    showView(txt, 0);
+                    Utils.showView(txt, 0);
                 }
             }
         }).execute(server);
@@ -519,11 +543,11 @@ public class MainActivity extends AppCompatActivity {
 //                    anim.start();
 //                    container.setVisibility(View.VISIBLE);
 
-                    showView(container, 0, 50);
+                    Utils.showView(container, 0, 50);
                     textView.setText("BASIC");
                     isAdvancedLedOptionsCollapsed = false;
                 } else {
-                    hideView(container, 0, 50);
+                    Utils.hideView(container, 0, 50);
 //                    ScaleAnimation anim = new ScaleAnimation(1, 1, 1, 0);
 //                    container.setAnimation(anim);
 //                    anim.setDuration(500);
@@ -571,7 +595,6 @@ public class MainActivity extends AppCompatActivity {
                 prefs.edit().putInt(App.PREFS_LED_COLOR, color).commit();
                 addHistoryEntry(String.format("Change LED <b>%s</b>", Utils.colorTextInHtml("color", color)));
                 mFeedbackService.setLedColor(color);
-                mFeedbackService.doFeedback();
             }
         });
         ledBlueButton.setOnClickListener(new View.OnClickListener() {
@@ -582,7 +605,6 @@ public class MainActivity extends AppCompatActivity {
                 prefs.edit().putInt(App.PREFS_LED_COLOR, color).commit();
                 addHistoryEntry(String.format("Change LED <b>%s</b>", Utils.colorTextInHtml("color", color)));
                 mFeedbackService.setLedColor(color);
-                mFeedbackService.doFeedback();
             }
         });
         ledGreenButton.setOnClickListener(new View.OnClickListener() {
@@ -592,9 +614,7 @@ public class MainActivity extends AppCompatActivity {
                 ledTextColor.setTextColor(color);
                 prefs.edit().putInt(App.PREFS_LED_COLOR, LED_COLOR_GREEN).commit();
                 addHistoryEntry(String.format("Change LED <b>%s</b>", Utils.colorTextInHtml("color", color)));
-
                 mFeedbackService.setLedColor(color);
-                mFeedbackService.doFeedback();
             }
         });
     }
@@ -655,7 +675,7 @@ public class MainActivity extends AppCompatActivity {
         setChannelName(prefs.getString(App.PREFS_CHANNEL, App.DEFAULT_CHANNEL));
         if (getChannelName().isEmpty()) {
             TextView view = (TextView) findViewById(R.id.channel_validation);
-            showView(view, 0);
+            Utils.showView(view, 0);
         }
         channelTextEdit.addTextChangedListener(new TextWatcher() {
             @Override
@@ -670,9 +690,9 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 TextView view = (TextView) findViewById(R.id.channel_validation);
                 if (s.toString().isEmpty()) {
-                    showView(view, 0);
+                    Utils.showView(view, 0);
                 } else {
-                    hideView(view, 0);
+                    Utils.hideView(view, 0);
                 }
                 prefs.edit().putString(App.PREFS_CHANNEL, s.toString()).commit();
             }
@@ -718,28 +738,28 @@ public class MainActivity extends AppCompatActivity {
 
         boolean hidePrevious = false;
         if (indicatorConnected.getVisibility() != View.GONE) {
-            hideView(indicatorConnected, 0);
+            Utils.hideView(indicatorConnected, 0);
             hidePrevious = true;
         }
         if (indicatorDisconnected.getVisibility() != View.GONE) {
-            hideView(indicatorDisconnected, 0);
+            Utils.hideView(indicatorDisconnected, 0);
             hidePrevious = true;
         }
-        showView(indicatorConnecting, hidePrevious ? DEFAULT_ANIMATION_DURATION * 2 : 0);
+        Utils.showView(indicatorConnecting, hidePrevious ? DEFAULT_ANIMATION_DURATION * 2 : 0);
     }
 
     private void showAnimationConnectedIfNotVisible() {
         if (indicatorConnected.getVisibility() == View.VISIBLE)
             return;
 
-        hideView(indicatorConnecting, 0);
+        Utils.hideView(indicatorConnecting, 0);
         if (indicatorConnecting.getVisibility() != View.GONE) {
-            hideView(indicatorConnecting, 0);
+            Utils.hideView(indicatorConnecting, 0);
         }
         if (indicatorDisconnected.getVisibility() != View.GONE) {
-            hideView(indicatorDisconnected, 0);
+            Utils.hideView(indicatorDisconnected, 0);
         }
-        showView(indicatorConnected, DEFAULT_ANIMATION_DURATION * 5);
+        Utils.showView(indicatorConnected, DEFAULT_ANIMATION_DURATION * 5);
     }
 
     private void showAnimationDisconnectedIfNotVisible() {
@@ -748,78 +768,14 @@ public class MainActivity extends AppCompatActivity {
 
         boolean hidePrevious = false;
         if (indicatorConnecting.getVisibility() != View.GONE) {
-            hideView(indicatorConnecting, 0);
+            Utils.hideView(indicatorConnecting, 0);
             hidePrevious = true;
         }
         if (indicatorConnected.getVisibility() != View.GONE) {
-            hideView(indicatorConnected, 0);
+            Utils.hideView(indicatorConnected, 0);
             hidePrevious = true;
         }
-        showView(indicatorDisconnected, hidePrevious ? DEFAULT_ANIMATION_DURATION * 2 : 0);
-    }
-
-    private void showView(final View view, int delay) {
-        showView(view, delay, DEFAULT_ANIMATION_DURATION);
-    }
-
-    private void showView(final View view, int delay, int duration) {
-        System.out.println("show view: " + view.toString() + " with delay " + delay);
-
-        final ObjectAnimator fadeIn = ObjectAnimator.ofFloat(view, "alpha", 0f, 1f);
-        fadeIn.setInterpolator(new DecelerateInterpolator(0.5f));
-        fadeIn.setStartDelay(delay);
-        fadeIn.setDuration(duration);
-
-        fadeIn.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                view.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-            }
-        });
-        fadeIn.start();
-    }
-
-    private void hideView(final View view, int delay) {
-        hideView(view, delay, DEFAULT_ANIMATION_DURATION);
-    }
-
-    private void hideView(final View view, int delay, int duration) {
-        System.out.println("hide view: " + view.toString() + " with delay " + delay);
-        final ObjectAnimator fadeIn = ObjectAnimator.ofFloat(view, "alpha", 1f, 0f);
-        fadeIn.setInterpolator(new DecelerateInterpolator(0.5f));
-        fadeIn.setStartDelay(delay);
-        fadeIn.setDuration(duration);
-        fadeIn.start();
-        fadeIn.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                view.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-            }
-        });
+        Utils.showView(indicatorDisconnected, hidePrevious ? DEFAULT_ANIMATION_DURATION * 2 : 0);
     }
 
     public class MessageHandler extends Handler {

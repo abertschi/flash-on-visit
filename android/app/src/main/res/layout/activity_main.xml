@@ -585,288 +585,287 @@
                     </RelativeLayout>
                 </android.support.v7.widget.CardView>
 
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="left|top"
-                    android:layout_marginLeft="7dp"
-                    android:layout_marginTop="7dp"
-                    android:paddingLeft="10dp"
-                    android:text="Feedback settings"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="@android:color/black"/>
-
-
-                <android.support.v7.widget.CardView
-                    android:id="@+id/led_card"
+                <RelativeLayout
+                    android:id="@+id/settings_container"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="7dp"
-                    app:cardCornerRadius="3dp">
+                    android:layout_height="wrap_content">
 
-                    <RelativeLayout
+
+                    <TextView
+                        android:id="@+id/feedback_settings_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left|top"
+                        android:layout_marginLeft="7dp"
+                        android:layout_marginTop="7dp"
+                        android:paddingLeft="10dp"
+                        android:text="Feedback settings"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:textColor="@android:color/black"/>
+
+
+                    <android.support.v7.widget.CardView
+                        android:id="@+id/led_card"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="#FFFFFF"
-                        android:paddingBottom="15dp"
-                        android:paddingLeft="20dp"
-                        android:paddingRight="20dp"
-                        android:paddingTop="20dp">
-
-                        <!--<TextView-->
-                        <!--android:id="@+id/led_preferences"-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="wrap_content"-->
-
-                        <!--android:gravity="top|left"-->
-                        <!--android:text="LED"-->
-                        <!--android:textAppearance="?android:attr/textAppearanceSmall"/>-->
-
-
-                        <FrameLayout
-                            android:id="@+id/tryout"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-
-                            >
-
-                            <TextView
-                                android:id="@+id/tryOutText"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="left|top"
-                                android:text="Give it a shot"
-                                android:textAppearance="?android:attr/textAppearanceMedium"
-                                android:textColor="@android:color/black"/>
-
-                            <TextView
-                                android:id="@+id/text"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="left|center"
-                                android:layout_marginTop="10dp"
-                                android:text="Show example feedback"
-                                android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-
-                            <com.andexert.library.RippleView
-                                android:id="@+id/tryoutButtonWrapper"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentBottom="true"
-                                android:layout_alignParentEnd="true"
-                                android:layout_gravity="right|center_vertical">
-
-                                <Button
-                                    android:id="@+id/tryoutButton"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:backgroundTint="#321325"
-                                    android:text="TRY"
-                                    android:textColor="@android:color/white"
-                                    android:textSize="16dp"
-                                    android:textStyle="normal"/>
-                            </com.andexert.library.RippleView>
-
-                        </FrameLayout>
-
+                        android:layout_below="@id/feedback_settings_title"
+                        android:layout_margin="7dp"
+                        app:cardCornerRadius="3dp">
 
                         <RelativeLayout
-                            android:id="@+id/advanced_options_led"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_below="@id/tryout"
-                            android:visibility="gone">
-
-
-                            <View
-                                android:id="@+id/sep6"
-                                android:layout_width="fill_parent"
-                                android:layout_height="1dip"
-                                android:layout_marginTop="10dp"
-                                android:background="#11000000"/>
-
+                            android:background="#FFFFFF"
+                            android:paddingBottom="15dp"
+                            android:paddingLeft="20dp"
+                            android:paddingRight="20dp"
+                            android:paddingTop="20dp">
 
                             <FrameLayout
-                                android:id="@+id/choose_color"
+                                android:id="@+id/tryout"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_below="@id/sep6"
-                                android:layout_marginTop="10dp"
+
                                 >
 
-                                <LinearLayout
+                                <TextView
+                                    android:id="@+id/tryOutText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_gravity="left|top"
-                                    android:orientation="horizontal">
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="Choose "
-                                        android:textAppearance="?android:attr/textAppearanceMedium"
-                                        android:textColor="@android:color/black"/>
-
-                                    <TextView
-                                        android:id="@+id/led_color_text"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="color"
-                                        android:textAppearance="?android:attr/textAppearanceMedium"
-                                        android:textColor="@android:color/holo_red_dark"/>
-
-                                </LinearLayout>
+                                    android:text="Give it a shot"
+                                    android:textAppearance="?android:attr/textAppearanceMedium"
+                                    android:textColor="@android:color/black"/>
 
                                 <TextView
-                                    android:id="@+id/choose_color_detail"
+                                    android:id="@+id/text"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_gravity="left|bottom"
-                                    android:layout_marginTop="25dp"
-                                    android:text="Availability is device dependent"
+                                    android:layout_gravity="left|center"
+                                    android:layout_marginTop="10dp"
+                                    android:text="Show example feedback"
                                     android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+
+                                <com.andexert.library.RippleView
+                                    android:id="@+id/tryoutButtonWrapper"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_alignParentBottom="true"
+                                    android:layout_alignParentEnd="true"
+                                    android:layout_gravity="right|center_vertical">
+
+                                    <Button
+                                        android:id="@+id/tryoutButton"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:backgroundTint="#321325"
+                                        android:text="TRY"
+                                        android:textColor="@android:color/white"
+                                        android:textSize="16dp"
+                                        android:textStyle="normal"/>
+                                </com.andexert.library.RippleView>
 
                             </FrameLayout>
 
-                            <LinearLayout
-                                android:id="@+id/led_choose"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_below="@id/choose_color"
-                                android:layout_gravity="center_horizontal|bottom"
-                                android:layout_marginTop="10dp"
-                                android:gravity="center"
-                                android:orientation="horizontal">
-
-
-                                <com.andexert.library.RippleView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content">
-
-                                    <android.support.design.widget.FloatingActionButton
-                                        android:id="@+id/led_red"
-                                        android:layout_width="50dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_margin="10dp"
-                                        app:backgroundTint="@android:color/holo_red_dark"
-                                        />
-
-                                </com.andexert.library.RippleView>
-
-
-                                <com.andexert.library.RippleView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content">
-
-                                    <android.support.design.widget.FloatingActionButton
-                                        android:id="@+id/led_blue"
-                                        android:layout_width="50dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_margin="10dp"
-                                        app:backgroundTint="@android:color/holo_blue_dark"
-                                        />
-
-                                </com.andexert.library.RippleView>
-
-                                <com.andexert.library.RippleView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content">
-
-                                    <android.support.design.widget.FloatingActionButton
-                                        android:id="@+id/led_green"
-                                        android:layout_width="50dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_margin="10dp"
-                                        app:backgroundTint="@android:color/holo_green_dark"
-                                        />
-
-                                </com.andexert.library.RippleView>
-                            </LinearLayout>
 
                             <RelativeLayout
-                                android:id="@+id/led_root_options"
+                                android:id="@+id/advanced_options_led"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_below="@id/led_choose">
+                                android:layout_below="@id/tryout"
+                                android:visibility="gone">
+
 
                                 <View
-                                    android:id="@+id/sep5"
+                                    android:id="@+id/sep6"
                                     android:layout_width="fill_parent"
                                     android:layout_height="1dip"
                                     android:layout_marginTop="10dp"
                                     android:background="#11000000"/>
 
-                                <FrameLayout
-                                    android:id="@+id/kernel_hack"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="50dp"
-                                    android:layout_below="@id/sep5"
-                                    android:layout_marginTop="15dp">
 
-                                    <TextView
-                                        android:id="@+id/textView422"
+                                <FrameLayout
+                                    android:id="@+id/choose_color"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_below="@id/sep6"
+                                    android:layout_marginTop="10dp"
+                                    >
+
+                                    <LinearLayout
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:layout_gravity="left|top"
-                                        android:text="LED hack (root)"
-                                        android:textAppearance="?android:attr/textAppearanceMedium"
-                                        android:textColor="@android:color/black"/>
+                                        android:orientation="horizontal">
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Choose LED "
+                                            android:textAppearance="?android:attr/textAppearanceMedium"
+                                            android:textColor="@android:color/black"/>
+
+                                        <TextView
+                                            android:id="@+id/led_color_text"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="color"
+                                            android:textAppearance="?android:attr/textAppearanceMedium"
+                                            android:textColor="@android:color/holo_red_dark"/>
+
+                                    </LinearLayout>
 
                                     <TextView
-                                        android:id="@+id/textView5"
+                                        android:id="@+id/choose_color_detail"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:layout_alignParentStart="true"
-                                        android:layout_below="@+id/textView422"
-                                        android:layout_gravity="left|center_vertical"
-                                        android:layout_marginTop="10dp"
-                                        android:text="Use kernel LED trigger"
+                                        android:layout_gravity="left|bottom"
+                                        android:layout_marginTop="25dp"
+                                        android:text="Availability is device dependent"
                                         android:textAppearance="?android:attr/textAppearanceSmall"/>
 
-                                    <Switch
-                                        android:id="@+id/led_kernel_hack"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_alignParentBottom="true"
-                                        android:layout_alignParentEnd="true"
-                                        android:layout_alignParentTop="true"
-                                        android:layout_gravity="right|center_vertical"
-                                        android:checked="false"/>
-
-
                                 </FrameLayout>
+
+                                <LinearLayout
+                                    android:id="@+id/led_choose"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_below="@id/choose_color"
+                                    android:layout_gravity="center_horizontal|bottom"
+                                    android:layout_marginTop="10dp"
+                                    android:gravity="center"
+                                    android:orientation="horizontal">
+
+
+                                    <com.andexert.library.RippleView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content">
+
+                                        <android.support.design.widget.FloatingActionButton
+                                            android:id="@+id/led_red"
+                                            android:layout_width="50dp"
+                                            android:layout_height="wrap_content"
+                                            android:layout_margin="10dp"
+                                            app:backgroundTint="@android:color/holo_red_dark"
+                                            />
+
+                                    </com.andexert.library.RippleView>
+
+
+                                    <com.andexert.library.RippleView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content">
+
+                                        <android.support.design.widget.FloatingActionButton
+                                            android:id="@+id/led_blue"
+                                            android:layout_width="50dp"
+                                            android:layout_height="wrap_content"
+                                            android:layout_margin="10dp"
+                                            app:backgroundTint="@android:color/holo_blue_dark"
+                                            />
+
+                                    </com.andexert.library.RippleView>
+
+                                    <com.andexert.library.RippleView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content">
+
+                                        <android.support.design.widget.FloatingActionButton
+                                            android:id="@+id/led_green"
+                                            android:layout_width="50dp"
+                                            android:layout_height="wrap_content"
+                                            android:layout_margin="10dp"
+                                            app:backgroundTint="@android:color/holo_green_dark"
+                                            />
+
+                                    </com.andexert.library.RippleView>
+                                </LinearLayout>
+
+                                <RelativeLayout
+                                    android:id="@+id/led_root_options"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_below="@id/led_choose">
+
+                                    <View
+                                        android:id="@+id/sep5"
+                                        android:layout_width="fill_parent"
+                                        android:layout_height="1dip"
+                                        android:layout_marginTop="10dp"
+                                        android:background="#11000000"/>
+
+                                    <FrameLayout
+                                        android:id="@+id/kernel_hack"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="50dp"
+                                        android:layout_below="@id/sep5"
+                                        android:layout_marginTop="15dp">
+
+                                        <TextView
+                                            android:id="@+id/textView422"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:layout_gravity="left|top"
+                                            android:text="LED hack (root)"
+                                            android:textAppearance="?android:attr/textAppearanceMedium"
+                                            android:textColor="@android:color/black"/>
+
+                                        <TextView
+                                            android:id="@+id/textView5"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:layout_alignParentStart="true"
+                                            android:layout_below="@+id/textView422"
+                                            android:layout_gravity="left|center_vertical"
+                                            android:layout_marginTop="10dp"
+                                            android:text="Use kernel LED trigger"
+                                            android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+                                        <Switch
+                                            android:id="@+id/led_kernel_hack"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:layout_alignParentBottom="true"
+                                            android:layout_alignParentEnd="true"
+                                            android:layout_alignParentTop="true"
+                                            android:layout_gravity="right|center_vertical"
+                                            android:checked="false"/>
+
+
+                                    </FrameLayout>
+                                </RelativeLayout>
                             </RelativeLayout>
+
+
+                            <View
+                                android:id="@+id/sep3"
+                                android:layout_width="fill_parent"
+                                android:layout_height="1dip"
+                                android:layout_below="@id/advanced_options_led"
+                                android:layout_marginTop="10dp"
+                                android:background="#11000000"/>
+
+
+                            <TextView
+                                android:id="@+id/button_show_advanced_led"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_below="@id/sep3"
+                                android:layout_marginRight="5dp"
+                                android:layout_marginTop="13dp"
+                                android:gravity="right"
+                                android:text="ADVANCED"
+                                android:textColor="#5F0F40"
+                                android:textSize="16dp"
+                                android:textStyle="bold"/>
+
+
                         </RelativeLayout>
 
+                    </android.support.v7.widget.CardView>
 
-                        <View
-                            android:id="@+id/sep3"
-                            android:layout_width="fill_parent"
-                            android:layout_height="1dip"
-                            android:layout_below="@id/advanced_options_led"
-                            android:layout_marginTop="10dp"
-                            android:background="#11000000"/>
-
-
-                        <TextView
-                            android:id="@+id/button_show_advanced_led"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@id/sep3"
-                            android:layout_marginRight="5dp"
-                            android:layout_marginTop="13dp"
-                            android:gravity="right"
-                            android:text="ADVANCED"
-                            android:textColor="#5F0F40"
-                            android:textSize="16dp"
-                            android:textStyle="bold"/>
-
-
-                    </RelativeLayout>
-
-                </android.support.v7.widget.CardView>
+                </RelativeLayout>
 
 
                 <TextView

@@ -15,13 +15,9 @@ import java.util.function.Function;
  */
 public class CheckServerAvailabilityTask extends AsyncTask<String, Void, Boolean> {
 
-    public interface Argument {
-        void apply(boolean arg);
-    }
+    private Utils.Argument<Boolean> callable;
 
-    private Argument callable;
-
-    public CheckServerAvailabilityTask(Argument callable) {
+    public CheckServerAvailabilityTask(Utils.Argument<Boolean> callable) {
         this.callable = callable;
     }
 

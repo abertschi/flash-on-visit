@@ -16,6 +16,9 @@ public class App {
     public static final String PREFS_LED_COLOR = "led_color";
     public static final String PREFS_SERVER = "server_name";
     public static final String PREFS_CHANNEL = "channel_name";
+    public static final String PREFS_IS_ROOTED = "is_rooted";
+    public static final String PREFS_FIRST_RUN = "first_run";
+
 
     public static final int LED_COLOR_RED = 0xffcc0000;
     public static final int LED_COLOR_DEFAULT = LED_COLOR_RED;

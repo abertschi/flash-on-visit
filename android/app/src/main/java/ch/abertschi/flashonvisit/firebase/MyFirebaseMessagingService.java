@@ -97,8 +97,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     protected ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             mFeedbackService = ((FeedbackService.LocalBinder) service).getService();
-            mFeedbackService.setLedKernelHack(prefs.getBoolean(App.PREFS_LED_KERNEL_HACK_ENABLED, false));
-            mFeedbackService.setLedColor(prefs.getInt(App.PREFS_LED_COLOR, App.LED_COLOR_DEFAULT));
+            MainActivity.initFeedbackServices(MyFirebaseMessagingService.this, mFeedbackService);
 
             Iterator<RemoteMessage> iterator = queuedRequests.iterator();
             while (iterator.hasNext()) {
