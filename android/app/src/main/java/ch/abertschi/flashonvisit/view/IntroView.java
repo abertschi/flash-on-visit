@@ -35,7 +35,7 @@ public class IntroView extends AppIntro {
         super.onCreate(savedInstanceState);
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (false && prefs.getBoolean(App.PREFS_FIRST_RUN, false)) {
+        if (prefs.getBoolean(App.PREFS_FIRST_RUN, false)) {
             launchActivity();
             finish();
             return;
