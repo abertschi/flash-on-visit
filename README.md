@@ -7,7 +7,7 @@
 **flash-on-visit** gives you visual feedback on your website traffic by flashing the caps lock LED of your computer keyboard and notification light of your Android phone :yellow_heart:
 
 
-This app is in early development :feet:
+This app is in beta development :feet: Feedback appreciated!
 
 ## Android client
 
