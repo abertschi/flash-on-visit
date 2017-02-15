@@ -1,3 +1,5 @@
+[![twitter: @andrinbertschi]( https://img.shields.io/badge/twitter-andrinbertschi-yellow.svg?style=flat-square)](http://twitter.com/andrinbertschi)
+
 # flash-on-visit
 
 > It's often the small things that matter most in life.  
@@ -59,4 +61,4 @@ Thanks to these amazing people:
 
 ## Contact
 Andrin Bertschi  
-[![twitter: @andrinbertschi]( https://img.shields.io/badge/twitter-andrinbertschi-yellow.svg?style=flat-square)](http://twitter.com/andrinbertschi)
+www.abertschi.ch  
