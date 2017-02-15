@@ -16,52 +16,21 @@
         android:layout_marginTop="92dp"
         android:src="@mipmap/logo"/>
 
-
-    <!--<TextView-->
-    <!--android:id="@+id/title"-->
-    <!--android:layout_below="@id/logo"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_gravity="center_horizontal"-->
-    <!--android:layout_centerHorizontal="true"-->
-    <!--android:layout_marginTop="50dp"-->
-    <!--android:padding="30dp"-->
-    <!--android:textAlignment="center"-->
-    <!--android:text=""-->
-    <!--android:textStyle="bold"-->
-    <!--android:textAppearance="?android:attr/textAppearanceLarge"-->
-    <!--android:textColor="@android:color/white"/>-->
-
-
     <ch.abertschi.flashonvisit.view.TypewriterView
         android:id="@+id/tagline_typewriter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/logo"
-        android:gravity="center"
-        android:padding="30dp"
-        android:editable="false"
-        android:focusable="false"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="50dp"
+        android:editable="false"
+        android:focusable="false"
+        android:gravity="center"
+        android:padding="30dp"
         android:text=""
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@android:color/white"
         android:textStyle="bold"
         android:windowSoftInputMode="stateHidden"/>
-
-    <!--<TextView-->
-    <!--android:id="@+id/detail1"-->
-    <!--android:layout_below="@id/title"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_gravity="center_horizontal"-->
-    <!--android:layout_centerHorizontal="true"-->
-    <!--android:layout_marginTop="50dp"-->
-    <!--android:text="FEEDBACK"-->
-    <!--android:textStyle="bold"-->
-    <!--android:textAppearance="?android:attr/textAppearanceLarge"-->
-    <!--android:textColor="@android:color/white"/>-->
-
 
 </RelativeLayout>

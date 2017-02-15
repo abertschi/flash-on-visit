@@ -44,7 +44,11 @@
         </service>
 
 
-        <activity android:name=".view.MainActivity">
+        <activity
+            android:name=".view.MainActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden"
+            >
             <!--Default Intent Filter-->
             <intent-filter>
                 <action android:name="android.intent.action.DEFAULT"/>

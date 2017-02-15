@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 /**
  * Checks if a hostaddress is reachable
- * <p/>
+ * <p>
  * Created by abertschi on 11.02.17.
  */
 public class CheckServerAvailabilityTask extends AsyncTask<String, Void, Boolean> {
@@ -25,14 +25,12 @@ public class CheckServerAvailabilityTask extends AsyncTask<String, Void, Boolean
     protected Boolean doInBackground(String... params) {
         boolean reachable = false;
         String host = params[0];
-        int port = 0;
+        int port;
         try {
             if (!host.startsWith("http://") && !host.startsWith("https://")) {
                 host = "http://" + host;
             }
-            System.out.println(host.lastIndexOf(":"));
             if (host.lastIndexOf(":") < 6) {
-
                 port = 80;
             } else {
                 String p = host.substring(host.lastIndexOf(":") + 1, host.length());
@@ -43,7 +41,6 @@ public class CheckServerAvailabilityTask extends AsyncTask<String, Void, Boolean
                 host = host.substring(0, host.length() - p.length() - 1);
             }
 
-            System.out.println(host + " / " + port);
             URL url = new URL(host + ":" + port);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
@@ -51,7 +48,6 @@ public class CheckServerAvailabilityTask extends AsyncTask<String, Void, Boolean
             reachable = true;
 
         } catch (Exception e) {
-            System.out.println(e);
         }
         return reachable;
     }
@@ -59,14 +55,6 @@ public class CheckServerAvailabilityTask extends AsyncTask<String, Void, Boolean
     @Override
     protected void onPostExecute(Boolean result) {
         callable.apply(result);
-    }
-
-    @Override
-    protected void onPreExecute() {
-    }
-
-    @Override
-    protected void onProgressUpdate(Void... values) {
     }
 }
 

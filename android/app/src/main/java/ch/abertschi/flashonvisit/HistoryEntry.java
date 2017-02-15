@@ -4,7 +4,7 @@ import java.util.Date;
 
 /**
  * Model for history entries
- *
+ * <p>
  * Created by abertschi on 09.02.17.
  */
 public class HistoryEntry {

@@ -1,25 +1,22 @@
 package ch.abertschi.flashonvisit.view;
 
-import android.app.NotificationManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.github.paolorotolo.appintro.AppIntro;
-import com.github.paolorotolo.appintro.AppIntro2Fragment;
-import com.github.paolorotolo.appintro.AppIntroFragment;
 
 import ch.abertschi.flashonvisit.App;
+import ch.abertschi.flashonvisit.Interfaces;
 import ch.abertschi.flashonvisit.R;
 import ch.abertschi.flashonvisit.Utils;
 
@@ -28,30 +25,50 @@ import ch.abertschi.flashonvisit.Utils;
  */
 public class IntroView extends AppIntro {
 
-    private SharedPreferences prefs;
+    private SharedPreferences mPrefs;
+    private static final String TAG = "IntroView";
+
+    private static final int WELCOME = 1;
+    private static final int CHANNEL = 2;
+    private static final int WEBSITE = 3;
+    private static final int GITHUB = 4;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getBoolean(App.PREFS_FIRST_RUN, false)) {
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (mPrefs.getBoolean(App.PREFS_FIRST_RUN, false)) {
             launchActivity();
             finish();
             return;
         }
 
-        addSlide(new IntroFragment());
-        addSlide(new Overview());
-        addSlide(new SetupSite());
-        addSlide(new GithubSite());
+        final String welcomeTxt = "Get VISUAL feedback on your website traffic.";
+        addSlide(IntroSlide.create(WELCOME, R.layout.intro_welcome, R.id.logo, welcomeTxt, (writer) -> {
+            writer.pause(1000)
+                    .type(welcomeTxt)
+                    .pause(1000).delete(".")
+                    .pause(300).type("\n\n:D");
+        }));
 
-        // Hide Skip/Done button.
+        final String channelTxt = "A channel is an identifier for your website.";
+        addSlide(IntroSlide.create(CHANNEL, R.layout.intro_channel, R.id.choose_channel_logo, channelTxt, (writer) -> {
+            writer.pause(300).type(channelTxt);
+        }));
+
+        final String websiteTxt = "Notify the the app whenever you get a new visit.";
+        addSlide(IntroSlide.create(WEBSITE, R.layout.intro_website, R.id.img, websiteTxt, (writer) -> {
+            writer.pause(300).type(websiteTxt);
+        }));
+
+        final String githubTxt = "Dig into the code on Github.";
+        addSlide(IntroSlide.create(GITHUB, R.layout.intro_github, R.id.img, githubTxt, (writer) -> {
+            writer.pause(300).type(githubTxt);
+        }));
+
         showSkipButton(true);
         setProgressButtonEnabled(true);
-
-        // Turn vibration on and set intensity.
-        // NOTE: you will probably need to ask VIBRATE permission in Manifest.
         setVibrate(true);
         setVibrateIntensity(30);
     }
@@ -68,169 +85,71 @@ public class IntroView extends AppIntro {
         launchActivity();
     }
 
+    @Override
+    public void onSlideChanged(@Nullable Fragment oldFragment, @Nullable Fragment newFragment) {
+        super.onSlideChanged(oldFragment, newFragment);
+        if (newFragment instanceof IntroSlide) {
+            IntroSlide slide = (IntroSlide) newFragment;
+            slide.start();
+            Log.i(TAG, "new slide: started" + newFragment.toString());
+        }
+    }
+
     private void launchActivity() {
-        prefs.edit().putBoolean(App.PREFS_FIRST_RUN, true).commit();
+        mPrefs.edit().putBoolean(App.PREFS_FIRST_RUN, true).commit();
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
 
-    @Override
-    public void onSlideChanged(@Nullable Fragment oldFragment, @Nullable Fragment newFragment) {
-        super.onSlideChanged(oldFragment, newFragment);
+    public static class IntroSlide extends Fragment {
 
-        if (newFragment instanceof Overview) {
-            ((Overview) newFragment).start();
-        } else if (newFragment instanceof SetupSite) {
-            ((SetupSite) newFragment).start();
-        } else if (newFragment instanceof GithubSite) {
-            ((GithubSite) newFragment).start();
+        private int mId;
+        private String mFinalText;
+        private int mLayoutId;
+        private int mImageId;
+        private Interfaces.Consumer<TypewriterView> mTextFunction;
+
+        private View mImage;
+        private TypewriterView mTypewriterView;
+        private boolean mInit = false;
+
+        public static IntroSlide create(int id, int layoutId, int imageId, String finalText,
+                                        Interfaces.Consumer<TypewriterView> textFunction) {
+            IntroSlide slide = new IntroSlide();
+            slide.mId = id;
+            slide.mFinalText = finalText;
+            slide.mLayoutId = layoutId;
+            slide.mImageId = imageId;
+            slide.mTextFunction = textFunction;
+            return slide;
         }
-    }
 
-    public static class IntroFragment extends Fragment {
-
-        private View logo;
-        private TypewriterView typewriterView;
-        private static boolean init = false;
+        public int getIdentification() {
+            return mId;
+        }
 
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.intro_welcome, container, false);
+            return inflater.inflate(mLayoutId, container, false);
         }
 
         public void start() {
-            new Handler(Looper.getMainLooper()).postDelayed(
-                    new Runnable() {
-                        public void run() {
-                            if (!init) {
-                                typewriterView.pause(1000).type("Get VISUAL feedback on your website traffic.")
-                                        .pause(1000).delete(".").pause(300).type("\n\n:D");
-                                init = true;
-                            }
-                        }
-                    },
-                    0);
+            if (!mInit) {
+                mTextFunction.accept(mTypewriterView);
+                mInit = true;
+            } else {
+                mTypewriterView.setText(mFinalText);
+            }
         }
 
         @Override
         public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            logo = view.findViewById(R.id.logo);
-            logo.setVisibility(View.GONE);
-            Utils.showView(logo, 100, 500);
-            typewriterView = (TypewriterView) view.findViewById(R.id.tagline_typewriter);
-            start();
+            mImage = view.findViewById(mImageId);
+            mTypewriterView = (TypewriterView) view.findViewById(R.id.tagline_typewriter);
 
-        }
-    }
+            mImage.setVisibility(View.GONE);
+            Utils.showView(mImage, 100, 1000);
 
-    public static class Overview extends Fragment {
-
-        private View img;
-
-        private TypewriterView typewriterView;
-
-        private static boolean init = false;
-
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.intro_channel, container, false);
-        }
-
-        @Override
-        public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-            super.onViewCreated(view, savedInstanceState);
-
-            img = view.findViewById(R.id.choose_channel_logo);
-            img.setVisibility(View.GONE);
-            Utils.showView(img, 100, 500);
-            typewriterView = (TypewriterView) view.findViewById(R.id.tagline_typewriter);
-        }
-
-        public void start() {
-            final String msg = "A channel is an identifier for your website.";
-            new Handler(Looper.getMainLooper()).postDelayed(
-                    new Runnable() {
-                        public void run() {
-                            if (!init) {
-                                typewriterView.pause(300).type(msg);
-                                init = true;
-                            }
-                        }
-                    },
-                    0);
-        }
-    }
-
-    public static class SetupSite extends Fragment {
-
-        private View img;
-
-        private TypewriterView typewriterView;
-
-        private static boolean init = false;
-
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.intro_website, container, false);
-        }
-
-        @Override
-        public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-            super.onViewCreated(view, savedInstanceState);
-
-            img = view.findViewById(R.id.img);
-            img.setVisibility(View.GONE);
-            Utils.showView(img, 100, 500);
-            typewriterView = (TypewriterView) view.findViewById(R.id.tagline_typewriter);
-        }
-
-        public void start() {
-            final String msg = "Notify the the app whenever you get a new visit.";
-            new Handler(Looper.getMainLooper()).postDelayed(
-                    new Runnable() {
-                        public void run() {
-                            if (!init) {
-                                typewriterView.pause(300).type(msg);
-                                init = true;
-                            }
-                        }
-                    },
-                    0);
-        }
-    }
-
-    public static class GithubSite extends Fragment {
-
-        private View img;
-
-        private TypewriterView typewriterView;
-
-        private static boolean init = false;
-
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.intro_github, container, false);
-        }
-
-        @Override
-        public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-            super.onViewCreated(view, savedInstanceState);
-
-            img = view.findViewById(R.id.img);
-            img.setVisibility(View.GONE);
-            Utils.showView(img, 100, 500);
-            typewriterView = (TypewriterView) view.findViewById(R.id.tagline_typewriter);
-        }
-
-        public void start() {
-            final String msg = "Dig into the code on Github.";
-            new Handler(Looper.getMainLooper()).postDelayed(
-                    new Runnable() {
-                        public void run() {
-                            if (!init) {
-                                typewriterView.pause(300).type(msg);
-                                init = true;
-                            }
-                        }
-                    },
-                    0);
         }
     }
 }

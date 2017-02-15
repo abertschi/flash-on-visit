@@ -21,20 +21,21 @@ import ch.abertschi.flashonvisit.R;
 
 /**
  * History RecycleView
- *
+ * 
+ * <p>
  * Created by abertschi on 09.02.17.
  */
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHolder> {
 
-    private List<HistoryEntry> model;
-    private Context context;
-    private RecyclerView recyclerView;
-    private DateFormat dateFormat = new android.text.format.DateFormat();
+    private DateFormat mDateFormat = new android.text.format.DateFormat();
+    private Context mContext;
+    private List<HistoryEntry> mModel;
+    private RecyclerView mRecyclerView;
 
     public HistoryAdapter(List<HistoryEntry> model, Context context, RecyclerView recyclerView) {
-        this.model = model;
-        this.context = context;
-        this.recyclerView = recyclerView;
+        this.mModel = model;
+        this.mContext = context;
+        this.mRecyclerView = recyclerView;
     }
 
     @Override
@@ -47,9 +48,9 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        HistoryEntry entry = model.get(position);
-        String date = dateFormat.format("d MMM. yy", entry.getDate()).toString();
-        String time = dateFormat.format("hh:mm:ss a", entry.getDate()).toString();
+        HistoryEntry entry = mModel.get(position);
+        String date = mDateFormat.format("d MMM. yy", entry.getDate()).toString();
+        String time = mDateFormat.format("hh:mm:ss a", entry.getDate()).toString();
 
         holder.dateLabel.setText(date + "\n" + time);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -57,25 +58,24 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         } else {
             holder.detailLabel.setText(Html.fromHtml(entry.getMessage()));
         }
-
         int imageId;
         if (position == 0) {
             imageId = R.mipmap.history_start;
         } else {
             imageId = R.mipmap.history;
         }
-        holder.image.setImageDrawable(ContextCompat.getDrawable(this.context, imageId));
+        holder.image.setImageDrawable(ContextCompat.getDrawable(this.mContext, imageId));
     }
 
     @Override
     public int getItemCount() {
-        return this.model.size();
+        return this.mModel.size();
     }
 
     public void add(int position, HistoryEntry item) {
-        model.add(position, item);
+        mModel.add(position, item);
         notifyItemInserted(position);
-        recyclerView.scrollToPosition(0);
+        mRecyclerView.scrollToPosition(0);
     }
 
     public void addAtFront(HistoryEntry item) {
@@ -83,25 +83,25 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
     }
 
     public void addAtEnd(HistoryEntry item) {
-        model.add(item);
+        mModel.add(item);
         notifyDataSetChanged();
     }
 
     public void remove(HistoryEntry item) {
-        int position = model.indexOf(item);
-        model.remove(position);
+        int position = mModel.indexOf(item);
+        mModel.remove(position);
         notifyItemRemoved(position);
     }
 
     public List<HistoryEntry> getModel() {
-        return Collections.unmodifiableList(this.model);
+        return Collections.unmodifiableList(this.mModel);
     }
 
     public void clearModel() {
-        int size = this.model.size();
+        int size = this.mModel.size();
         if (size > 0) {
             for (int i = 0; i < size; i++) {
-                this.model.remove(0);
+                this.mModel.remove(0);
             }
             this.notifyItemRangeRemoved(0, size);
         }
@@ -147,8 +147,6 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
             } else {
                 imageId = R.mipmap.history_thick2;
             }
-
-            System.out.println(imageId);
             image.setImageDrawable(ContextCompat.getDrawable(this.context, imageId));
         }
     }

@@ -10,27 +10,24 @@ import android.support.v13.app.ActivityCompat;
  */
 public class RequestUserPermission {
 
-    private Activity activity;
-
-    // Storage Permissions
+    private Activity mActivity;
     private static final int REQUEST_CODE = 1;
     private static String[] PERMISSIONS = {
             Manifest.permission.CAMERA
     };
 
     public RequestUserPermission(Activity activity) {
-        this.activity = activity;
+        this.mActivity = activity;
     }
 
     public boolean isAllowedToUseCamera() {
-        return ActivityCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+        return ActivityCompat.checkSelfPermission(mActivity, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
     }
 
     public void verifyAllPermissions() {
         if (!isAllowedToUseCamera()) {
-            // We don't have permission so prompt the user
             ActivityCompat.requestPermissions(
-                    activity,
+                    mActivity,
                     PERMISSIONS,
                     REQUEST_CODE
             );

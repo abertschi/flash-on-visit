@@ -31,24 +31,22 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private FeedbackService mFeedbackService;
     private boolean mServiceIsBound;
-    private SharedPreferences prefs;
-
-    private List<RemoteMessage> queuedRequests = new LinkedList<>();
+    private SharedPreferences mPrefs;
+    private List<RemoteMessage> mQueuedRequests = new LinkedList<>();
 
     @Override
     public void onCreate() {
         super.onCreate();
-        prefs = PreferenceManager.getDefaultSharedPreferences(MyFirebaseMessagingService.this);
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(MyFirebaseMessagingService.this);
         if (isAllowedToRun()) {
-            System.out.println("BINDING SERVICE");
-            FirebaseMessaging.getInstance().subscribeToTopic(prefs.getString(App.PREFS_CHANNEL, App.DEFAULT_CHANNEL));
+            FirebaseMessaging.getInstance().subscribeToTopic(mPrefs.getString(App.PREFS_CHANNEL, App.DEFAULT_CHANNEL));
             doBindService();
         }
     }
 
     private boolean isAllowedToRun() {
-        return prefs.getBoolean(App.PREFS_START_ON_BOOT, false) ||
-                (prefs.getBoolean(App.PREFS_ENABLED, false && MainActivity.get() != null));
+        return mPrefs.getBoolean(App.PREFS_START_ON_BOOT, false) ||
+                (mPrefs.getBoolean(App.PREFS_ENABLED, false && MainActivity.get() != null));
 
     }
 
@@ -84,10 +82,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             return;
         }
         Log.d(TAG, "From: " + remoteMessage.getFrom());
-
         if (mFeedbackService == null) {
             Log.e(TAG, "Can not do feedback because mFeedbackService is null!. Queuing requests ...");
-            queuedRequests.add(remoteMessage);
+            mQueuedRequests.add(remoteMessage);
             return;
         } else {
             processMessage(remoteMessage);
@@ -99,7 +96,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             mFeedbackService = ((FeedbackService.LocalBinder) service).getService();
             MainActivity.initFeedbackServices(MyFirebaseMessagingService.this, mFeedbackService);
 
-            Iterator<RemoteMessage> iterator = queuedRequests.iterator();
+            Iterator<RemoteMessage> iterator = mQueuedRequests.iterator();
             while (iterator.hasNext()) {
                 RemoteMessage m = iterator.next();
                 processMessage(m);
@@ -108,7 +105,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         public void onServiceDisconnected(ComponentName className) {
-            System.out.println("onServiceDisconnected");
             mFeedbackService = null;
         }
     };

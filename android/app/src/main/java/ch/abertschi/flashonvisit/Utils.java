@@ -23,15 +23,12 @@ public class Utils {
 
     private static final int DEFAULT_ANIMATION_DURATION = 100;
 
+    private Utils() {
+    }
+
     public static String colorTextInHtml(String text, int color) {
         String hexColor = String.format("#%06X", (0xFFFFFF & color));
         return String.format("<font color=\"%s\">%s</font>", hexColor, text);
-    }
-
-    public static int getThemeColorById(final Context context, int id) {
-        final TypedValue value = new TypedValue();
-        context.getTheme().resolveAttribute(id, value, true);
-        return value.data;
     }
 
     public static void checkIfRooted(final Argument<Boolean> callable, final Context c) {
@@ -52,17 +49,16 @@ public class Utils {
     }
 
     public static void showView(final View view, int delay, int duration) {
-        System.out.println("show view: " + view.toString() + " with delay " + delay);
         if (view.getVisibility() == View.VISIBLE) {
             return;
         }
 
-        final ObjectAnimator fadeIn = ObjectAnimator.ofFloat(view, "alpha", 0f, 1f);
-        fadeIn.setInterpolator(new DecelerateInterpolator(0.5f));
-        fadeIn.setStartDelay(delay);
-        fadeIn.setDuration(duration);
+        final ObjectAnimator fade = ObjectAnimator.ofFloat(view, "alpha", 0f, 1f);
+        fade.setInterpolator(new DecelerateInterpolator(0.5f));
+        fade.setStartDelay(delay);
+        fade.setDuration(duration);
 
-        fadeIn.addListener(new Animator.AnimatorListener() {
+        fade.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
                 view.setVisibility(View.VISIBLE);
@@ -80,7 +76,7 @@ public class Utils {
             public void onAnimationRepeat(Animator animation) {
             }
         });
-        fadeIn.start();
+        fade.start();
     }
 
     public static void hideView(final View view, int delay) {
@@ -92,13 +88,11 @@ public class Utils {
             return;
         }
 
-        System.out.println("hide view: " + view.toString() + " with delay " + delay);
-        final ObjectAnimator fadeIn = ObjectAnimator.ofFloat(view, "alpha", 1f, 0f);
-        fadeIn.setInterpolator(new DecelerateInterpolator(0.5f));
-        fadeIn.setStartDelay(delay);
-        fadeIn.setDuration(duration);
-        fadeIn.start();
-        fadeIn.addListener(new Animator.AnimatorListener() {
+        final ObjectAnimator fade = ObjectAnimator.ofFloat(view, "alpha", 1f, 0f);
+        fade.setInterpolator(new DecelerateInterpolator(0.5f));
+        fade.setStartDelay(delay);
+        fade.setDuration(duration);
+        fade.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
             }
@@ -116,6 +110,7 @@ public class Utils {
             public void onAnimationRepeat(Animator animation) {
             }
         });
+        fade.start();
     }
 
     public interface Argument<T> {
