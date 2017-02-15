@@ -27,9 +27,10 @@ app.get('/channels/:channel', (req, res) => {
     if (ip.lastIndexOf(':') > -1) {
         ip = ip.substring(ip.lastIndexOf(':') + 1, ip.length);
     }
-    let host = req.headers.host;
+    let host = req.get('host');
+    let origin = req.get('origin');
 
-    log('New notify request in %s on %s by %s', req.params.channel, host, ip);
+    log('New notify request in %s on %s by %s', req.params.channel, origin, ip);
 
     if (!req.params.channel) {
         res.status(500).send({
@@ -42,7 +43,8 @@ app.get('/channels/:channel', (req, res) => {
     let payload = {
         channel: req.params.channel,
         ip: ip,
-        host: host
+        host: host,
+        origin: origin
     };
 
     // websocket new event
