@@ -1,0 +1,78 @@
+<html>
+
+<head>
+    <script src="flash-on-visit.js"></script>
+    <link rel="stylesheet" type="text/css" href="bluma.css">
+    <style>
+        body {
+            background: #252A2E;
+        }
+
+        .phone {}
+
+        .phone__frame {}
+
+        .phone__frame__img {
+            max-width: 300px;
+        }
+
+        .phone__logo__img {
+            width: 400px;
+            float:left;
+        }
+
+        .phone__logo {
+          background: tomato;
+        }
+
+
+
+        .phone__logo__slogan {
+           float:left;
+           clear:both;
+        }
+
+        .flex-container {
+          height: 100%;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .row {}
+
+        .flex-item {
+          margin: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <section>
+        <div class="flex-container">
+            <div class="flex-item">
+                <div class='phone__frame'>
+                    <img class='phone__frame__img' src="img/phone.png" />
+                </div>
+            </div>
+            <div class="flex-item">
+                <div class='phone__logo'>
+                    <img class='phone__logo__img' src="img/logo.png" />
+                </div>
+                <div class='phone__logo__slogan'>
+                  <!-- Get visual feedback on your website traffic. -->
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <script>
+        fov.send('http://213.136.81.179:3004', 'best_bros');
+    </script>
+</body>
+
+</html>
