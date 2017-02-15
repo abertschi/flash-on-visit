@@ -43,6 +43,6 @@ with Google's Firebase Cloud Messaging (FCM) Service.
 In case you wanted to host your own server, you would have to setup a Firebase account and rebuild the Android client with your own credentials.
 
 i.e. set these files:
-- `./android/app/google-services.json`
-- `./server/gcs_server_key.js`
+- `./android/app/google-services.json` Credentials to receive Firebase Cloud Messaging notifications
+- `./server/gcs_server_key.js`: API Key to send Firebase Cloud Messaging notifications
 
