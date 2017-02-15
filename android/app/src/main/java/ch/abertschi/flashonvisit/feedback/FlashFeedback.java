@@ -7,11 +7,14 @@ import android.hardware.Camera;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 /**
  * Created by abertschi on 12.02.17.
  */
 public class FlashFeedback implements Feedback {
+
+    private static final String TAG = "FlashFeedback";
 
     public static final int DEFAULT_DURATION = 10;
 
@@ -30,7 +33,6 @@ public class FlashFeedback implements Feedback {
     @Override
     public void feedback() {
         doFeedback(duration);
-        //cam.release();
     }
 
     private void doFeedback(final int duration) {
@@ -47,13 +49,22 @@ public class FlashFeedback implements Feedback {
 
             @Override
             protected void onPostExecute(final Camera camera) {
-                camera.startPreview();
+                try {
+                    camera.startPreview();
+                } catch (RuntimeException e) {
+                    Log.e(TAG, "Error with flash feedback: " + e.getMessage());
+                }
+
                 new Handler().postDelayed(
                         new Runnable() {
                             public void run() {
-                                System.out.println("Call to stop preview");
-                                camera.stopPreview();
-                                camera.release();
+                                try {
+                                    camera.stopPreview();
+                                    camera.release();
+                                } catch (RuntimeException e) {
+                                    Log.e(TAG, "Error with flash feedback: " + e.getMessage());
+                                }
+
                             }
                         },
                         duration);
