@@ -27,7 +27,9 @@ app.get('/channels/:channel', (req, res) => {
     if (ip.lastIndexOf(':') > -1) {
         ip = ip.substring(ip.lastIndexOf(':') + 1, ip.length);
     }
-    log('New flash request in %s by %s', req.params.channel, ip);
+    let host = req.headers.host;
+
+    log('New notify request in %s on %s by %s', req.params.channel, host, ip);
 
     if (!req.params.channel) {
         res.status(500).send({
@@ -39,7 +41,8 @@ app.get('/channels/:channel', (req, res) => {
 
     let payload = {
         channel: req.params.channel,
-        ip: ip
+        ip: ip,
+        host: host
     };
 
     // websocket new event
@@ -54,12 +57,18 @@ app.get('/channels/:channel', (req, res) => {
         .end(response => {
             if (response.error) {
                 res.status(500).send({
+                    status: 500,
                     error: 'GCS: Invalid client registration token',
-                    details: response.body
+                    message: response.body,
+                    channel: payload.channel
                 });
                 log('Error: Invalid client registration token');
             } else {
-                res.send(JSON.stringify(payload));
+                res.send({
+                  status: 200,
+                  message: 'Clients notified',
+                  channel: payload.channel
+                });
             }
         });
 });
