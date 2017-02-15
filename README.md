@@ -13,6 +13,8 @@ This app is in early development :feet:
   <img src='.github/phone_showcase.png' />
 </p>
 
+Download the App from Google Play Store.
+
 ## MacOS client
 
 ## Integrate on your website
