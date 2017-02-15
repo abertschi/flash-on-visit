@@ -19,6 +19,12 @@ Download the App from Google Play Store.
 The MacOS client is a Node.js app.  
 Check out [./client/README.md](client/README.md) for installation instructions.
 
+### Credits
+Thanks to these amazing people
+- 
+-
+-
+
 ## Integrate on your website
 Perform an HTTP GET request on `http://213.136.81.179:3004/channels/<channel>` where `<channel>` is an identifier for your website. The most straigth forward approach to do that is to include the following script tag into the head of your website.
 
@@ -46,3 +52,9 @@ i.e. set these files:
 - `./android/app/google-services.json` Credentials to receive Firebase Cloud Messaging notifications
 - `./server/gcs_server_key.js`: API Key to send Firebase Cloud Messaging notifications
 
+## Contributing
+
+Help is always welcome :yellow_heart:. Contribute to the project by forking and submitting a pull request.
+
+## Contact
+[![twitter: @andrinbertschi]( https://img.shields.io/badge/twitter-andrinbertschi-yellow.svg?style=flat-square)](http://twitter.com/andrinbertschi)
