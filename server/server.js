@@ -30,7 +30,7 @@ app.get('/channels/:channel', (req, res) => {
     let host = req.get('host');
     let origin = req.get('origin');
 
-    log('New notify request in %s on %s by %s', req.params.channel, origin, ip);
+    log('New notify request in %s on %s by %s', req.params.channel, origin ? origin : '-', ip);
 
     if (!req.params.channel) {
         res.status(500).send({
