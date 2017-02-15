@@ -13,14 +13,13 @@ import ch.abertschi.flashonvisit.R;
 
 /**
  * LED feedback service
- * <p/>
+ * <p>
  * Created by abertschi on 11.02.17
  */
 public class LedFeedback implements Feedback {
 
     public static final int LED_COLOR_DEFAULT = 0xffcc0000;
     public static final int DEFAULT_DURATION = 100;
-
     private static final int LED_NOTIFICATION_ID = 1;
 
     private int ledColor = LED_COLOR_DEFAULT;
@@ -28,7 +27,7 @@ public class LedFeedback implements Feedback {
     private Integer tempDuration;
     private LEDManager ledManager;
     private Context context;
-    private boolean kernelTrigger = false;
+    private boolean kernelTrigger;
 
     public LedFeedback(Context context) {
         ledManager = new LEDManager(context);
@@ -57,23 +56,20 @@ public class LedFeedback implements Feedback {
             ledManager.ApplyBrightness(10);
             ledManager.Apply();
             new Handler(Looper.getMainLooper()).postDelayed(
-                    new Runnable() {
-                        public void run() {
-                            ledManager.setChoiseToOff();
-                            ledManager.ApplyBrightness(10);
-                            ledManager.Apply();
-                        }
+                    () -> {
+                        ledManager.setChoiseToOff();
+                        ledManager.ApplyBrightness(10);
+                        ledManager.Apply();
                     },
                     feedbackDuration);
         } else {
             NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);
-            mBuilder.setSmallIcon(R.mipmap.ic_launcher);
+            mBuilder.setSmallIcon(R.mipmap.flash_on_visit_logo);
             mBuilder.setContentTitle("Flash On Visit");
             mBuilder.setPriority(Notification.PRIORITY_HIGH);
 
             Notification notif = mBuilder.build();
-
             notif.ledARGB = ledColor;
             notif.flags = Notification.FLAG_SHOW_LIGHTS;
             notif.ledOnMS = feedbackDuration;
@@ -81,11 +77,9 @@ public class LedFeedback implements Feedback {
             nm.notify(LED_NOTIFICATION_ID, notif);
 
             new Handler(Looper.getMainLooper()).postDelayed(
-                    new Runnable() {
-                        public void run() {
-                            NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                            nm.cancel(LED_NOTIFICATION_ID);
-                        }
+                    () -> {
+                        NotificationManager nm1 = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                        nm1.cancel(LED_NOTIFICATION_ID);
                     },
                     delayUntilHide);
         }

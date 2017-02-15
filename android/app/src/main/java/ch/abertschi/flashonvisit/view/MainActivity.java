@@ -58,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "flashonvisit";
 
-    private static final long RECONNECT_FREQUENCY = 5000;
     private static final int DEFAULT_ANIMATION_DURATION = 100;
     private static final int HISTORY_COLLAPSED_HEIGHT_DP = 150;
 
@@ -66,31 +65,31 @@ public class MainActivity extends AppCompatActivity {
     private static final int LED_COLOR_GREEN = 0xff669900;
     private static final int LED_COLOR_RED = App.LED_COLOR_RED;
 
-    private SharedPreferences prefs;
+    private SharedPreferences mPrefs;
 
-    private boolean isAdvancedLedOptionsCollapsed = true;
-    private boolean isHistoryCollapsed = true;
-    private RecyclerView historyRecycleView;
-    private ViewGroup rootViewContainer;
-    private EditText serverTextEdit;
-    private EditText channelTextEdit;
-    private Switch ledKernelHackSwitch;
+    private boolean mIsAdvancedLedOptionsCollapsed = true;
+    private boolean mIsHistoryCollapsed = true;
+    private RecyclerView mHistoryRecycleView;
+    private ViewGroup mRootViewContainer;
+    private EditText mServerTextEdit;
+    private EditText mChannelTextEdit;
+    private Switch mLedKernelHackSwitch;
 
-    private TextView ledTextColor;
-    private ImageView indicatorDisconnected;
-    private ImageView indicatorConnected;
+    private TextView mLedTextColor;
+    private ImageView mIndicatorDisconnected;
+    private ImageView mIndicatorConnected;
 
-    private AVLoadingIndicatorView indicatorConnecting;
-    private HistoryAdapter historyAdapter;
+    private AVLoadingIndicatorView mIndicatorConnecting;
+    private HistoryAdapter mHistoryAdapter;
 
     private FeedbackService mFeedbackService;
     private boolean mServiceIsBound;
 
-    boolean isFlashEnabled;
-    boolean isLedEnabled;
-    boolean isVibraEnabled;
-    private boolean isEnabledOnBoot;
-    private boolean isEnabled = false;
+    boolean mIsFlashEnabled;
+    boolean mIsLedEnabled;
+    boolean mIsVibraEnabled;
+    private boolean mIsEnabledOnBoot;
+    private boolean mIsEnabled;
 
     private static MainActivity instance;
 
@@ -102,18 +101,19 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         instance = this;
+
+        super.onCreate(savedInstanceState);
         mUiHandler = new MessageHandler(Looper.getMainLooper());
-
         setContentView(R.layout.activity_main);
-        this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        this.isEnabled = this.prefs.getBoolean(App.PREFS_ENABLED, Boolean.FALSE);
-        this.isEnabledOnBoot = this.prefs.getBoolean(App.PREFS_START_ON_BOOT, false);
 
-        this.isVibraEnabled = this.prefs.getBoolean(App.PREFS_FEEDBACK_VIBRA_ENABLED, false);
-        this.isLedEnabled = this.prefs.getBoolean(App.PREFS_FEEDBACK_LED_ENABLED, false);
-        this.isFlashEnabled = this.prefs.getBoolean(App.PREFS_FEEDBACK_FLASH_ENABLED, false);
+        this.mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        this.mIsEnabled = this.mPrefs.getBoolean(App.PREFS_ENABLED, Boolean.FALSE);
+        this.mIsEnabledOnBoot = this.mPrefs.getBoolean(App.PREFS_START_ON_BOOT, false);
+
+        this.mIsVibraEnabled = this.mPrefs.getBoolean(App.PREFS_FEEDBACK_VIBRA_ENABLED, false);
+        this.mIsLedEnabled = this.mPrefs.getBoolean(App.PREFS_FEEDBACK_LED_ENABLED, false);
+        this.mIsFlashEnabled = this.mPrefs.getBoolean(App.PREFS_FEEDBACK_FLASH_ENABLED, false);
 
         List<HistoryEntry> historyModel = new ArrayList<>();
         initializeViews(historyModel);
@@ -121,13 +121,12 @@ public class MainActivity extends AppCompatActivity {
         doBindService();
         checkIfRootedAndApplySettings();
 
-        if (isEnabled) {
+        if (mIsEnabled) {
             subscribeToService();
         } else {
             showAnimationDisconnectedIfNotVisible();
         }
         checkIfServerAddressIsValid(getServerName());
-
     }
 
     private void subscribeToService() {
@@ -135,13 +134,13 @@ public class MainActivity extends AppCompatActivity {
 
         String channel = getChannelName(); // TODO validate better
         if (!channel.isEmpty()) {
-            isEnabled = true;
+            mIsEnabled = true;
             FirebaseMessaging.getInstance().subscribeToTopic(getChannelName());
         }
     }
 
     private void unsubscribeFromService() {
-        isEnabled = false;
+        mIsEnabled = false;
         String channel = getChannelName(); // TODO validate better
         if (!channel.isEmpty()) {
             FirebaseMessaging.getInstance().unsubscribeFromTopic(getChannelName());
@@ -158,13 +157,11 @@ public class MainActivity extends AppCompatActivity {
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             mFeedbackService = ((FeedbackService.LocalBinder) service).getService();
-            System.out.println("onServiceConnected");
             initFeedbackServices(MainActivity.this, mFeedbackService);
             //showAnimationConnectedIfNotVisible();
         }
 
         public void onServiceDisconnected(ComponentName className) {
-            System.out.println("onServiceDisconnected");
             mFeedbackService = null;
             //showAnimationDisconnectedIfNotVisible();
         }
@@ -172,8 +169,10 @@ public class MainActivity extends AppCompatActivity {
 
     public static void initFeedbackServices(Context c, FeedbackService service) {
         SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(c);
+
         service.setLedKernelHack(p.getBoolean(App.PREFS_LED_KERNEL_HACK_ENABLED, false));
         service.setLedColor(p.getInt(App.PREFS_LED_COLOR, App.LED_COLOR_DEFAULT));
+
         if (p.getBoolean(App.PREFS_FEEDBACK_LED_ENABLED, false)) {
             service.addFeedbackService(FeedbackService.TYPE.LED);
         }
@@ -185,13 +184,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public MessageHandler getUiHandler() {
+        return mUiHandler;
+    }
+
     private void doBindService() {
         //showAnimationConnectingIfNotVisible();
         Intent intent = new Intent(this, FeedbackService.class);
         startService(intent);
         this.bindService(intent, mConnection, Context.BIND_ABOVE_CLIENT);
         mServiceIsBound = true;
-        System.out.println("doBindService");
     }
 
     private void doUnbindService() {
@@ -201,17 +203,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public MessageHandler getUiHandler() {
-        return mUiHandler;
-    }
-
     private void initializeViews(List<HistoryEntry> historyModel) {
-        rootViewContainer = (ViewGroup) this.findViewById(R.id.container);
+        mRootViewContainer = (ViewGroup) this.findViewById(R.id.container);
         initHistoryRecycleView(historyModel);
 
-        indicatorConnected = (ImageView) this.findViewById(R.id.connection_logo_connected);
-        indicatorDisconnected = (ImageView) this.findViewById(R.id.connection_logo_disconnected);
-        indicatorConnecting = (AVLoadingIndicatorView) this.findViewById(R.id.connection_logo_loading);
+        mIndicatorConnected = (ImageView) this.findViewById(R.id.connection_logo_connected);
+        mIndicatorDisconnected = (ImageView) this.findViewById(R.id.connection_logo_disconnected);
+        mIndicatorConnecting = (AVLoadingIndicatorView) this.findViewById(R.id.connection_logo_loading);
 
         initPowerView();
         initStartOnBootView();
@@ -231,15 +229,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkIfRootedAndApplySettings() {
         final View kernelHackView = findViewById(R.id.led_root_options);
-        if (prefs.contains(App.PREFS_IS_ROOTED)) {
-            kernelHackView.setVisibility(prefs.getBoolean(App.PREFS_IS_ROOTED, true) ? View.VISIBLE : View.GONE);
+        if (mPrefs.contains(App.PREFS_IS_ROOTED)) {
+            kernelHackView.setVisibility(mPrefs.getBoolean(App.PREFS_IS_ROOTED, true) ? View.VISIBLE : View.GONE);
         }
-        Utils.checkIfRooted(new Utils.Argument<Boolean>() {
-            @Override
-            public void apply(Boolean arg) {
-                kernelHackView.setVisibility(arg ? View.VISIBLE : View.GONE);
-                prefs.edit().putBoolean(App.PREFS_IS_ROOTED, arg).commit();
-            }
+        Utils.checkIfRooted(isRooted -> {
+            kernelHackView.setVisibility(isRooted ? View.VISIBLE : View.GONE);
+            mPrefs.edit().putBoolean(App.PREFS_IS_ROOTED, isRooted).commit();
         }, this);
     }
 
@@ -255,100 +250,98 @@ public class MainActivity extends AppCompatActivity {
         final View selectionIndicatorFlash = findViewById(R.id.feedback_channel_selection_flash);
         final int SELECTION_INDICATOR_DURATION = 300;
 
-        selectionIndicatorLed.setVisibility(isLedEnabled ? View.VISIBLE : View.GONE);
-        selectionIndicatorVibra.setVisibility(isVibraEnabled ? View.VISIBLE : View.GONE);
-        selectionIndicatorFlash.setVisibility(isFlashEnabled ? View.VISIBLE : View.GONE);
+        selectionIndicatorLed.setVisibility(mIsLedEnabled ? View.VISIBLE : View.GONE);
+        selectionIndicatorVibra.setVisibility(mIsVibraEnabled ? View.VISIBLE : View.GONE);
+        selectionIndicatorFlash.setVisibility(mIsFlashEnabled ? View.VISIBLE : View.GONE);
 
         flashButton.getBackground()
-                .setColorFilter(isFlashEnabled
+                .setColorFilter(mIsFlashEnabled
                         ? colorSelected : colorUnselected, PorterDuff.Mode.SRC_OVER);
         ledButton.getBackground()
-                .setColorFilter(isLedEnabled
+                .setColorFilter(mIsLedEnabled
                         ? colorSelected : colorUnselected, PorterDuff.Mode.SRC_OVER);
         vibraButton.getBackground()
-                .setColorFilter(isVibraEnabled
+                .setColorFilter(mIsVibraEnabled
                         ? colorSelected : colorUnselected, PorterDuff.Mode.SRC_OVER);
 
         showFeedbackValidationMessageIfRequired();
 
-        flashButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int color;
-                if (isFlashEnabled) {
-                    Utils.hideView(selectionIndicatorFlash, 0, SELECTION_INDICATOR_DURATION);
-                    mFeedbackService.removeFeedbackService(FeedbackService.TYPE.FLASH);
-                    color = colorUnselected;
-                    addHistoryEntry("Disable <b>FLASH</b> feedback");
-                } else {
-                    RequestUserPermission p = new RequestUserPermission(MainActivity.this);
-                    if (p.isAllowedToUseCamera()) {
-                        Utils.showView(selectionIndicatorFlash, 0, SELECTION_INDICATOR_DURATION);
-                        mFeedbackService.addFeedbackService(FeedbackService.TYPE.FLASH);
-                        color = colorSelected;
-                        addHistoryEntry("Enable <b>FLASH</b> feedback");
-                        mFeedbackService.doExampleFeedback(FeedbackService.TYPE.FLASH);
-                    } else {
-                        p.verifyAllPermissions();
-                        return;
-                    }
-                }
-                flashButton.getBackground().setColorFilter(color, PorterDuff.Mode.SRC_OVER);
-                isFlashEnabled = !isFlashEnabled;
-                prefs.edit().putBoolean(App.PREFS_FEEDBACK_FLASH_ENABLED, isFlashEnabled).commit();
-                showFeedbackValidationMessageIfRequired();
-            }
-        });
-        ledButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int color;
-                if (isLedEnabled) {
-                    Utils.hideView(selectionIndicatorLed, 0, SELECTION_INDICATOR_DURATION);
-                    mFeedbackService.removeFeedbackService(FeedbackService.TYPE.LED);
-                    color = colorUnselected;
-                    addHistoryEntry("Disable <b>LED</b> feedback");
-                } else {
-                    Utils.showView(selectionIndicatorLed, 0, SELECTION_INDICATOR_DURATION);
-                    mFeedbackService.addFeedbackService(FeedbackService.TYPE.LED);
+        flashButton.setOnClickListener(v -> {
+            int color;
+            if (mIsFlashEnabled) {
+                mFeedbackService.removeFeedbackService(FeedbackService.TYPE.FLASH);
+
+                Utils.hideView(selectionIndicatorFlash, 0, SELECTION_INDICATOR_DURATION);
+                color = colorUnselected;
+                addHistoryEntry("Disable <b>FLASH</b> feedback");
+            } else {
+                RequestUserPermission p = new RequestUserPermission(MainActivity.this);
+                if (p.isAllowedToUseCamera()) {
+                    mFeedbackService.addFeedbackService(FeedbackService.TYPE.FLASH);
+                    mFeedbackService.doExampleFeedback(FeedbackService.TYPE.FLASH);
+
+                    Utils.showView(selectionIndicatorFlash, 0, SELECTION_INDICATOR_DURATION);
                     color = colorSelected;
-                    mFeedbackService.doExampleFeedback(FeedbackService.TYPE.LED);
-                    addHistoryEntry("Enable <b>LED</b> feedback");
-                }
-                ledButton.getBackground().setColorFilter(color, PorterDuff.Mode.SRC_OVER);
-                isLedEnabled = !isLedEnabled;
-                prefs.edit().putBoolean(App.PREFS_FEEDBACK_LED_ENABLED, isLedEnabled).commit();
-                showFeedbackValidationMessageIfRequired();
-            }
-        });
-        vibraButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int color;
-                if (isVibraEnabled) {
-                    Utils.hideView(selectionIndicatorVibra, 0, SELECTION_INDICATOR_DURATION);
-                    mFeedbackService.removeFeedbackService(FeedbackService.TYPE.VIBRA);
-                    color = colorUnselected;
-                    addHistoryEntry("Disable <b>VIBRA</b> feedback");
+                    addHistoryEntry("Enable <b>FLASH</b> feedback");
                 } else {
-                    Utils.showView(selectionIndicatorVibra, 0, SELECTION_INDICATOR_DURATION);
-                    color = colorSelected;
-                    mFeedbackService.addFeedbackService(FeedbackService.TYPE.VIBRA);
-                    mFeedbackService.doExampleFeedback(FeedbackService.TYPE.VIBRA);
-                    addHistoryEntry("Enable <b>VIBRA</b> feedback");
+                    p.verifyAllPermissions();
+                    return;
                 }
-                vibraButton.getBackground().setColorFilter(color, PorterDuff.Mode.SRC_OVER);
-                isVibraEnabled = !isVibraEnabled;
-                prefs.edit().putBoolean(App.PREFS_FEEDBACK_VIBRA_ENABLED, isVibraEnabled).commit();
-                showFeedbackValidationMessageIfRequired();
             }
+            flashButton.getBackground().setColorFilter(color, PorterDuff.Mode.SRC_OVER);
+            mIsFlashEnabled = !mIsFlashEnabled;
+            mPrefs.edit().putBoolean(App.PREFS_FEEDBACK_FLASH_ENABLED, mIsFlashEnabled).commit();
+            showFeedbackValidationMessageIfRequired();
+        });
+        ledButton.setOnClickListener(v -> {
+            int color;
+            if (mIsLedEnabled) {
+                mFeedbackService.removeFeedbackService(FeedbackService.TYPE.LED);
+
+                Utils.hideView(selectionIndicatorLed, 0, SELECTION_INDICATOR_DURATION);
+                color = colorUnselected;
+                addHistoryEntry("Disable <b>LED</b> feedback");
+            } else {
+                mFeedbackService.addFeedbackService(FeedbackService.TYPE.LED);
+                mFeedbackService.doExampleFeedback(FeedbackService.TYPE.LED);
+
+                Utils.showView(selectionIndicatorLed, 0, SELECTION_INDICATOR_DURATION);
+                color = colorSelected;
+                addHistoryEntry("Enable <b>LED</b> feedback");
+            }
+            ledButton.getBackground().setColorFilter(color, PorterDuff.Mode.SRC_OVER);
+            mIsLedEnabled = !mIsLedEnabled;
+            mPrefs.edit().putBoolean(App.PREFS_FEEDBACK_LED_ENABLED, mIsLedEnabled).commit();
+            showFeedbackValidationMessageIfRequired();
+        });
+        vibraButton.setOnClickListener(v -> {
+            int color;
+            if (mIsVibraEnabled) {
+                mFeedbackService.removeFeedbackService(FeedbackService.TYPE.VIBRA);
+
+                Utils.hideView(selectionIndicatorVibra, 0, SELECTION_INDICATOR_DURATION);
+                color = colorUnselected;
+                addHistoryEntry("Disable <b>VIBRA</b> feedback");
+            } else {
+                mFeedbackService.addFeedbackService(FeedbackService.TYPE.VIBRA);
+                mFeedbackService.doExampleFeedback(FeedbackService.TYPE.VIBRA);
+
+                Utils.showView(selectionIndicatorVibra, 0, SELECTION_INDICATOR_DURATION);
+                color = colorSelected;
+                addHistoryEntry("Enable <b>VIBRA</b> feedback");
+            }
+            vibraButton.getBackground().setColorFilter(color, PorterDuff.Mode.SRC_OVER);
+            mIsVibraEnabled = !mIsVibraEnabled;
+            mPrefs.edit().putBoolean(App.PREFS_FEEDBACK_VIBRA_ENABLED, mIsVibraEnabled).commit();
+            showFeedbackValidationMessageIfRequired();
         });
     }
 
     private void showFeedbackValidationMessageIfRequired() {
         final View view = findViewById(R.id.feedback_channel_validation);
         final View feedbackSettingsContainer = findViewById(R.id.settings_container);
-        if (!isFlashEnabled && !isLedEnabled && !isVibraEnabled) {
+
+        if (!mIsFlashEnabled && !mIsLedEnabled && !mIsVibraEnabled) {
             Utils.hideView(feedbackSettingsContainer, 0, 200);
             Utils.showView(view, 800, 200);
         } else {
@@ -358,180 +351,158 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addHistoryEntry(String content) {
-        historyAdapter.addAtFront(new HistoryEntry(content));
+        mHistoryAdapter.addAtFront(new HistoryEntry(content));
     }
 
     private void initHistoryRecycleView(List<HistoryEntry> model) {
-        this.historyRecycleView = (RecyclerView) this.findViewById(R.id.history_recycleview);
-        historyRecycleView.setNestedScrollingEnabled(false);
+        this.mHistoryRecycleView = (RecyclerView) this.findViewById(R.id.history_recycleview);
+        mHistoryRecycleView.setNestedScrollingEnabled(false);
 
-        historyAdapter = new HistoryAdapter(model, this, historyRecycleView);
-        historyRecycleView.setAdapter(historyAdapter);
-        historyRecycleView.addItemDecoration(new HistoryAdapter.HistoryItemDecorator(this, historyAdapter));
+        mHistoryAdapter = new HistoryAdapter(model, this, mHistoryRecycleView);
+        mHistoryRecycleView.setAdapter(mHistoryAdapter);
+        mHistoryRecycleView.addItemDecoration(new HistoryAdapter.HistoryItemDecorator(this, mHistoryAdapter));
 
         LinearLayoutManager historyLayout = new LinearLayoutManager(this);
-        historyRecycleView.setLayoutManager(historyLayout);
+        mHistoryRecycleView.setLayoutManager(historyLayout);
 
         this.findViewById(R.id.clearHistoryButton)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        historyAdapter.clearModel();
-                        addHistoryEntry("Welcome to flash-on-visit <b>:D</b>");
-                    }
+                .setOnClickListener(v -> {
+                    mHistoryAdapter.clearModel();
+                    addHistoryEntry("Welcome to flash-on-visit <b>:D</b>");
                 });
     }
 
     private void initAboutView() {
         final TextView dots = (TextView) this.findViewById(R.id.dots);
-        dots.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MaterialDialog dialog = new MaterialDialog.Builder(MainActivity.this)
-                        .title("About")
-                        .content("This app is made with <3 by abertschi\n"
-                                + "and is completely free as in free speech.\n\nFeedback and Code at \n"
-                                + "https://github.com/abertschi/flash-on-visit")
-
-                        .positiveText("ROCK ON")
-                        .show();
-            }
+        dots.setOnClickListener(v -> {
+            new MaterialDialog.Builder(MainActivity.this)
+                    .title("About")
+                    .content("This app is made with <3 by abertschi\n"
+                            + "and is completely free as in free speech.\n\nFeedback and Code at \n"
+                            + "https://github.com/abertschi/flash-on-visit")
+                    .positiveText("ROCK ON")
+                    .show();
         });
     }
 
     private void checkIfServerAddressIsValid(String server) {
-        new CheckServerAvailabilityTask(new Utils.Argument<Boolean>() {
-            @Override
-            public void apply(Boolean isValid) {
-                TextView txt = (TextView) findViewById(R.id.address_validation);
-                if (isValid) {
-                    Utils.hideView(txt, 0);
-                } else {
-                    Utils.showView(txt, 0);
-                }
+        new CheckServerAvailabilityTask(isValid -> {
+            TextView txt = (TextView) findViewById(R.id.address_validation);
+            if (isValid) {
+                Utils.hideView(txt, 0);
+            } else {
+                Utils.showView(txt, 0);
             }
         }).execute(server);
     }
 
     private void initStartOnBootView() {
         final Switch view = (Switch) findViewById(R.id.start_on_boot_swtich);
-        this.isEnabledOnBoot = this.prefs.getBoolean(App.PREFS_START_ON_BOOT, false);
-        view.setChecked(isEnabledOnBoot);
+        this.mIsEnabledOnBoot = this.mPrefs.getBoolean(App.PREFS_START_ON_BOOT, false);
 
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isEnabledOnBoot = !isEnabledOnBoot;
-                prefs.edit().putBoolean(App.PREFS_START_ON_BOOT, isEnabledOnBoot).commit();
-            }
+        view.setChecked(mIsEnabledOnBoot);
+        view.setOnClickListener(v -> {
+            mIsEnabledOnBoot = !mIsEnabledOnBoot;
+            mPrefs.edit().putBoolean(App.PREFS_START_ON_BOOT, mIsEnabledOnBoot).commit();
         });
     }
 
     private void initPowerView() {
         final Button powerButton = (Button) findViewById(R.id.button);
-        powerButton.setText(this.isEnabled ? "STOP" : "START");
-        if (isEnabled) {
+        powerButton.setText(this.mIsEnabled ? "STOP" : "START");
+        if (mIsEnabled) {
             showAnimationConnectedIfNotVisible();
         } else {
             showAnimationDisconnectedIfNotVisible();
         }
 
-        powerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isEnabled) {
-                    isEnabled = false;
-                    powerButton.setText("START");
-                    unsubscribeFromService();
-                    showAnimationDisconnectedIfNotVisible();
-                } else {
-                    checkIfServerAddressIsValid(getServerName());
-                    boolean validInput = true;
-                    if (getChannelName().isEmpty()) {
-                        validInput = false;
-                        channelTextEdit.requestFocus();
-                        channelTextEdit.setSelection(0);
-                        YoYo.with(Techniques.Shake)
-                                .duration(700)
-                                .playOn(findViewById(R.id.channel_validation));
-                    }
-                    if (getServerName().isEmpty()) {
-                        validInput = false;
-                        serverTextEdit.requestFocus();
-                        serverTextEdit.setSelection(0);
-                        YoYo.with(Techniques.Shake)
-                                .duration(700)
-                                .playOn(findViewById(R.id.address_validation));
-                    }
-                    if (validInput) {
-                        isEnabled = true;
-                        powerButton.setText("STOP");
-                        subscribeToService();
-                        showAnimationConnectedIfNotVisible();
-                    }
+        powerButton.setOnClickListener(v -> {
+            if (mIsEnabled) {
+                mIsEnabled = false;
+                powerButton.setText("START");
+                unsubscribeFromService();
+                showAnimationDisconnectedIfNotVisible();
+            } else {
+                checkIfServerAddressIsValid(getServerName());
+                boolean validInput = true;
+                if (getChannelName().isEmpty()) {
+                    validInput = false;
+                    mChannelTextEdit.requestFocus();
+                    mChannelTextEdit.setSelection(0);
+                    YoYo.with(Techniques.Shake)
+                            .duration(700)
+                            .playOn(findViewById(R.id.channel_validation));
                 }
-                prefs.edit().putBoolean(App.PREFS_ENABLED, isEnabled).commit();
+                if (getServerName().isEmpty()) {
+                    validInput = false;
+                    mServerTextEdit.requestFocus();
+                    mServerTextEdit.setSelection(0);
+                    YoYo.with(Techniques.Shake)
+                            .duration(700)
+                            .playOn(findViewById(R.id.address_validation));
+                }
+                if (validInput) {
+                    mIsEnabled = true;
+                    powerButton.setText("STOP");
+                    subscribeToService();
+                    showAnimationConnectedIfNotVisible();
+                }
             }
+            mPrefs.edit().putBoolean(App.PREFS_ENABLED, mIsEnabled).commit();
         });
     }
 
     private void initLedKernelHackView() {
-        this.ledKernelHackSwitch = (Switch) this.findViewById(R.id.led_kernel_hack);
-        ledKernelHackSwitch.setChecked(prefs.getBoolean(App.PREFS_LED_KERNEL_HACK_ENABLED, false));
+        this.mLedKernelHackSwitch = (Switch) this.findViewById(R.id.led_kernel_hack);
+        mLedKernelHackSwitch.setChecked(mPrefs.getBoolean(App.PREFS_LED_KERNEL_HACK_ENABLED, false));
+        mLedKernelHackSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mPrefs.edit().putBoolean(App.PREFS_LED_KERNEL_HACK_ENABLED, isChecked).commit();
+            mFeedbackService.setLedKernelHack(isChecked);
 
-        ledKernelHackSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                prefs.edit().putBoolean(App.PREFS_LED_KERNEL_HACK_ENABLED, isChecked).commit();
-                mFeedbackService.setLedKernelHack(isChecked);
-                if (isChecked) {
-                    addHistoryEntry("Change LED mode to <b>hack</b>");
-                } else {
-                    addHistoryEntry("Change LED mode to <b>normal</b>");
-                }
+            if (isChecked) {
+                addHistoryEntry("Change LED mode to <b>hack</b>");
+            } else {
+                addHistoryEntry("Change LED mode to <b>normal</b>");
             }
         });
     }
 
     private void initHistoryCollapseButton() {
         final TextView historyCollapseButton = (TextView) this.findViewById(R.id.moreHistoryButton);
-        historyCollapseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                RelativeLayout container = (RelativeLayout) findViewById(R.id.history_recycleview_container);
-                RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) container.getLayoutParams();
-                if (isHistoryCollapsed) {
-                    historyCollapseButton.setText("LESS");
-                    isHistoryCollapsed = false;
-                    layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                } else {
-                    isHistoryCollapsed = true;
-                    historyCollapseButton.setText("MORE");
-                    int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                            HISTORY_COLLAPSED_HEIGHT_DP, getResources().getDisplayMetrics());
-                    layoutParams.height = height;
-                }
-                container.setLayoutParams(layoutParams);
+        historyCollapseButton.setOnClickListener(v -> {
+            RelativeLayout container = (RelativeLayout) findViewById(R.id.history_recycleview_container);
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) container.getLayoutParams();
+
+            if (mIsHistoryCollapsed) {
+                historyCollapseButton.setText("LESS");
+                mIsHistoryCollapsed = false;
+                layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            } else {
+                mIsHistoryCollapsed = true;
+                historyCollapseButton.setText("MORE");
+                int height = (int) TypedValue
+                        .applyDimension(TypedValue.COMPLEX_UNIT_DIP
+                                , HISTORY_COLLAPSED_HEIGHT_DP
+                                , getResources().getDisplayMetrics());
+                layoutParams.height = height;
             }
+            container.setLayoutParams(layoutParams);
         });
     }
 
     private void initLedOptionsCollapseButton() {
         final TextView button = (TextView) this.findViewById(R.id.button_show_advanced_led);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final View container = findViewById(R.id.advanced_options_led);
-                TextView textView = (TextView) findViewById(R.id.button_show_advanced_led);
-                if (isAdvancedLedOptionsCollapsed) {
-                    Utils.showView(container, 0, 50);
-                    textView.setText("BASIC");
-                    isAdvancedLedOptionsCollapsed = false;
-                } else {
-                    Utils.hideView(container, 0, 50);
-                    textView.setText("ADVANCED");
-                    isAdvancedLedOptionsCollapsed = true;
-                }
+        button.setOnClickListener(v -> {
+            final View container = findViewById(R.id.advanced_options_led);
+            TextView textView = (TextView) findViewById(R.id.button_show_advanced_led);
+            if (mIsAdvancedLedOptionsCollapsed) {
+                Utils.showView(container, 0, 50);
+                textView.setText("BASIC");
+                mIsAdvancedLedOptionsCollapsed = false;
+            } else {
+                Utils.hideView(container, 0, 50);
+                textView.setText("ADVANCED");
+                mIsAdvancedLedOptionsCollapsed = true;
             }
         });
     }
@@ -541,69 +512,56 @@ public class MainActivity extends AppCompatActivity {
         final View ledBlueButton = this.findViewById(R.id.led_blue);
         final View ledGreenButton = this.findViewById(R.id.led_green);
 
-        int storedColor = prefs.getInt(App.PREFS_LED_COLOR, App.LED_COLOR_DEFAULT);
-        ledTextColor = (TextView) findViewById(R.id.led_color_text);
-        ledTextColor.setTextColor(storedColor);
+        int storedColor = mPrefs.getInt(App.PREFS_LED_COLOR, App.LED_COLOR_DEFAULT);
+        mLedTextColor = (TextView) findViewById(R.id.led_color_text);
+        mLedTextColor.setTextColor(storedColor);
 
-        ledRedButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int color = LED_COLOR_RED;
-                ledTextColor.setTextColor(color);
-                prefs.edit().putInt(App.PREFS_LED_COLOR, color).commit();
-                addHistoryEntry(String.format("Change LED <b>%s</b>", Utils.colorTextInHtml("color", color)));
-                mFeedbackService.setLedColor(color);
-            }
+        ledRedButton.setOnClickListener(v -> {
+            int color = LED_COLOR_RED;
+            mFeedbackService.setLedColor(color);
+            mLedTextColor.setTextColor(color);
+            mPrefs.edit().putInt(App.PREFS_LED_COLOR, color).commit();
+            addHistoryEntry(String.format("Change LED <b>%s</b>", Utils.colorTextInHtml("color", color)));
         });
-        ledBlueButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int color = LED_COLOR_BLUE;
-                ledTextColor.setTextColor(color);
-                prefs.edit().putInt(App.PREFS_LED_COLOR, color).commit();
-                addHistoryEntry(String.format("Change LED <b>%s</b>", Utils.colorTextInHtml("color", color)));
-                mFeedbackService.setLedColor(color);
-            }
+
+        ledBlueButton.setOnClickListener(v -> {
+            int color = LED_COLOR_BLUE;
+            mFeedbackService.setLedColor(color);
+            mLedTextColor.setTextColor(color);
+            mPrefs.edit().putInt(App.PREFS_LED_COLOR, color).commit();
+            addHistoryEntry(String.format("Change LED <b>%s</b>", Utils.colorTextInHtml("color", color)));
         });
-        ledGreenButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int color = LED_COLOR_GREEN;
-                ledTextColor.setTextColor(color);
-                prefs.edit().putInt(App.PREFS_LED_COLOR, LED_COLOR_GREEN).commit();
-                addHistoryEntry(String.format("Change LED <b>%s</b>", Utils.colorTextInHtml("color", color)));
-                mFeedbackService.setLedColor(color);
-            }
+
+        ledGreenButton.setOnClickListener(v -> {
+            int color = LED_COLOR_GREEN;
+            mFeedbackService.setLedColor(color);
+            mLedTextColor.setTextColor(color);
+            mPrefs.edit().putInt(App.PREFS_LED_COLOR, LED_COLOR_GREEN).commit();
+            addHistoryEntry(String.format("Change LED <b>%s</b>", Utils.colorTextInHtml("color", color)));
         });
     }
 
     private void initLedTryOutView() {
         final View tryOutLedButton = this.findViewById(R.id.tryoutButton);
 
-        tryOutLedButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mFeedbackService.doExampleFeedback();
-                historyAdapter.addAtFront(new HistoryEntry("Try out LED"));
-                final ImageView view = (ImageView) findViewById(R.id.lightbulp);
-                view.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.mipmap.lightbulb_y2));
-                Handler handler = new Handler(Looper.getMainLooper());
-                final Runnable r = new Runnable() {
-                    @Override
-                    public void run() {
-                        view.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.mipmap.lightbulb));
-                    }
-                };
-                handler.postDelayed(r, 150);
-            }
+        tryOutLedButton.setOnClickListener(v -> {
+            mFeedbackService.doExampleFeedback();
+            mHistoryAdapter.addAtFront(new HistoryEntry("Example feedback"));
+
+            final ImageView view = (ImageView) findViewById(R.id.lightbulp);
+            view.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.mipmap.lightbulb_y2));
+            Handler handler = new Handler(Looper.getMainLooper());
+
+            final Runnable r = () -> view.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), R.mipmap.lightbulb));
+            handler.postDelayed(r, 150);
         });
     }
 
     private void initServerEditText() {
-        serverTextEdit = (EditText) this.findViewById(R.id.serveradress);
-        setServerName(prefs.getString(App.PREFS_SERVER, App.DEFAULT_SERVER_NAME));
+        mServerTextEdit = (EditText) this.findViewById(R.id.serveradress);
+        setServerName(mPrefs.getString(App.PREFS_SERVER, App.DEFAULT_SERVER_NAME));
 
-        serverTextEdit.addTextChangedListener(new TextWatcher() {
+        mServerTextEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
@@ -615,27 +573,29 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 checkIfServerAddressIsValid(s.toString());
-                prefs.edit().putString(App.PREFS_SERVER, s.toString()).commit();
+                mPrefs.edit().putString(App.PREFS_SERVER, s.toString()).commit();
             }
         });
     }
 
     private String getServerName() {
-        return serverTextEdit.getText().toString();
+        return mServerTextEdit.getText().toString();
     }
 
     private void setServerName(String name) {
-        serverTextEdit.setText(name);
+        mServerTextEdit.setText(name);
     }
 
     private void initChannelView() {
-        this.channelTextEdit = (EditText) this.findViewById(R.id.channel);
-        setChannelName(prefs.getString(App.PREFS_CHANNEL, App.DEFAULT_CHANNEL));
+        this.mChannelTextEdit = (EditText) this.findViewById(R.id.channel);
+        setChannelName(mPrefs.getString(App.PREFS_CHANNEL, App.DEFAULT_CHANNEL));
+
         if (getChannelName().isEmpty()) {
             TextView view = (TextView) findViewById(R.id.channel_validation);
             Utils.showView(view, 0);
         }
-        channelTextEdit.addTextChangedListener(new TextWatcher() {
+
+        mChannelTextEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
@@ -652,88 +612,88 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Utils.hideView(view, 0);
                 }
-                prefs.edit().putString(App.PREFS_CHANNEL, s.toString()).commit();
+                mPrefs.edit().putString(App.PREFS_CHANNEL, s.toString()).commit();
             }
         });
     }
 
     private void setChannelName(String name) {
-        channelTextEdit.setText(name);
+        mChannelTextEdit.setText(name);
     }
 
     private String getChannelName() {
-        return channelTextEdit.getText().toString();
+        return mChannelTextEdit.getText().toString();
     }
 
     private void showSplashAnimation() {
-        for (int i = 0; i < rootViewContainer.getChildCount(); i++) {
-            View v = rootViewContainer.getChildAt(i);
+        for (int i = 0; i < mRootViewContainer.getChildCount(); i++) {
+            View view = mRootViewContainer.getChildAt(i);
 
-            TranslateAnimation animation = new TranslateAnimation(0, 0, 400, 0);
-            animation.setDuration(300);
-            animation.setStartOffset((100 * i));
-            animation.setInterpolator(new DecelerateInterpolator(0.5f));
-            animation.setFillAfter(true);
+            TranslateAnimation translate = new TranslateAnimation(0, 0, 400, 0);
+            translate.setDuration(300);
+            translate.setStartOffset((100 * i));
+            translate.setInterpolator(new DecelerateInterpolator(0.5f));
+            translate.setFillAfter(true);
 
-            Animation a = new AlphaAnimation(0, 1.0f);
-            a.setDuration(800);
-            a.setInterpolator(new DecelerateInterpolator(0.5f));
-            a.setStartOffset((100 * i));
-            a.setFillAfter(true);
+            Animation alpha = new AlphaAnimation(0, 1.0f);
+            alpha.setDuration(800);
+            alpha.setInterpolator(new DecelerateInterpolator(0.5f));
+            alpha.setStartOffset((100 * i));
+            alpha.setFillAfter(true);
 
-            AnimationSet set = new AnimationSet(true);
-            set.addAnimation(animation);
-            set.addAnimation(a);
-            set.setFillAfter(true);
-            v.setAnimation(set);
-            set.start();
+            AnimationSet animationSet = new AnimationSet(true);
+            view.setAnimation(animationSet);
+            animationSet.addAnimation(translate);
+            animationSet.addAnimation(alpha);
+            animationSet.setFillAfter(true);
+            animationSet.start();
         }
     }
 
     private void showAnimationConnectingIfNotVisible() {
-        if (indicatorConnecting.getVisibility() == View.VISIBLE)
+        if (mIndicatorConnecting.getVisibility() == View.VISIBLE)
             return;
 
         boolean hidePrevious = false;
-        if (indicatorConnected.getVisibility() != View.GONE) {
-            Utils.hideView(indicatorConnected, 0);
+        if (mIndicatorConnected.getVisibility() != View.GONE) {
+            Utils.hideView(mIndicatorConnected, 0);
             hidePrevious = true;
         }
-        if (indicatorDisconnected.getVisibility() != View.GONE) {
-            Utils.hideView(indicatorDisconnected, 0);
+        if (mIndicatorDisconnected.getVisibility() != View.GONE) {
+            Utils.hideView(mIndicatorDisconnected, 0);
             hidePrevious = true;
         }
-        Utils.showView(indicatorConnecting, hidePrevious ? DEFAULT_ANIMATION_DURATION * 2 : 0);
+        Utils.showView(mIndicatorConnecting, hidePrevious ? DEFAULT_ANIMATION_DURATION * 2 : 0);
     }
 
     private void showAnimationConnectedIfNotVisible() {
-        if (indicatorConnected.getVisibility() == View.VISIBLE)
+        if (mIndicatorConnected.getVisibility() == View.VISIBLE)
             return;
 
-        Utils.hideView(indicatorConnecting, 0);
-        if (indicatorConnecting.getVisibility() != View.GONE) {
-            Utils.hideView(indicatorConnecting, 0);
+        Utils.hideView(mIndicatorConnecting, 0);
+        if (mIndicatorConnecting.getVisibility() != View.GONE) {
+            Utils.hideView(mIndicatorConnecting, 0);
         }
-        if (indicatorDisconnected.getVisibility() != View.GONE) {
-            Utils.hideView(indicatorDisconnected, 0);
+        if (mIndicatorDisconnected.getVisibility() != View.GONE) {
+            Utils.hideView(mIndicatorDisconnected, 0);
         }
-        Utils.showView(indicatorConnected, DEFAULT_ANIMATION_DURATION * 5);
+        Utils.showView(mIndicatorConnected, DEFAULT_ANIMATION_DURATION * 5);
     }
 
     private void showAnimationDisconnectedIfNotVisible() {
-        if (indicatorDisconnected.getVisibility() == View.VISIBLE)
+        if (mIndicatorDisconnected.getVisibility() == View.VISIBLE)
             return;
 
         boolean hidePrevious = false;
-        if (indicatorConnecting.getVisibility() != View.GONE) {
-            Utils.hideView(indicatorConnecting, 0);
+        if (mIndicatorConnecting.getVisibility() != View.GONE) {
+            Utils.hideView(mIndicatorConnecting, 0);
             hidePrevious = true;
         }
-        if (indicatorConnected.getVisibility() != View.GONE) {
-            Utils.hideView(indicatorConnected, 0);
+        if (mIndicatorConnected.getVisibility() != View.GONE) {
+            Utils.hideView(mIndicatorConnected, 0);
             hidePrevious = true;
         }
-        Utils.showView(indicatorDisconnected, hidePrevious ? DEFAULT_ANIMATION_DURATION * 2 : 0);
+        Utils.showView(mIndicatorDisconnected, hidePrevious ? DEFAULT_ANIMATION_DURATION * 2 : 0);
     }
 
     public class MessageHandler extends Handler {
@@ -746,15 +706,12 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void handleMessage(final Message message) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    int state = message.what;
-                    switch (state) {
-                        case NEW_REQUEST:
-                            addHistoryEntry(message.obj.toString());
-                            break;
-                    }
+            runOnUiThread(() -> {
+                int state = message.what;
+                switch (state) {
+                    case NEW_REQUEST:
+                        addHistoryEntry(message.obj.toString());
+                        break;
                 }
             });
         }

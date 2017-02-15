@@ -56,15 +56,12 @@ public class FlashFeedback implements Feedback {
                 }
 
                 new Handler().postDelayed(
-                        new Runnable() {
-                            public void run() {
-                                try {
-                                    camera.stopPreview();
-                                    camera.release();
-                                } catch (RuntimeException e) {
-                                    Log.e(TAG, "Error with flash feedback: " + e.getMessage());
-                                }
-
+                        () -> {
+                            try {
+                                camera.stopPreview();
+                                camera.release();
+                            } catch (RuntimeException e) {
+                                Log.e(TAG, "Error with flash feedback: " + e.getMessage());
                             }
                         },
                         duration);
