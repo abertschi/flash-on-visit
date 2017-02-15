@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -33,13 +34,19 @@ public class FlashFeedback implements Feedback {
     }
 
     private void doFeedback(final int duration) {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
+
+        new AsyncTask<Void, String, Camera>() {
             @Override
-            public void run() {
+            protected Camera doInBackground(Void... params) {
                 final Camera camera = Camera.open();
                 Camera.Parameters p = camera.getParameters();
                 p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
                 camera.setParameters(p);
+                return camera;
+            }
+
+            @Override
+            protected void onPostExecute(final Camera camera) {
                 camera.startPreview();
                 new Handler().postDelayed(
                         new Runnable() {
@@ -51,7 +58,7 @@ public class FlashFeedback implements Feedback {
                         },
                         duration);
             }
-        });
+        }.execute();
     }
 
     @Override

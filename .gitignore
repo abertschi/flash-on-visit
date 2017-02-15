@@ -6,3 +6,4 @@ android/.idea
 app-release.apk
 gcs_server_key.js
 google-services.json
+**/node_modules/

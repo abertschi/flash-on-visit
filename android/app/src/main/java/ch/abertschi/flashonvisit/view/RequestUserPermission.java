@@ -13,8 +13,8 @@ public class RequestUserPermission {
     private Activity activity;
 
     // Storage Permissions
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
+    private static final int REQUEST_CODE = 1;
+    private static String[] PERMISSIONS = {
             Manifest.permission.CAMERA
     };
 
@@ -22,16 +22,17 @@ public class RequestUserPermission {
         this.activity = activity;
     }
 
-    public void verifyStoragePermissions() {
-        // Check if we have write permission
-        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+    public boolean isAllowedToUseCamera() {
+        return ActivityCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+    }
 
-        if (permission != PackageManager.PERMISSION_GRANTED) {
+    public void verifyAllPermissions() {
+        if (!isAllowedToUseCamera()) {
             // We don't have permission so prompt the user
             ActivityCompat.requestPermissions(
                     activity,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
+                    PERMISSIONS,
+                    REQUEST_CODE
             );
         }
     }

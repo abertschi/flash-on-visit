@@ -1,7 +1,5 @@
 package ch.abertschi.flashonvisit.view;
 
-import android.animation.Animator;
-import android.animation.ObjectAnimator;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -40,9 +38,7 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
-import com.github.nkzawa.socketio.client.Socket;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.kdb.ledcontrol.LEDManager;
 import com.wang.avi.AVLoadingIndicatorView;
 
 import java.util.ArrayList;
@@ -135,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void subscribeToService() {
-        new RequestUserPermission(this).verifyStoragePermissions();
+        new RequestUserPermission(this).verifyAllPermissions();
 
         String channel = getChannelName(); // TODO validate better
         if (!channel.isEmpty()) {
@@ -228,6 +224,7 @@ public class MainActivity extends AppCompatActivity {
         initServerEditText();
         initChannelView();
         initServiceSelectionView();
+        new RequestUserPermission(this).verifyAllPermissions();
 
         addHistoryEntry("Welcome to flash-on-visit <b>:D</b>");
     }
@@ -284,11 +281,17 @@ public class MainActivity extends AppCompatActivity {
                     color = colorUnselected;
                     addHistoryEntry("Disable <b>FLASH</b> feedback");
                 } else {
-                    Utils.showView(selectionIndicatorFlash, 0, SELECTION_INDICATOR_DURATION);
-                    mFeedbackService.addFeedbackService(FeedbackService.TYPE.FLASH);
-                    color = colorSelected;
-                    mFeedbackService.doExampleFeedback(FeedbackService.TYPE.FLASH);
-                    addHistoryEntry("Enable <b>FLASH</b> feedback");
+                    RequestUserPermission p = new RequestUserPermission(MainActivity.this);
+                    if (p.isAllowedToUseCamera()) {
+                        Utils.showView(selectionIndicatorFlash, 0, SELECTION_INDICATOR_DURATION);
+                        mFeedbackService.addFeedbackService(FeedbackService.TYPE.FLASH);
+                        color = colorSelected;
+                        addHistoryEntry("Enable <b>FLASH</b> feedback");
+                        mFeedbackService.doExampleFeedback(FeedbackService.TYPE.FLASH);
+                    } else {
+                        p.verifyAllPermissions();
+                        return;
+                    }
                 }
                 flashButton.getBackground().setColorFilter(color, PorterDuff.Mode.SRC_OVER);
                 isFlashEnabled = !isFlashEnabled;
@@ -521,56 +524,11 @@ public class MainActivity extends AppCompatActivity {
                 final View container = findViewById(R.id.advanced_options_led);
                 TextView textView = (TextView) findViewById(R.id.button_show_advanced_led);
                 if (isAdvancedLedOptionsCollapsed) {
-//                    ScaleAnimation anim = new ScaleAnimation(1, 1, 0, 1);
-//                    container.setAnimation(anim);
-//                    anim.setDuration(500);
-//                    anim.setAnimationListener(new Animation.AnimationListener() {
-//                        @Override
-//                        public void onAnimationStart(Animation animation) {
-//
-//                        }
-//
-//                        @Override
-//                        public void onAnimationEnd(Animation animation) {
-//
-//                        }
-//
-//                        @Override
-//                        public void onAnimationRepeat(Animation animation) {
-//
-//                        }
-//                    });
-//                    anim.start();
-//                    container.setVisibility(View.VISIBLE);
-
                     Utils.showView(container, 0, 50);
                     textView.setText("BASIC");
                     isAdvancedLedOptionsCollapsed = false;
                 } else {
                     Utils.hideView(container, 0, 50);
-//                    ScaleAnimation anim = new ScaleAnimation(1, 1, 1, 0);
-//                    container.setAnimation(anim);
-//                    anim.setDuration(500);
-//                    anim.setAnimationListener(new Animation.AnimationListener() {
-//                        @Override
-//                        public void onAnimationStart(Animation animation) {
-//                            System.out.println("ON START");
-//                        }
-//
-//                        @Override
-//                        public void onAnimationEnd(Animation animation) {
-//                            System.out.println("ENDED");
-//                            container.setVisibility(View.GONE);
-//                        }
-//
-//                        @Override
-//                        public void onAnimationRepeat(Animation animation) {
-//
-//                        }
-//                    });
-//                    anim.startNow();
-//                    System.out.println("started");
-
                     textView.setText("ADVANCED");
                     isAdvancedLedOptionsCollapsed = true;
                 }
