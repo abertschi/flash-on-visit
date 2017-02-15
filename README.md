@@ -24,7 +24,7 @@ Thanks to these amazing people:
 - TODO: Icons, LEDManager
 
 ## Integrate on your website
-Perform an HTTP GET request on `http://213.136.81.179:3004/channels/<channel>` where `<channel>` is an identifier for your website. The most straigth forward approach to achieve that is by using the script [./client_browser/README.md](client_browser/flash-on-visit.js) as following:
+Perform an HTTP GET request on `http://213.136.81.179:3004/channels/<channel>` where `<channel>` is an identifier for your website. The most straigth forward approach to achieve that is by using the script [./client_browser/flash-on-visit.js](client_browser/flash-on-visit.js) as following:
 
 ```html
 <html>
