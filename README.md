@@ -17,14 +17,14 @@ Download the App from Google Play Store.
 
 ## MacOS client
 The MacOS client is a Node.js app.  
-Check out [./client_macos/README.md](client_macos/README.md) for installation instructions.
+Check out [client_macos/README.md](client_macos/README.md) for installation instructions.
 
 ### Credits
 Thanks to these amazing people:
 - TODO: Icons, LEDManager
 
 ## Integrate on your website
-Perform an HTTP GET request on `http://213.136.81.179:3004/channels/<channel>` where `<channel>` is an identifier for your website. The most straigth forward approach to achieve that is by using the script [./client_browser/flash-on-visit.js](client_browser/flash-on-visit.js) as following:
+Perform an HTTP GET request on `http://213.136.81.179:3004/channels/<channel>` where `<channel>` is an identifier for your website. The most straigth forward approach to achieve that is by using the script [client_browser/flash-on-visit.js](client_browser/flash-on-visit.js) as following:
 
 ```html
 <html>
@@ -42,7 +42,7 @@ Perform an HTTP GET request on `http://213.136.81.179:3004/channels/<channel>` w
 This will notify clients listening for notifications in the set channel.
 
 ## Host your own backend
-A current version of [./server/server.js](server/server.js) is running on my server.  
+A current version of [server/server.js](server/server.js) is running on my server.  
 The backend is a Node.js app running `express` and `socket.io` features a hook to notify Android clients
 with Google's Firebase Cloud Messaging (FCM) Service. 
 
