@@ -41,7 +41,7 @@ This will notify clients listening for notifications in the set channel.
 
 ## Host your own backend
 A current version of [./server/server.js](server/server.js) is running on my server.  
-The backend is a Node.js app running `express` and `socket.io` and a features a hook to notify Android clients
+The backend is a Node.js app running `express` and `socket.io` and features a hook to notify Android clients
 with Google's Firebase Cloud Messaging (FCM) Service. 
 
 In case you wanted to host your own server, you would have to setup a Firebase account and rebuild the Android client with your own credentials.
