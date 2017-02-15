@@ -55,7 +55,7 @@ Help is always welcome :yellow_heart:. Contribute to the project by forking and 
 
 ### Credits
 Thanks to these amazing people:  
-* [KDB223](https://github.com/KDB223) with his work on [LEDControl](https://github.com/KDB223/LEDControl)
+* [KDB223](https://github.com/KDB223) with his work on [LEDControl](https://github.com/KDB223/LEDControl), Apache License Version 2.0
 
 
 ## Contact
