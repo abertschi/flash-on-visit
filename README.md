@@ -1,3 +1,5 @@
+[![twitter: @andrinbertschi]( https://img.shields.io/badge/twitter-andrinbertschi-yellow.svg?style=flat-square)](http://twitter.com/andrinbertschi)
+
 # flash-on-visit
 
 > It's often the small things that matter most in life.  
@@ -18,10 +20,6 @@ Download the App from Google Play Store.
 ## MacOS client
 The MacOS client is a Node.js app.  
 Check out [client_macos/README.md](client_macos/README.md) for installation instructions.
-
-### Credits
-Thanks to these amazing people:
-- TODO: Icons, LEDManager
 
 ## Integrate on your website
 Perform an HTTP GET request on `http://213.136.81.179:3004/channels/<channel>` where `<channel>` is an identifier for your website. The most straigth forward approach to achieve that is by using the script [client_browser/flash-on-visit.js](client_browser/flash-on-visit.js) as following:
@@ -56,5 +54,11 @@ i.e. set these files:
 
 Help is always welcome :yellow_heart:. Contribute to the project by forking and submitting a pull request.
 
+### Credits
+Thanks to these amazing people:  
+* [KDB223](https://github.com/KDB223) with his work on [LEDControl](https://github.com/KDB223/LEDControl)
+
+
 ## Contact
-[![twitter: @andrinbertschi]( https://img.shields.io/badge/twitter-andrinbertschi-yellow.svg?style=flat-square)](http://twitter.com/andrinbertschi)
+Andrin Bertschi  
+www.abertschi.ch  
