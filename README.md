@@ -20,10 +20,8 @@ The MacOS client is a Node.js app.
 Check out [./client/README.md](client/README.md) for installation instructions.
 
 ### Credits
-Thanks to these amazing people
-- 
--
--
+Thanks to these amazing people:
+- TODO: Icons, LEDManager
 
 ## Integrate on your website
 Perform an HTTP GET request on `http://213.136.81.179:3004/channels/<channel>` where `<channel>` is an identifier for your website. The most straigth forward approach to do that is to include the following script tag into the head of your website.
