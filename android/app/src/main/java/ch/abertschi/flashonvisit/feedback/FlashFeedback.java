@@ -40,15 +40,24 @@ public class FlashFeedback implements Feedback {
         new AsyncTask<Void, String, Camera>() {
             @Override
             protected Camera doInBackground(Void... params) {
-                final Camera camera = Camera.open();
-                Camera.Parameters p = camera.getParameters();
-                p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-                camera.setParameters(p);
+                Camera camera = null;
+                try {
+                    camera = Camera.open();
+                    Camera.Parameters p = camera.getParameters();
+                    p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+                    camera.setParameters(p);
+                } catch (RuntimeException e) {
+                    Log.e(TAG, "Error with flash feedback: " + e.getMessage());
+                }
                 return camera;
             }
 
             @Override
             protected void onPostExecute(final Camera camera) {
+                if (camera == null) {
+                    Log.e(TAG, "Camera is null, not flashing Camera flash");
+                    return;
+                }
                 try {
                     camera.startPreview();
                 } catch (RuntimeException e) {
