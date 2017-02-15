@@ -15,8 +15,7 @@ This app is in beta development :feet:  Feedback appreciated!
   <img src='.github/phone_showcase.png' />
 </p>
 
-Download the App from Google Play Store.
-
+[Download the App from Google Play Store](https://play.google.com/store/apps/details?id=ch.abertschi.flashonvisit) 🔥
 ## MacOS client
 The MacOS client is a Node.js app.  
 Check out [client_macos/README.md](client_macos/README.md) for installation instructions.
