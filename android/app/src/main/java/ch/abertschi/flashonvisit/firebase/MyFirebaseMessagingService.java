@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.IBinder;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -19,6 +20,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import ch.abertschi.flashonvisit.App;
+import ch.abertschi.flashonvisit.HistoryEntry;
+import ch.abertschi.flashonvisit.db.HistoryDbHelper;
 import ch.abertschi.flashonvisit.feedback.FeedbackService;
 import ch.abertschi.flashonvisit.view.MainActivity;
 
@@ -34,11 +37,16 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private SharedPreferences mPrefs;
     private List<RemoteMessage> mQueuedRequests = new LinkedList<>();
 
+    private HistoryDbHelper mHistoryDbHelper;
+    private SQLiteDatabase mDb;
+
     @Override
     public void onCreate() {
         super.onCreate();
         mPrefs = PreferenceManager.getDefaultSharedPreferences(MyFirebaseMessagingService.this);
         if (isAllowedToRun()) {
+            mHistoryDbHelper = new HistoryDbHelper(this);
+            mDb = mHistoryDbHelper.getWritableDatabase();
             FirebaseMessaging.getInstance().subscribeToTopic(mPrefs.getString(App.PREFS_CHANNEL, App.DEFAULT_CHANNEL));
             doBindService();
         }
@@ -53,6 +61,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (mDb != null) {
+            mDb.close();
+        }
         doUnbindService();
     }
 
@@ -61,14 +72,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
             String ip = remoteMessage.getData().get("ip");
             String channel = remoteMessage.getData().get("channel");
+            String historyMsg = String.format("New request in <b>%s</b> by %s", channel, ip);
             if (MainActivity.get() != null) {
                 MainActivity.MessageHandler handler = MainActivity.get().getUiHandler();
                 Message message = handler.obtainMessage();
-                message.obj = String.format("New request in <b>%s</b> by %s", channel, ip);
+                message.obj = historyMsg;
                 message.what = MainActivity.MessageHandler.NEW_REQUEST;
                 handler.dispatchMessage(message);
             }
             mFeedbackService.doFeedback();
+            HistoryEntry entry = new HistoryEntry(historyMsg);
+            mHistoryDbHelper.addHistoryEntry(mDb, entry);
         }
 
         if (remoteMessage.getNotification() != null) {

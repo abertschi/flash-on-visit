@@ -5,8 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -46,6 +48,7 @@ import java.util.List;
 
 import ch.abertschi.flashonvisit.App;
 import ch.abertschi.flashonvisit.CheckServerAvailabilityTask;
+import ch.abertschi.flashonvisit.db.HistoryDbHelper;
 import ch.abertschi.flashonvisit.feedback.FeedbackService;
 import ch.abertschi.flashonvisit.HistoryEntry;
 import ch.abertschi.flashonvisit.R;
@@ -127,6 +130,57 @@ public class MainActivity extends AppCompatActivity {
             showAnimationDisconnectedIfNotVisible();
         }
         checkIfServerAddressIsValid(getServerName());
+        fetchDatabase();
+    }
+
+    private void fetchDatabase() {
+        new AsyncTask<Void, Void, List<HistoryEntry>>() {
+            @Override
+            protected List<HistoryEntry> doInBackground(Void... params) {
+                HistoryDbHelper dbHelper = new HistoryDbHelper(MainActivity.this);
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+                List<HistoryEntry> entries = dbHelper.getAll(db);
+                db.close();
+                return entries;
+            }
+
+            @Override
+            protected void onPostExecute(List<HistoryEntry> historyEntries) {
+                super.onPostExecute(historyEntries);
+                for (HistoryEntry e : historyEntries) {
+                    mHistoryAdapter.addAtEnd(e);
+                }
+                if (mHistoryAdapter.getModel().size() == 0) {
+                    addWelcomeMsgToHistoryEntries();
+                }
+            }
+        }.execute();
+    }
+
+    private void emptyDatabase() {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                HistoryDbHelper dbHelper = new HistoryDbHelper(MainActivity.this);
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+                dbHelper.deleteAll(db);
+                db.close();
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void v) {
+                if (mHistoryAdapter.getModel().size() == 0) {
+                    addWelcomeMsgToHistoryEntries();
+                }
+            }
+        }.execute();
+    }
+
+    private void addWelcomeMsgToHistoryEntries() {
+        addHistoryEntry("Welcome to flash-on-visit <b>:D</b>");
     }
 
     private void subscribeToService() {
@@ -224,7 +278,6 @@ public class MainActivity extends AppCompatActivity {
         initServiceSelectionView();
         new RequestUserPermission(this).verifyAllPermissions();
 
-        addHistoryEntry("Welcome to flash-on-visit <b>:D</b>");
     }
 
     private void checkIfRootedAndApplySettings() {
@@ -368,7 +421,7 @@ public class MainActivity extends AppCompatActivity {
         this.findViewById(R.id.clearHistoryButton)
                 .setOnClickListener(v -> {
                     mHistoryAdapter.clearModel();
-                    addHistoryEntry("Welcome to flash-on-visit <b>:D</b>");
+                    emptyDatabase();
                 });
     }
 

@@ -1,5 +1,7 @@
 package ch.abertschi.flashonvisit;
 
+import android.provider.BaseColumns;
+
 import java.util.Date;
 
 /**
@@ -33,5 +35,11 @@ public class HistoryEntry {
     public HistoryEntry setDate(Date date) {
         this.date = date;
         return this;
+    }
+
+    public static class DbEntry implements BaseColumns {
+        public static final String TABLE_NAME = "history";
+        public static final String COLUMN_NAME_DATE = "date";
+        public static final String COLUMN_NAME_MESSAGE = "message";
     }
 }
