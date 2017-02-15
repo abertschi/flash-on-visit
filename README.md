@@ -1,8 +1,5 @@
 # flash-on-visit
 
-<p align="center">
-  <img src='.github/cover.png' />
-</p>
 > It's often the small things that matter most in life.  
 
 **flash-on-visit** gives you visual feedback on your website traffic by flashing the caps lock LED of your computer keyboard and notification light of your Android phone :yellow_heart:
@@ -11,6 +8,10 @@
 This app is in early development :feet:
 
 ## Android client
+
+<p align="center">
+  <img src='.github/phone_showcase.png' />
+</p>
 
 ## MacOS client
 
