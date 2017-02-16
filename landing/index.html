@@ -1,78 +1,272 @@
+<!DOCTYPE html>
 <html>
 
+
 <head>
-    <script src="flash-on-visit.js"></script>
-    <link rel="stylesheet" type="text/css" href="bluma.css">
+    <title>flash-on-visit</title>
+    <link href="//fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <link rel="stylesheet" href="normalize.css">
     <style>
-        body {
-            background: #252A2E;
-        }
-
-        .phone {}
-
-        .phone__frame {}
-
-        .phone__frame__img {
-            max-width: 300px;
-        }
-
-        .phone__logo__img {
-            width: 400px;
-            float:left;
-        }
-
-        .phone__logo {
-          background: tomato;
-        }
-
-
-
-        .phone__logo__slogan {
-           float:left;
-           clear:both;
-        }
-
-        .flex-container {
-          height: 100%;
-            padding: 0;
+    body {
             margin: 0;
-            list-style: none;
+            background-color: #252A2E;
+        }
+
+        header {
+            height: 100vh;
+            width: 100%;
+            min-width: 700px;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+            text-align: center;
+            overflow: hidden;
+            position: fixed;
+            top: 0px;
+            margin-left: auto;
+        }
+
+        header h1 {
+            width: 400px;
+            height: 270px;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            background: url(img/logo.png) no-repeat 0 0;
+            background-size: 400px;
+            color: transparent;
+            text-indent: -9999em;
+        }
+
+        header h2 {
+            color: white;
+            margin-top: 0px;
+        }
+
+        .logo {
             display: flex;
             align-items: center;
             justify-content: center;
+            width: 70%;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 10vh;
         }
 
-        .row {}
-
-        .flex-item {
-          margin: 50px;
+        .logo__img__img {
+            height: 500px;
+            z-index: 100;
+            position: absolute;
         }
+
+        .logo__img {
+            height: 500px;
+            margin-right: 100px;
+            position: relative;
+            margin-top: 5vh;
+        }
+
+        .logo__img__app {
+            position: relative;
+            height: 420px;
+            width: 283px;
+            margin-top: 35px;
+            position: absolute;
+            display: block;
+            z-index: 10;
+            margin-left: 11px;
+            color: transparent;
+            overflow: hidden;
+        }
+
+        .logo__img__app__img {
+            background: url(img/landing_screen.jpg) no-repeat 0 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-size: 230px;
+            height: 8000px;
+        }
+
+        .logo__text {
+            padding-top: 40px;
+            margin-left: 200px;
+            font-weight: normal;
+            font-style: italic;
+        }
+
+        .logo__logo {
+            text-align: center;
+            width: 600px;
+        }
+
+        button {
+            display: inline-block;
+            height: 40px;
+            line-height: 40px;
+            background: #5F0F40;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-decoration: none;
+            text-align: center;
+            padding: 0 25px;
+            outline: none;
+            border: 0;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            font-style: normal;
+            cursor: pointer;
+        }
+
+        .logo__buttons {
+            margin-top: 00px;
+        }
+
+        .logo__button {
+            margin-top: 10px;
+            width: 250px;
+            height: 60px;
+            margin-left: 20px;
+            margin-right: 20px;
+            padding: 0 20px;
+            font-size: 20px;
+        }
+
+        .visual {
+            background-color: #5F0F40;
+        }
+
+        .visual2 {
+            background-color: #321325;
+        }
+
+        .feature {
+            height: 2750px;
+        }
+
+        .vertical-text {
+            /*transform: rotate(270deg);*/
+            position: fixed;
+            bottom: 20px;
+            /*transform-origin: left top 0;*/
+            /*float: right;*/
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+            color: white;
+            /*background-color: red;*/
+            /*width: 100px;*/
+            font-weight: normal;
+            font-style: italic;
+            width: 70%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        a {
+            color: white;
+            text-decoration: none;
+        }
+    }
     </style>
+    <script src="jquery-3.1.1.min.js"></script>
+    <script src="typed.min.js"></script>
+    <script src="flash-on-visit.js"></script>
 </head>
 
-<body>
-    <section>
-        <div class="flex-container">
-            <div class="flex-item">
-                <div class='phone__frame'>
-                    <img class='phone__frame__img' src="img/phone.png" />
-                </div>
+<body class='home'>
+    <header>
+        <div class='logo'>
+            <div class='vertical-text' id='abertschi'>
+                <a href='http://www.abertschi.ch'>Made with <span class=' bold'><3</span> and a <span class=' bold'>keyboard</span> by Andrin Bertschi</a>
             </div>
-            <div class="flex-item">
-                <div class='phone__logo'>
-                    <img class='phone__logo__img' src="img/logo.png" />
-                </div>
-                <div class='phone__logo__slogan'>
-                  <!-- Get visual feedback on your website traffic. -->
-                </div>
-            </div>
+            <div class='logo__img'>
+                <img class='logo__img__img' src='img/phone.png' alt='logo' />
+                <div class='logo__img__app nano'>
+                    <div class='logo__img__app__img' id='scroll'>
 
+                    </div>
+                </div>
+            </div>
+            <div class='logo__text'>
+                <div class='logo__logo'>
+                    <h1>Flash on Visit</h1>
+                </div>
+                <h2 id='slogan'></h2>
+                <div class='logo__buttons' id='buttons'>
+                    <button id='download' class='logo__button'>Donwload</button>
+                    <button id='contribute' class='logo__button'>Contribute</button>
+                </div>
+            </div>
         </div>
+    </header>
+    <section class='feature'>
+
     </section>
 
     <script>
-        fov.send('http://213.136.81.179:3004', 'best_bros');
+        (function($) {
+            fov.send('http://213.136.81.179:3004', 'showcase');
+            
+            $("#download").click(function() {
+                window.location.href = 'https://play.google.com/store/apps/details?id=ch.abertschi.flashonvisit';
+            });
+
+
+            $("#contribute").click(function() {
+                window.location.href = 'https://github.com/abertschi/flash-on-visit';
+            });
+
+            $(window).scroll(function() {
+                var fromTop = $(window).scrollTop();
+                fromTop = fromTop / 5;
+                if (fromTop < 392) {
+                    $("#scroll").css('margin', '-' + fromTop + 'px 0px 0px 0px');
+                }
+            });
+
+            var sloganText = "Get <span class='visual'>VISUAL</span> <span class='visual'>FEEDBACK</span> on your website traffic";
+            $("#slogan").typed({
+                strings: [sloganText],
+                typeSpeed: 30
+            });
+
+            jQuery('#buttons').hide().delay(4000).fadeIn(function() {});
+
+            $(window).keypress(function() {
+                $("#slogan").stop(true, true);
+                $("#slogan").finish();
+                jQuery('#buttons').show();
+                $("#slogan").html(sloganText);
+            });
+
+            $(window).resize(function() {
+                setAutorText();
+            });
+
+            setAutorText();
+
+            function setAutorText() {
+                var height = $(window).height();
+                console.log(height);
+                if (height < 632) {
+                    $("#abertschi").hide();
+                } else {
+                    $("#abertschi").show();
+                }
+            }
+        })(jQuery);
     </script>
+
 </body>
 
 </html>
