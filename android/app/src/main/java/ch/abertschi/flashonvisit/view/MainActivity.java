@@ -114,6 +114,10 @@ public class MainActivity extends AppCompatActivity {
         this.mIsEnabled = this.mPrefs.getBoolean(App.PREFS_ENABLED, Boolean.FALSE);
         this.mIsEnabledOnBoot = this.mPrefs.getBoolean(App.PREFS_START_ON_BOOT, false);
 
+        if (mPrefs.getString(App.PREFS_CHANNEL_OLD, "").isEmpty()) {
+            mPrefs.edit().putString(App.PREFS_CHANNEL_OLD, App.DEFAULT_CHANNEL).commit();
+        }
+
         this.mIsVibraEnabled = this.mPrefs.getBoolean(App.PREFS_FEEDBACK_VIBRA_ENABLED, false);
         this.mIsLedEnabled = this.mPrefs.getBoolean(App.PREFS_FEEDBACK_LED_ENABLED, false);
         this.mIsFlashEnabled = this.mPrefs.getBoolean(App.PREFS_FEEDBACK_FLASH_ENABLED, false);
@@ -183,22 +187,34 @@ public class MainActivity extends AppCompatActivity {
         addHistoryEntry("Welcome to flash-on-visit <b>:D</b>");
     }
 
-    private void subscribeToService() {
+    private void subscribeToService(String channel) {
         new RequestUserPermission(this).verifyAllPermissions();
+        String old = this.mPrefs.getString(App.PREFS_CHANNEL_OLD, "");
+        if (!old.isEmpty()) {
+            unsubscribeFromService(old);
+        }
 
-        String channel = getChannelName(); // TODO validate better
         if (!channel.isEmpty()) {
             mIsEnabled = true;
+            this.mPrefs.edit().putString(App.PREFS_CHANNEL_OLD, channel).commit();
             FirebaseMessaging.getInstance().subscribeToTopic(getChannelName());
         }
     }
 
-    private void unsubscribeFromService() {
+    private void subscribeToService() {
+        subscribeToService(getChannelName());
+    }
+
+    private void unsubscribeFromService(String channel) {
         mIsEnabled = false;
-        String channel = getChannelName(); // TODO validate better
         if (!channel.isEmpty()) {
-            FirebaseMessaging.getInstance().unsubscribeFromTopic(getChannelName());
+            FirebaseMessaging.getInstance().unsubscribeFromTopic(channel);
         }
+    }
+
+    private void unsubscribeFromService() {
+        String channel = getChannelName(); // TODO validate better
+        unsubscribeFromService(channel);
     }
 
     @Override
@@ -439,14 +455,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkIfServerAddressIsValid(String server) {
-        new CheckServerAvailabilityTask(isValid -> {
-            TextView txt = (TextView) findViewById(R.id.address_validation);
-            if (isValid) {
-                Utils.hideView(txt, 0);
-            } else {
-                Utils.showView(txt, 0);
-            }
-        }).execute(server);
+//        new CheckServerAvailabilityTask(isValid -> {
+//            TextView txt = (TextView) findViewById(R.id.address_validation);
+//            if (isValid) {
+//                Utils.hideView(txt, 0);
+//            } else {
+//                Utils.showView(txt, 0);
+//            }
+//        }).execute(server);
     }
 
     private void initStartOnBootView() {
@@ -666,6 +682,7 @@ public class MainActivity extends AppCompatActivity {
                     Utils.hideView(view, 0);
                 }
                 mPrefs.edit().putString(App.PREFS_CHANNEL, s.toString()).commit();
+//                subscribeToService();
             }
         });
     }

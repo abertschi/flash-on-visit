@@ -16,6 +16,7 @@ public class App {
     public static final String PREFS_LED_COLOR = "led_color";
     public static final String PREFS_SERVER = "server_name";
     public static final String PREFS_CHANNEL = "channel_name";
+    public static final String PREFS_CHANNEL_OLD = "channel_name_old";
     public static final String PREFS_IS_ROOTED = "is_rooted";
     public static final String PREFS_FIRST_RUN = "first_run";
 
@@ -23,5 +24,5 @@ public class App {
     public static final int LED_COLOR_DEFAULT = LED_COLOR_RED;
 
     public static final String DEFAULT_SERVER_NAME = "http://213.136.81.179:3004";
-    public static final String DEFAULT_CHANNEL = "abertschi";
+    public static final String DEFAULT_CHANNEL = "showcase";
 }
