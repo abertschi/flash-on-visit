@@ -1,3 +1,4 @@
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![twitter: @andrinbertschi]( https://img.shields.io/badge/twitter-andrinbertschi-yellow.svg?style=flat-square)](http://twitter.com/andrinbertschi)
 
 # flash-on-visit
@@ -55,7 +56,7 @@ Help is always welcome :yellow_heart:. Contribute to the project by forking and 
 
 ### Credits
 Thanks to these amazing people:  
-* [KDB223](https://github.com/KDB223) with his work on [LEDControl](https://github.com/KDB223/LEDControl)
+* [KDB223](https://github.com/KDB223) with his work on [LEDControl](https://github.com/KDB223/LEDControl), Apache License Version 2.0
 
 
 ## Contact
