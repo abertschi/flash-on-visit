@@ -176,6 +176,38 @@
             color: white;
             text-decoration: none;
         }
+
+        @media only screen and (max-device-width: 480px) {
+            body {
+              /*background-color: red;*/
+            }
+            header {
+                /*position: relative;*/
+            }
+
+            .logo{
+
+              /*align-items: stretch;
+              justify-content: flex-start;
+              width: 70%;
+              margin-left: auto;
+              margin-right: auto;
+              margin-top: 10vh;*/
+
+            }
+
+            /*.feature {
+              height: 0px;
+            }
+
+            .logo__text {
+              width: 100vw;
+            }
+
+            .logo__img {
+              width: 100vw;
+            }*/
+        }
     }
     </style>
     <script src="jquery-3.1.1.min.js"></script>
@@ -216,7 +248,7 @@
     <script>
         (function($) {
             fov.send('http://213.136.81.179:3004', 'showcase');
-            
+
             $("#download").click(function() {
                 window.location.href = 'https://play.google.com/store/apps/details?id=ch.abertschi.flashonvisit';
             });
