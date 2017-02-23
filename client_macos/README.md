@@ -23,7 +23,7 @@ Fire up flash-on-visit and get visitor notifications:
 ```sh
 $ node client.js --help
 
- Usage: client [options] <file ...>
+ Usage: client.js --host <host> --channel <channel>
 
  Options:
 
