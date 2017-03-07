@@ -5,7 +5,7 @@
 
 > It's often the small things that matter most in life.  
 
-**flash-on-visit** gives you visual feedback on your website traffic by flashing the caps lock LED of your computer keyboard and notification light of your Android phone :yellow_heart:
+**flash-on-visit** gives you visual feedback on your website traffic by flashing the caps lock LED of your computer keyboard and notification light of your Android phone.
 
 
 This app is in beta development :feet:  Feedback appreciated!
@@ -52,7 +52,7 @@ i.e. set these files:
 
 ## Contributing
 
-Help is always welcome :yellow_heart:. Contribute to the project by forking and submitting a pull request.
+Help is always welcome. Contribute to the project by forking and submitting a pull request.
 
 ### Credits
 Thanks to these amazing people:  
